@@ -500,7 +500,7 @@ document.getElementById('f-line').addEventListener('input', checkBtn);
 document.getElementById('agree').addEventListener('change', checkBtn);
 
 // =============================================
-// 送出報名 → 寫入 Google Sheets（完美修復版）
+// 送出報名 → 寫入 Google Sheets（最終絕對不噴錯版）
 // =============================================
 document.getElementById('submit-btn').addEventListener('click', async function(){
   this.disabled = true; 
@@ -513,7 +513,7 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   
   let small = 0, big = 0;
   
-  // 1. 計算堂數（維持原本邏輯）
+  // 1. 計算堂數
   [...selSlots].forEach(k => {
     const parts = k.split('-'); 
     const m = parseInt(parts[1]), i = parseInt(parts[2]);
@@ -523,7 +523,7 @@ document.getElementById('submit-btn').addEventListener('click', async function()
     }
   });
 
-  // 2. 核心修正：打包原始的「代碼字串」（用逗號隔開），讓後端可以正常統計！
+  // 2. 核心關鍵：打包原始的「代碼字串」（用逗號隔開），傳給後端統計人數
   const rawSlotsStr = [...selSlots].join(',');         // 例如: "s-7-0,s-7-1"
   const rawWaitlistStr = [...waitSlots].join(',');     // 例如: "w-7-2"
 
@@ -531,12 +531,12 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   const disc = total >= 10 ? Math.round(raw * 0.05) : 0;
   const final = raw - disc;
 
-  // 3. 打包 Payload，傳送正確的格式給後端
+  // 3. 打包傳給後端的資料（Payload）
   const payload = {
     action: 'register',
     name, line, phone, level,
-    slots: rawSlotsStr,        // 傳送原始代碼，後端統計就不會壞掉！
-    waitlist: rawWaitlistStr,  // 傳送原始候補代碼
+    slots: rawSlotsStr,        // 確保傳過去的是 s-7-0 這種代碼！
+    waitlist: rawWaitlistStr,  
     smallCount: small, 
     bigCount: big,
     totalFee: final, 
@@ -545,13 +545,14 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   };
 
   try {
-    // 處理前端顯示用的中文（僅用於最後成功畫面的 alert/顯示，不傳給後端）
+    // 4. 處理網頁畫面上顯示用的中文（僅限前端顯示，不影響後端）
     const formattedSlots = [...selSlots].map(k => {
       const parts = k.split('-'); const m = parseInt(parts[1]), i = parseInt(parts[2]);
       const s = DEFS[m] && DEFS[m][i];
-      const timeLabel = s ? (s.t === '19-20' ? '19:00-20:00' : '20:00-21:00') : '';
-      return s ? `${s.d} ${timeLabel}` : '';
-    }).join('<br>').filter(Boolean);
+      if (!s) return '';
+      const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
+      return `${s.d} ${timeLabel}`;
+    }).filter(str => str !== '').join('<br>'); // 修正後的過濾寫法
 
     await fetch(GAS_URL, {
       method: 'POST',
@@ -560,13 +561,13 @@ document.getElementById('submit-btn').addEventListener('click', async function()
       mode: 'no-cors'
     });
 
+    // 顯示成功畫面
     document.getElementById('form-main').style.display='none';
     document.getElementById('success-box').style.display='block';
     document.getElementById('success-msg').innerHTML=
       `<b>${name}</b> 你好！<br><br>`+
       `程度：${levelMap[level]}<br>`+
-      (selSlots.size?`正選：${total} 堂｜課程費 $${final.toLocaleString()}${total>=10?' (95折 -$'+disc+')':''}<br>`:'')+
-      (waitSlots.size?`候補：${waitSlots.size} 個時段<br>`:'')+
+      (selSlots.size?`正選時段：<br>${formattedSlots}<br>共 ${total} 堂｜課程費 $${final.toLocaleString()}${total>=10?' (95折 -$'+disc+')':''}<br>`:'')+
       `場地費 $80/堂，上課當天收取<br>`+
       (total>=10?`🏆 12/30–31 團體賽報名券已納入！<br>`:'')+
       `<br>教練將於 3 個工作天內透過 LINE 確認班級與繳費 🎾`;
