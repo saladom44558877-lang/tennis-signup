@@ -500,7 +500,7 @@ document.getElementById('f-line').addEventListener('input', checkBtn);
 document.getElementById('agree').addEventListener('change', checkBtn);
 
 // =============================================
-// 送出報名 → 寫入 Google Sheets（修正優化版）
+// 送出報名 → 寫入 Google Sheets（完美修復版）
 // =============================================
 document.getElementById('submit-btn').addEventListener('click', async function(){
   this.disabled = true; 
@@ -513,37 +513,30 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   
   let small = 0, big = 0;
   
-  // 1. 在前端直接把正選代碼陣列，轉換成換行的「中文時間字串」
-  const formattedSlots = [...selSlots].map(k => {
+  // 1. 計算堂數（維持原本邏輯）
+  [...selSlots].forEach(k => {
     const parts = k.split('-'); 
     const m = parseInt(parts[1]), i = parseInt(parts[2]);
     const s = DEFS[m] && DEFS[m][i];
-    if (!s) return k;
-    if (s.cls === 'big') big++; else small++;
-    const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
-    return `${s.d} ${timeLabel}`;
-  }).join('\n'); // 用換行分隔
+    if (s) {
+      if (s.cls === 'big') big++; else small++;
+    }
+  });
 
-  // 2. 在前端直接把候補代碼陣列，轉換成換行的「中文時間字串」
-  const formattedWaitlist = [...waitSlots].map(k => {
-    const parts = k.split('-'); 
-    const m = parseInt(parts[1]), i = parseInt(parts[2]);
-    const s = DEFS[m] && DEFS[m][i];
-    if (!s) return k;
-    const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
-    return `${s.d} ${timeLabel} (候補)`;
-  }).join('\n');
+  // 2. 核心修正：打包原始的「代碼字串」（用逗號隔開），讓後端可以正常統計！
+  const rawSlotsStr = [...selSlots].join(',');         // 例如: "s-7-0,s-7-1"
+  const rawWaitlistStr = [...waitSlots].join(',');     // 例如: "w-7-2"
 
   const total = small + big, raw = small * 550 + big * 490;
   const disc = total >= 10 ? Math.round(raw * 0.05) : 0;
   const final = raw - disc;
 
-  // 3. 打包 Payload，把翻譯好的中文直接帶入 slots 和 waitlist
+  // 3. 打包 Payload，傳送正確的格式給後端
   const payload = {
     action: 'register',
     name, line, phone, level,
-    slots: formattedSlots,       // 漂亮的中文換行字串
-    waitlist: formattedWaitlist, // 漂亮的中文候補字串
+    slots: rawSlotsStr,        // 傳送原始代碼，後端統計就不會壞掉！
+    waitlist: rawWaitlistStr,  // 傳送原始候補代碼
     smallCount: small, 
     bigCount: big,
     totalFee: final, 
@@ -552,12 +545,21 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   };
 
   try {
+    // 處理前端顯示用的中文（僅用於最後成功畫面的 alert/顯示，不傳給後端）
+    const formattedSlots = [...selSlots].map(k => {
+      const parts = k.split('-'); const m = parseInt(parts[1]), i = parseInt(parts[2]);
+      const s = DEFS[m] && DEFS[m][i];
+      const timeLabel = s ? (s.t === '19-20' ? '19:00-20:00' : '20:00-21:00') : '';
+      return s ? `${s.d} ${timeLabel}` : '';
+    }).join('<br>').filter(Boolean);
+
     await fetch(GAS_URL, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload),
       mode: 'no-cors'
     });
+
     document.getElementById('form-main').style.display='none';
     document.getElementById('success-box').style.display='block';
     document.getElementById('success-msg').innerHTML=
