@@ -130,7 +130,6 @@
     </div>
   </div>
 
-  <!-- 課程特色介紹 -->
   <div class="card">
     <div class="sec-label">課程特色</div>
     <div class="feature-grid">
@@ -179,12 +178,10 @@
     </div>
   </div>
 
-  <!-- 讀取中提示 -->
   <div class="loading-bar" id="loading-bar">⏳ 讀取最新名額中...</div>
 
   <div id="form-main">
 
-    <!-- 基本資料 -->
     <div class="card">
       <div class="sec-label">基本資料</div>
       <div class="field"><label>姓名 *</label><input id="f-name" placeholder="請輸入真實姓名"></div>
@@ -192,7 +189,6 @@
       <div class="field"><label>聯絡電話</label><input id="f-phone" placeholder="停課通知用"></div>
     </div>
 
-    <!-- 程度選擇 -->
     <div class="card">
       <div class="sec-label">課程程度 *</div>
       <div class="level-grid" id="level-grid">
@@ -202,7 +198,6 @@
       </div>
     </div>
 
-    <!-- 時段選擇 -->
     <div class="card">
       <div class="sec-label">選擇時段（想上幾堂選幾個）</div>
       <div class="month-tabs" id="month-tabs">
@@ -217,14 +212,12 @@
       <div class="sel-info" id="sel-info">已選 0 個正選時段・0 個候補時段</div>
     </div>
 
-    <!-- 候補清單 -->
     <div id="waitlist-box" class="waitlist-box">
       <div class="waitlist-title">🟣 候補名單</div>
       <div class="waitlist-sub">以下時段額滿，你已加入候補。有名額釋出時教練會優先聯繫你。</div>
       <div id="waitlist-items"></div>
     </div>
 
-    <!-- 費用試算 -->
     <div class="card">
       <div class="sec-label">費用試算</div>
       <div class="fee-box">
@@ -243,7 +236,6 @@
       </div>
     </div>
 
-    <!-- 注意事項 -->
     <div class="card">
       <div class="sec-label">注意事項</div>
       <div class="rules">
@@ -304,7 +296,7 @@ const DEFS = {
   9:[
     {d:"09/01(二)",t:"19-20",type:"tue",cls:"big"},{d:"09/02(三)",t:"19-20",type:"wed",cls:"small"},
     {d:"09/03(四)",t:"19-20",type:"thu",cls:"small"},{d:"09/03(四)",t:"20-21",type:"thu",cls:"small"},
-    {d:"09/08(二)",t:"20-21",type:"tue",cls:"big"},{d:"09/10(四)",t:"19-20",type:"thu",cls:"small"},
+    {d:"09/08(二)",t:"20-21",type:"tue",cls:"big"},{d:"09/10(開)",t:"19-20",type:"thu",cls:"small"},
     {d:"09/10(四)",t:"20-21",type:"thu",cls:"small"},{d:"09/15(二)",t:"19-20",type:"tue",cls:"big"},
     {d:"09/15(二)",t:"20-21",type:"tue",cls:"big"},{d:"09/16(三)",t:"19-20",type:"wed",cls:"small"},
     {d:"09/16(三)",t:"20-21",type:"wed",cls:"small"},{d:"09/17(四)",t:"19-20",type:"thu",cls:"small"},
@@ -508,29 +500,54 @@ document.getElementById('f-line').addEventListener('input', checkBtn);
 document.getElementById('agree').addEventListener('change', checkBtn);
 
 // =============================================
-// 送出報名 → 寫入 Google Sheets
+// 送出報名 → 寫入 Google Sheets（修正優化版）
 // =============================================
 document.getElementById('submit-btn').addEventListener('click', async function(){
-  this.disabled=true; this.textContent='送出中...';
-  const name=document.getElementById('f-name').value.trim();
-  const line=document.getElementById('f-line').value.trim();
-  const phone=document.getElementById('f-phone').value.trim();
-  const levelMap={beginner:'初階班', mid:'中階班', '1v1':'對打班'};
-  let small=0, big=0;
-  for(const k of selSlots){
-    const parts=k.split('-'); const m=parseInt(parts[1]), i=parseInt(parts[2]);
-    if(DEFS[m]&&DEFS[m][i]){ if(DEFS[m][i].cls==='big') big++; else small++; }
-  }
-  const total=small+big, raw=small*550+big*490;
-  const disc=total>=10?Math.round(raw*0.05):0, final=raw-disc;
+  this.disabled = true; 
+  this.textContent = '送出中...';
+  
+  const name = document.getElementById('f-name').value.trim();
+  const line = document.getElementById('f-line').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const levelMap = {beginner: '初階班', mid: '中階班', '1v1': '對打班'};
+  
+  let small = 0, big = 0;
+  
+  // 1. 在前端直接把正選代碼陣列，轉換成換行的「中文時間字串」
+  const formattedSlots = [...selSlots].map(k => {
+    const parts = k.split('-'); 
+    const m = parseInt(parts[1]), i = parseInt(parts[2]);
+    const s = DEFS[m] && DEFS[m][i];
+    if (!s) return k;
+    if (s.cls === 'big') big++; else small++;
+    const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
+    return `${s.d} ${timeLabel}`;
+  }).join('\n'); // 用換行分隔
 
+  // 2. 在前端直接把候補代碼陣列，轉換成換行的「中文時間字串」
+  const formattedWaitlist = [...waitSlots].map(k => {
+    const parts = k.split('-'); 
+    const m = parseInt(parts[1]), i = parseInt(parts[2]);
+    const s = DEFS[m] && DEFS[m][i];
+    if (!s) return k;
+    const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
+    return `${s.d} ${timeLabel} (候補)`;
+  }).join('\n');
+
+  const total = small + big, raw = small * 550 + big * 490;
+  const disc = total >= 10 ? Math.round(raw * 0.05) : 0;
+  const final = raw - disc;
+
+  // 3. 打包 Payload，把翻譯好的中文直接帶入 slots 和 waitlist
   const payload = {
     action: 'register',
     name, line, phone, level,
-    slots: [...selSlots].join(','),
-    waitlist: [...waitSlots].join(','),
-    smallCount: small, bigCount: big,
-    totalFee: final, discount: disc,
+    slots: formattedSlots,       // 漂亮的中文換行字串
+    waitlist: formattedWaitlist, // 漂亮的中文候補字串
+    smallCount: small, 
+    bigCount: big,
+    totalFee: final, 
+    discount: disc,
     time: new Date().toLocaleString('zh-TW')
   };
 
