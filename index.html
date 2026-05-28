@@ -422,24 +422,36 @@ function wk(m,i){ return 'w-'+m+'-'+i; }
 function renderSlots(){
   const filterVal = document.getElementById('level-filter').value;
   const defs = (DEFS[curM] || [])
-    .map((s, origIdx) => ({...s, origIdx}))   // ← 先記住原始 index
+    .map((s, origIdx) => ({...s, origIdx}))
     .filter(s => {
       if(!filterVal) return true;
       if(s.special === 'tournament') return false;
       if(filterVal === 'rally')    return s.type === 'thu' && s.t === '20-21';
       if(filterVal === 'mid')      return s.type === 'thu' && s.t === '19-20';
-      if(filterVal === 'beginner') return s.type !== 'thu' || s.t !== '20-21' && s.t !== '19-20';
+      if(filterVal === 'beginner') return s.type !== 'thu' || (s.t !== '20-21' && s.t !== '19-20');
       return true;
     });
   const grid = document.getElementById('slot-grid');
-  grid.innerHTML = defs.map((s) => {           // ← 拿掉 i
-    const key=sk(curM,s.origIdx), wkey=wk(curM,s.origIdx);  // ← 用原始 index
+  grid.innerHTML = defs.map((s) => {
+    const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
+
+    if(s.special==='tournament'){
+      return `<div class="slot-card" style="cursor:default;background:#fffbeb;border-color:#fcd34d;opacity:0.85;">
+        <div class="slot-date">${s.d}</div>
+        <div class="slot-time">${timeLabel}</div>
+        <div class="badges">
+          <span class="badge" style="background:#fef3c7;color:#92400e;">🏆 團體賽</span>
+        </div>
+        <div style="height:5px;border-radius:20px;background:#fcd34d;margin-bottom:4px;"></div>
+        <div class="slot-status" style="color:#b45309;font-size:10px;font-weight:600;">年末團體賽時段・不開放報名</div>
+      </div>`;
+    }
+
+    const key=sk(curM,s.origIdx), wkey=wk(curM,s.origIdx);
     const max=maxOf(s.cls);
     const cnt=counts[key]||0, wcnt=wcounts[wkey]||0;
     const full=cnt>=max, waitFull=wcnt>=MAX_W;
     const isSel=selSlots.has(key), isWait=waitSlots.has(wkey);
-    const wdLabel=s.type==='wed'?'週三':s.type==='thu'?'週四':'週二';
-    const wdCls=s.type==='wed'?'b-wed':s.type==='thu'?'b-thu':'b-tue';
     const price=s.cls==='big'?'$490':s.cls==='rally'?'$800':'$550';
     const pct=Math.min(cnt/max*100,100);
     let barCls=pct>=100?'bar-red':pct>=60?'bar-yellow':'bar-green';
@@ -465,7 +477,6 @@ function renderSlots(){
       clickAction='none';
     }
 
-    // 程度標籤
     let levelBadge;
     if(s.type==='thu' && s.t==='20-21'){
       levelBadge='<span class="badge" style="background:#fce7f3;color:#9d174d;">對打課</span>';
@@ -475,7 +486,6 @@ function renderSlots(){
       levelBadge='<span class="badge" style="background:#dcfce7;color:#166534;">初階班</span>';
     }
 
-    // 教練標籤
     let coachBadge='';
     if(curM===8 && s.type==='tue'){
       coachBadge='<span class="badge b-coach">Miguel教練</span>';
