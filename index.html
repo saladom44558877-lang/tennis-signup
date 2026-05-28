@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎾 網球課程報名</title>
+  <title>🎾 亞當網球課程報名表</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a1a1a; padding: 1rem; }
@@ -653,15 +653,24 @@ document.getElementById('submit-btn').addEventListener('click', async function()
     });
 
     // 顯示成功畫面
+    const formattedWaitlist = [...waitSlots].map(k => {
+      const parts = k.split('-'); const m = parseInt(parts[1]), i = parseInt(parts[2]);
+      const s = DEFS[m] && DEFS[m][i];
+      if (!s) return '';
+      const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
+      return `${s.d} ${timeLabel}`;
+    }).filter(str => str !== '').join('<br>');
+
     document.getElementById('form-main').style.display='none';
     document.getElementById('success-box').style.display='block';
     document.getElementById('success-msg').innerHTML=
       `<b>${name}</b> 你好！<br><br>`+
       `程度：${levelMap[level]}<br>`+
       (selSlots.size?`正選時段：<br>${formattedSlots}<br>共 ${total} 堂｜課程費 $${final.toLocaleString()}${total>=10?' (95折 -$'+disc+')':''}<br>`:'')+
+      (waitSlots.size?`<br>候補時段：<br>${formattedWaitlist}<br>`:'')+
       `場地費 $80/堂，上課當天收取<br>`+
       (total>=10?`🏆 已取得 12/30–31 網球團體賽免費資格！<br>`:'')+
-      `<br>教練將於 6 月底確認訂單後，透過 LINE 確認課程訂單與繳費資訊 🎾`;
+      `<br>教練將於 6 月底確認訂單後，透過 LINE 與您確認課程訂單＆繳費資訊 🎾`;
   } catch(e) {
     this.disabled=false; this.textContent='送出報名';
     alert('送出失敗，請稍後再試或直接聯繫教練');
