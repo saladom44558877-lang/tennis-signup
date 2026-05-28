@@ -209,6 +209,14 @@
 
     <div class="card">
       <div class="sec-label">選擇時段（想上幾堂選幾個）</div>
+      <div style="margin-bottom:12px;">
+  <select id="level-filter" style="width:100%;padding:8px 12px;border-radius:9px;border:1.5px solid #e2e8f0;font-size:13px;color:#1a1a1a;background:#fff;outline:none;">
+    <option value="">全部時段</option>
+    <option value="beginner">🟢 初階班（週二、週三）</option>
+    <option value="mid">🔵 中階班（週四 19-20）</option>
+    <option value="rally">🩷 對打課（週四 20-21）</option>
+  </select>
+</div>
       <div class="month-tabs" id="month-tabs">
         <div class="mtab active" data-m="7">7月</div>
         <div class="mtab" data-m="8">8月</div>
@@ -394,7 +402,15 @@ function sk(m,i){ return 's-'+m+'-'+i; }
 function wk(m,i){ return 'w-'+m+'-'+i; }
 
 function renderSlots(){
-  const defs = DEFS[curM] || [];
+  const filterVal = document.getElementById('level-filter').value;
+  const defs = (DEFS[curM] || []).filter(s => {
+    if(!filterVal) return true;
+    if(s.special === 'tournament') return false;
+    if(filterVal === 'rally')    return s.type === 'thu' && s.t === '20-21';
+    if(filterVal === 'mid')      return s.type === 'thu' && s.t === '19-20';
+    if(filterVal === 'beginner') return s.type !== 'thu' || s.t !== '20-21' && s.t !== '19-20';
+    return true;
+  });
   const grid = document.getElementById('slot-grid');
   grid.innerHTML = defs.map((s,i) => {
     const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
@@ -570,7 +586,8 @@ document.getElementById('month-tabs').addEventListener('click', function(e){
 document.getElementById('f-name').addEventListener('input', checkBtn);
 document.getElementById('f-line').addEventListener('input', checkBtn);
 document.getElementById('agree').addEventListener('change', checkBtn);
-
+  
+document.getElementById('level-filter').addEventListener('change', renderSlots);
 // =============================================
 // 送出報名 → 寫入 Google Sheets（最終絕對不噴錯版）
 // =============================================
