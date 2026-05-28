@@ -653,13 +653,17 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   try {
     // 4. 處理網頁畫面上顯示用的中文（僅限前端顯示，不影響後端）
     const formattedSlots = [...selSlots].map(k => {
-      const parts = k.split('-'); const m = parseInt(parts[1]), i = parseInt(parts[2]);
-      const s = DEFS[m] && DEFS[m][i];
-      if (!s) return '';
-      const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
-      return `${s.d} ${timeLabel}`;
-    }).filter(str => str !== '').join('<br>'); // 修正後的過濾寫法
-
+  const parts = k.split('-'); const m = parseInt(parts[1]), i = parseInt(parts[2]);
+  const s = DEFS[m] && DEFS[m][i];
+  if (!s) return '';
+  const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
+  let classLabel;
+  if (s.cls === 'big') classLabel = '大班初階';
+  else if (s.cls === 'rally') classLabel = '對打課';
+  else if (s.type === 'thu' && s.t === '19-20') classLabel = '小班中階';
+  else classLabel = '小班初階';
+  return `${s.d} ${timeLabel}（${classLabel}）`;
+}).filter(str => str !== '').join('<br>');
     await fetch(GAS_URL, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
