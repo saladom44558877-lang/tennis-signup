@@ -644,7 +644,7 @@ document.getElementById('submit-btn').addEventListener('click', async function()
       (selSlots.size?`正選時段：<br>${formattedSlots}<br>共 ${total} 堂｜課程費 $${final.toLocaleString()}${total>=10?' (95折 -$'+disc+')':''}<br>`:'')+
       `場地費 $80/堂，上課當天收取<br>`+
       (total>=10?`🏆 已取得 12/30–31 網球團體賽免費資格！<br>`:'')+
-      `<br>教練將於 5 個工作天內透過 LINE 確認班級與繳費 🎾`;
+      `<br>教練將於 6 月底確認訂單後，透過 LINE 確認課程訂單與繳費資訊 🎾`;
   } catch(e) {
     this.disabled=false; this.textContent='送出報名';
     alert('送出失敗，請稍後再試或直接聯繫教練');
@@ -658,7 +658,7 @@ document.getElementById('btn-load-old').addEventListener('click', async function
   const msgEl = document.getElementById('search-msg');
   
   if (!searchLine) {
-    alert('請先輸入 LINE ID 再點擊帶入');
+    alert('請先輸入 LINE ID 或聯絡電話再點擊帶入');
     return;
   }
   
