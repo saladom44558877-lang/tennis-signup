@@ -421,32 +421,19 @@ function wk(m,i){ return 'w-'+m+'-'+i; }
 
 function renderSlots(){
   const filterVal = document.getElementById('level-filter').value;
-  const defs = (DEFS[curM] || []).filter(s => {
-    if(!filterVal) return true;
-    if(s.special === 'tournament') return false;
-    if(filterVal === 'rally')    return s.type === 'thu' && s.t === '20-21';
-    if(filterVal === 'mid')      return s.type === 'thu' && s.t === '19-20';
-    if(filterVal === 'beginner') return s.type !== 'thu' || s.t !== '20-21' && s.t !== '19-20';
-    return true;
-  });
+  const defs = (DEFS[curM] || [])
+    .map((s, origIdx) => ({...s, origIdx}))   // ← 先記住原始 index
+    .filter(s => {
+      if(!filterVal) return true;
+      if(s.special === 'tournament') return false;
+      if(filterVal === 'rally')    return s.type === 'thu' && s.t === '20-21';
+      if(filterVal === 'mid')      return s.type === 'thu' && s.t === '19-20';
+      if(filterVal === 'beginner') return s.type !== 'thu' || s.t !== '20-21' && s.t !== '19-20';
+      return true;
+    });
   const grid = document.getElementById('slot-grid');
-  grid.innerHTML = defs.map((s,i) => {
-    const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
-
-    // 團體賽特殊時段：只顯示，不可點選
-    if(s.special==='tournament'){
-      return `<div class="slot-card" style="cursor:default;background:#fffbeb;border-color:#fcd34d;opacity:0.85;">
-        <div class="slot-date">${s.d}</div>
-        <div class="slot-time">${timeLabel}</div>
-        <div class="badges">
-          <span class="badge" style="background:#fef3c7;color:#92400e;">🏆 團體賽</span>
-        </div>
-        <div style="height:5px;border-radius:20px;background:#fcd34d;margin-bottom:4px;"></div>
-        <div class="slot-status" style="color:#b45309;font-size:10px;font-weight:600;">年末團體賽時段・不開放報名</div>
-      </div>`;
-    }
-
-    const key=sk(curM,i), wkey=wk(curM,i);
+  grid.innerHTML = defs.map((s) => {           // ← 拿掉 i
+    const key=sk(curM,s.origIdx), wkey=wk(curM,s.origIdx);  // ← 用原始 index
     const max=maxOf(s.cls);
     const cnt=counts[key]||0, wcnt=wcounts[wkey]||0;
     const full=cnt>=max, waitFull=wcnt>=MAX_W;
