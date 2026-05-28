@@ -125,8 +125,8 @@
     <div class="hero-title">🎾 網球課程報名</div>
     <div class="hero-sub">中正河濱公園網球場｜教練逐一調整動作｜名額有限</div>
     <div class="class-types">
-      <div class="ct ct-small"><div class="ct-title">📌 小班（週三/四）</div>2–5人｜Adam教練｜$550/堂</div>
-      <div class="ct ct-big"><div class="ct-title">📌 大班（週二）</div>4–10人｜Adam＋Miguel｜$490/堂</div>
+      <div class="ct ct-small"><div class="ct-title">📌 小班（週三/四 + 8月週二）</div>2–5人｜Adam教練｜$550/堂<br><b>對打課</b>（週四20-21）2–3人｜$800/堂</div>
+      <div class="ct ct-big"><div class="ct-title">📌 大班（週二，9月起）</div>4–10人｜Adam＋Miguel｜$490/堂</div>
     </div>
   </div>
 
@@ -227,20 +227,46 @@
       <div id="waitlist-items"></div>
     </div>
 
+
+    <div class="card" id="tournament-card">
+      <div class="sec-label">年底團體賽報名意願</div>
+      <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:12px;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;">🏆 12/30–31 網球團體賽</div>
+        <div style="font-size:12px;color:#78350f;line-height:1.9;">
+          報名費：<b>$600 元</b><br>
+          🎁 <b>報名滿 10 堂課即可免費參賽！</b>（省 $600）
+        </div>
+      </div>
+      <div style="font-size:13px;color:#555;margin-bottom:10px;">請問您是否有意願報名年底的團體賽？</div>
+      <div style="display:flex;gap:8px;" id="tournament-opts">
+        <div class="tournament-opt" data-val="yes" style="flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;user-select:none;">
+          <div style="font-size:18px;margin-bottom:4px;">✅</div>有意願
+        </div>
+        <div class="tournament-opt" data-val="maybe" style="flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;user-select:none;">
+          <div style="font-size:18px;margin-bottom:4px;">🤔</div>考慮中
+        </div>
+        <div class="tournament-opt" data-val="no" style="flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;user-select:none;">
+          <div style="font-size:18px;margin-bottom:4px;">❌</div>暫不考慮
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="sec-label">費用試算</div>
       <div class="fee-box">
         <div class="fee-title">📊 你的報名費用</div>
-        <div class="fee-row"><span>週三/四小班</span><span id="fs">0 堂 × $550 = $0</span></div>
-        <div class="fee-row"><span>週二大班</span><span id="fb">0 堂 × $490 = $0</span></div>
+        <div class="fee-row"><span>小班</span><span id="fs">0 堂 × $550 = $0</span></div>
+        <div class="fee-row"><span>大班</span><span id="fb">0 堂 × $490 = $0</span></div>
+        <div class="fee-row"><span>對打課</span><span id="fr">0 堂 × $800 = $0</span></div>
         <div class="fee-row" id="fd" style="display:none"><span class="fee-disc">🎉 10堂95折優惠</span><span class="fee-disc" id="fd-amt"></span></div>
         <div class="fee-row"><span>場地費（上課當天收）</span><span>$80 × <span id="fc">0</span> 堂</span></div>
         <div class="fee-row"><span>課程費合計</span><span id="ft" style="color:#1d4ed8">$0</span></div>
-        <div id="fg" class="fee-gift" style="display:none">🏆 選滿10堂！獲得 12/30-31 網球團體賽報名券一張</div>
+        <div id="fg" class="fee-gift" style="display:none">🏆 選滿10堂！免費參加 12/30–31 網球團體賽（免報名費 $600）</div>
         <div class="fee-note">
-          ・10堂套票95折，小班大班可混搭<br>
+          ・10堂套票95折（小班、大班可混搭，對打課不計折扣）<br>
           ・場地費 $80/堂，上課當天收取<br>
-          ・候補確認入班後再計費
+          ・候補確認入班後再計費<br>
+          ・年底團體賽報名費 $600，報名滿10堂免費參加
         </div>
       </div>
     </div>
@@ -251,7 +277,7 @@
         <div class="rule-row"><span class="r-icon">🎾</span><span>課表於報名完成後，由教練確認並統一公告給學員</span></div>
         <div class="rule-row"><span class="r-icon">🎾</span><span>下雨天停課，順延一週補課（補課日由教練另行通知）</span></div>
         <div class="rule-row"><span class="r-icon">🎾</span><span>請假仍需負擔當堂場地費 $80，請於上課前 1 小時告知</span></div>
-        <div class="rule-row"><span class="r-icon">🎾</span><span>小班 2–5 人｜大班 4–10 人，未達最低人數不開課</span></div>
+        <div class="rule-row"><span class="r-icon">🎾</span><span>小班 2–5 人｜大班 4–10 人｜對打課 2–3 人，未達最低人數不開課</span></div>
         <div class="rule-row"><span class="r-icon">🎾</span><span>繳費後名額正式成立，教練保留最終班級分配權</span></div>
         <div class="rule-row"><span class="r-icon">🟣</span><span>額滿可填候補，每時段上限 3 位，有名額時優先通知</span></div>
       </div>
@@ -286,60 +312,61 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbxddtd_CFTtvDCBd1aLe9ve
 const DEFS = {
   7:[
     {d:"07/01(三)",t:"20-21",type:"wed",cls:"small"},{d:"07/02(四)",t:"19-20",type:"thu",cls:"small"},
-    {d:"07/02(四)",t:"20-21",type:"thu",cls:"small"},{d:"07/08(三)",t:"19-20",type:"wed",cls:"small"},
+    {d:"07/02(四)",t:"20-21",type:"thu",cls:"rally"},{d:"07/08(三)",t:"19-20",type:"wed",cls:"small"},
     {d:"07/08(三)",t:"20-21",type:"wed",cls:"small"},{d:"07/15(三)",t:"19-20",type:"wed",cls:"small"},
     {d:"07/15(三)",t:"20-21",type:"wed",cls:"small"},{d:"07/22(三)",t:"19-20",type:"wed",cls:"small"},
     {d:"07/23(四)",t:"19-20",type:"thu",cls:"small"},{d:"07/29(三)",t:"19-20",type:"wed",cls:"small"},
     {d:"07/29(三)",t:"20-21",type:"wed",cls:"small"},{d:"07/30(四)",t:"19-20",type:"thu",cls:"small"},
-    {d:"07/30(四)",t:"20-21",type:"thu",cls:"small"}
+    {d:"07/30(四)",t:"20-21",type:"thu",cls:"rally"}
   ],
   8:[
-    {d:"08/04(二)",t:"20-21",type:"tue",cls:"big"},{d:"08/05(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"08/05(三)",t:"20-21",type:"wed",cls:"small"},{d:"08/06(四)",t:"20-21",type:"thu",cls:"small"},
-    {d:"08/11(二)",t:"20-21",type:"tue",cls:"big"},{d:"08/12(三)",t:"20-21",type:"wed",cls:"small"},
-    {d:"08/13(四)",t:"19-20",type:"thu",cls:"small"},{d:"08/18(二)",t:"19-20",type:"tue",cls:"big"},
-    {d:"08/18(二)",t:"20-21",type:"tue",cls:"big"},{d:"08/25(二)",t:"19-20",type:"tue",cls:"big"},
-    {d:"08/25(二)",t:"20-21",type:"tue",cls:"big"},{d:"08/26(三)",t:"20-21",type:"wed",cls:"small"},
-    {d:"08/27(四)",t:"20-21",type:"thu",cls:"small"}
+    {d:"08/04(二)",t:"20-21",type:"tue",cls:"small"},{d:"08/05(三)",t:"19-20",type:"wed",cls:"small"},
+    {d:"08/05(三)",t:"20-21",type:"wed",cls:"small"},{d:"08/06(四)",t:"20-21",type:"thu",cls:"rally"},
+    {d:"08/11(二)",t:"20-21",type:"tue",cls:"small"},{d:"08/12(三)",t:"20-21",type:"wed",cls:"small"},
+    {d:"08/13(四)",t:"19-20",type:"thu",cls:"small"},{d:"08/18(二)",t:"19-20",type:"tue",cls:"small"},
+    {d:"08/18(二)",t:"20-21",type:"tue",cls:"small"},{d:"08/25(二)",t:"19-20",type:"tue",cls:"small"},
+    {d:"08/25(二)",t:"20-21",type:"tue",cls:"small"},{d:"08/26(三)",t:"20-21",type:"wed",cls:"small"},
+    {d:"08/27(四)",t:"20-21",type:"thu",cls:"rally"}
   ],
   9:[
     {d:"09/01(二)",t:"19-20",type:"tue",cls:"big"},{d:"09/02(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"09/03(四)",t:"19-20",type:"thu",cls:"small"},{d:"09/03(四)",t:"20-21",type:"thu",cls:"small"},
+    {d:"09/03(四)",t:"19-20",type:"thu",cls:"small"},{d:"09/03(四)",t:"20-21",type:"thu",cls:"rally"},
     {d:"09/08(二)",t:"20-21",type:"tue",cls:"big"},{d:"09/10(開)",t:"19-20",type:"thu",cls:"small"},
-    {d:"09/10(四)",t:"20-21",type:"thu",cls:"small"},{d:"09/15(二)",t:"19-20",type:"tue",cls:"big"},
+    {d:"09/10(四)",t:"20-21",type:"thu",cls:"rally"},{d:"09/15(二)",t:"19-20",type:"tue",cls:"big"},
     {d:"09/15(二)",t:"20-21",type:"tue",cls:"big"},{d:"09/16(三)",t:"19-20",type:"wed",cls:"small"},
     {d:"09/16(三)",t:"20-21",type:"wed",cls:"small"},{d:"09/17(四)",t:"19-20",type:"thu",cls:"small"},
-    {d:"09/17(四)",t:"20-21",type:"thu",cls:"small"},{d:"09/23(三)",t:"20-21",type:"wed",cls:"small"},
-    {d:"09/24(四)",t:"19-20",type:"thu",cls:"small"},{d:"09/24(四)",t:"20-21",type:"thu",cls:"small"},
+    {d:"09/17(四)",t:"20-21",type:"thu",cls:"rally"},{d:"09/23(三)",t:"20-21",type:"wed",cls:"small"},
+    {d:"09/24(四)",t:"19-20",type:"thu",cls:"small"},{d:"09/24(四)",t:"20-21",type:"thu",cls:"rally"},
     {d:"09/30(三)",t:"19-20",type:"wed",cls:"small"},{d:"09/30(三)",t:"20-21",type:"wed",cls:"small"}
   ],
   10:[
     {d:"10/01(四)",t:"19-20",type:"thu",cls:"small"},{d:"10/06(二)",t:"19-20",type:"tue",cls:"big"},
     {d:"10/07(三)",t:"19-20",type:"wed",cls:"small"},{d:"10/08(四)",t:"19-20",type:"thu",cls:"small"},
-    {d:"10/08(四)",t:"20-21",type:"thu",cls:"small"},{d:"10/14(三)",t:"19-20",type:"wed",cls:"small"},
+    {d:"10/08(四)",t:"20-21",type:"thu",cls:"rally"},{d:"10/14(三)",t:"19-20",type:"wed",cls:"small"},
     {d:"10/15(四)",t:"19-20",type:"thu",cls:"small"},{d:"10/20(二)",t:"20-21",type:"tue",cls:"big"},
     {d:"10/22(四)",t:"19-20",type:"thu",cls:"small"},{d:"10/27(二)",t:"20-21",type:"tue",cls:"big"},
     {d:"10/29(四)",t:"19-20",type:"thu",cls:"small"}
   ],
   11:[
     {d:"11/03(二)",t:"19-20",type:"tue",cls:"big"},{d:"11/04(三)",t:"20-21",type:"wed",cls:"small"},
-    {d:"11/12(四)",t:"20-21",type:"thu",cls:"small"},{d:"11/17(二)",t:"19-20",type:"tue",cls:"big"},
-    {d:"11/17(二)",t:"20-21",type:"tue",cls:"big"},{d:"11/19(四)",t:"20-21",type:"thu",cls:"small"},
+    {d:"11/12(四)",t:"20-21",type:"thu",cls:"rally"},{d:"11/17(二)",t:"19-20",type:"tue",cls:"big"},
+    {d:"11/17(二)",t:"20-21",type:"tue",cls:"big"},{d:"11/19(四)",t:"20-21",type:"thu",cls:"rally"},
     {d:"11/24(二)",t:"20-21",type:"tue",cls:"big"}
   ],
   12:[
     {d:"12/02(三)",t:"19-20",type:"wed",cls:"small"},{d:"12/02(三)",t:"20-21",type:"wed",cls:"small"},
-    {d:"12/03(四)",t:"20-21",type:"thu",cls:"small"},{d:"12/09(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"12/10(四)",t:"20-21",type:"thu",cls:"small"},{d:"12/16(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"12/17(四)",t:"19-20",type:"thu",cls:"small"},{d:"12/17(四)",t:"20-21",type:"thu",cls:"small"},
+    {d:"12/03(四)",t:"20-21",type:"thu",cls:"rally"},{d:"12/09(三)",t:"19-20",type:"wed",cls:"small"},
+    {d:"12/10(四)",t:"20-21",type:"thu",cls:"rally"},{d:"12/16(三)",t:"19-20",type:"wed",cls:"small"},
+    {d:"12/17(四)",t:"19-20",type:"thu",cls:"small"},{d:"12/17(四)",t:"20-21",type:"thu",cls:"rally"},
     {d:"12/23(三)",t:"19-20",type:"wed",cls:"small"},{d:"12/24(四)",t:"19-20",type:"thu",cls:"small"},
-    {d:"12/24(四)",t:"20-21",type:"thu",cls:"small"},{d:"12/30(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"12/30(三)",t:"20-21",type:"wed",cls:"small"},{d:"12/31(四)",t:"19-20",type:"thu",cls:"small"}
+    {d:"12/24(四)",t:"20-21",type:"thu",cls:"rally"},{d:"12/30(三)",t:"19-20",type:"wed",cls:"small",special:"tournament"},
+    {d:"12/30(三)",t:"20-21",type:"wed",cls:"small",special:"tournament"},{d:"12/31(四)",t:"19-20",type:"thu",cls:"small",special:"tournament"}
   ]
 };
 
 const MAX_S=5, MAX_B=10, MAX_W=3;
 let curM=7, level='', selSlots=new Set(), waitSlots=new Set();
+let tournamentIntent='';
 let counts={}, wcounts={};
 
 // =============================================
@@ -362,7 +389,7 @@ async function loadCounts() {
 // =============================================
 // 渲染時段
 // =============================================
-function maxOf(cls){ return cls==='big'? MAX_B : MAX_S; }
+function maxOf(cls){ return cls==='big'? MAX_B : cls==='rally'? 3 : MAX_S; }
 function sk(m,i){ return 's-'+m+'-'+i; }
 function wk(m,i){ return 'w-'+m+'-'+i; }
 
@@ -370,6 +397,21 @@ function renderSlots(){
   const defs = DEFS[curM] || [];
   const grid = document.getElementById('slot-grid');
   grid.innerHTML = defs.map((s,i) => {
+    const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
+
+    // 團體賽特殊時段：只顯示，不可點選
+    if(s.special==='tournament'){
+      return `<div class="slot-card" style="cursor:default;background:#fffbeb;border-color:#fcd34d;opacity:0.85;">
+        <div class="slot-date">${s.d}</div>
+        <div class="slot-time">${timeLabel}</div>
+        <div class="badges">
+          <span class="badge" style="background:#fef3c7;color:#92400e;">🏆 團體賽</span>
+        </div>
+        <div style="height:5px;border-radius:20px;background:#fcd34d;margin-bottom:4px;"></div>
+        <div class="slot-status" style="color:#b45309;font-size:10px;font-weight:600;">年末團體賽時段・不開放報名</div>
+      </div>`;
+    }
+
     const key=sk(curM,i), wkey=wk(curM,i);
     const max=maxOf(s.cls);
     const cnt=counts[key]||0, wcnt=wcounts[wkey]||0;
@@ -377,7 +419,7 @@ function renderSlots(){
     const isSel=selSlots.has(key), isWait=waitSlots.has(wkey);
     const wdLabel=s.type==='wed'?'週三':s.type==='thu'?'週四':'週二';
     const wdCls=s.type==='wed'?'b-wed':s.type==='thu'?'b-thu':'b-tue';
-    const price=s.cls==='big'?'$490':'$550';
+    const price=s.cls==='big'?'$490':s.cls==='rally'?'$800':'$550';
     const pct=Math.min(cnt/max*100,100);
     let barCls=pct>=100?'bar-red':pct>=60?'bar-yellow':'bar-green';
     let cardCls='slot-card', statusTxt, statusCls, clickAction;
@@ -402,13 +444,30 @@ function renderSlots(){
       clickAction='none';
     }
 
-    const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
+    // 程度標籤
+    let levelBadge;
+    if(s.type==='thu' && s.t==='20-21'){
+      levelBadge='<span class="badge" style="background:#fce7f3;color:#9d174d;">對打課</span>';
+    } else if(s.type==='thu'){
+      levelBadge='<span class="badge" style="background:#dbeafe;color:#1e40af;">中階班</span>';
+    } else {
+      levelBadge='<span class="badge" style="background:#dcfce7;color:#166534;">初階班</span>';
+    }
+
+    // 教練標籤
+    let coachBadge='';
+    if(curM===8 && s.type==='tue'){
+      coachBadge='<span class="badge b-coach">Miguel教練</span>';
+    } else if(s.cls==='big'){
+      coachBadge='<span class="badge b-coach">雙教練</span>';
+    }
+
     return `<div class="${cardCls}" data-click="${clickAction}">
       <div class="slot-date">${s.d}</div>
       <div class="slot-time">${timeLabel}</div>
       <div class="badges">
-        <span class="badge ${wdCls}">${wdLabel}</span>
-        ${s.cls==='big'?'<span class="badge b-coach">雙教練</span>':''}
+        ${coachBadge}
+        ${levelBadge}
         <span class="badge b-price">${price}</span>
       </div>
       <div class="slot-bar-bg"><div class="slot-bar-fill ${barCls}" style="width:${pct}%"></div></div>
@@ -457,15 +516,19 @@ function renderWaitlist(){
 }
 
 function calcFee(){
-  let small=0, big=0;
+  let small=0, big=0, rally=0;
   for(const k of selSlots){
     const parts=k.split('-'); const m=parseInt(parts[1]), i=parseInt(parts[2]);
-    if(DEFS[m]&&DEFS[m][i]){ if(DEFS[m][i].cls==='big') big++; else small++; }
+    if(DEFS[m]&&DEFS[m][i]){
+      const cls=DEFS[m][i].cls;
+      if(cls==='big') big++; else if(cls==='rally') rally++; else small++;
+    }
   }
-  const total=small+big, raw=small*550+big*490;
-  const is10=total>=10, disc=is10?Math.round(raw*0.05):0, final=raw-disc;
+  const total=small+big+rally, raw=small*550+big*490+rally*800;
+  const is10=total>=10, disc=is10?Math.round((small*550+big*490)*0.05):0, final=raw-disc;
   document.getElementById('fs').textContent=`${small} 堂 × $550 = $${(small*550).toLocaleString()}`;
   document.getElementById('fb').textContent=`${big} 堂 × $490 = $${(big*490).toLocaleString()}`;
+  document.getElementById('fr').textContent=`${rally} 堂 × $800 = $${(rally*800).toLocaleString()}`;
   document.getElementById('fc').textContent=total;
   const fd=document.getElementById('fd');
   if(is10){ fd.style.display='flex'; document.getElementById('fd-amt').textContent=`- $${disc.toLocaleString()}`; }
@@ -520,7 +583,7 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   const phone = document.getElementById('f-phone').value.trim();
   const levelMap = {beginner: '初階班', mid: '中階班', '1v1': '對打班'};
   
-  let small = 0, big = 0;
+  let small = 0, big = 0, rally = 0;
   
   // 1. 計算堂數
   [...selSlots].forEach(k => {
@@ -528,7 +591,7 @@ document.getElementById('submit-btn').addEventListener('click', async function()
     const m = parseInt(parts[1]), i = parseInt(parts[2]);
     const s = DEFS[m] && DEFS[m][i];
     if (s) {
-      if (s.cls === 'big') big++; else small++;
+      if (s.cls === 'big') big++; else if (s.cls === 'rally') rally++; else small++;
     }
   });
 
@@ -536,8 +599,8 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   const rawSlotsStr = [...selSlots].join(',');         // 例如: "s-7-0,s-7-1"
   const rawWaitlistStr = [...waitSlots].join(',');     // 例如: "w-7-2"
 
-  const total = small + big, raw = small * 550 + big * 490;
-  const disc = total >= 10 ? Math.round(raw * 0.05) : 0;
+  const total = small + big + rally, raw = small * 550 + big * 490 + rally * 800;
+  const disc = total >= 10 ? Math.round((small * 550 + big * 490) * 0.05) : 0;
   const final = raw - disc;
 
   // 3. 打包傳給後端的資料（Payload）
@@ -548,9 +611,11 @@ document.getElementById('submit-btn').addEventListener('click', async function()
     waitlist: rawWaitlistStr,  
     smallCount: small, 
     bigCount: big,
+    rallyCount: rally,
     totalFee: final, 
     discount: disc,
-    time: new Date().toLocaleString('zh-TW')
+    time: new Date().toLocaleString('zh-TW'),
+    tournamentIntent: tournamentIntent
   };
 
   try {
@@ -578,7 +643,7 @@ document.getElementById('submit-btn').addEventListener('click', async function()
       `程度：${levelMap[level]}<br>`+
       (selSlots.size?`正選時段：<br>${formattedSlots}<br>共 ${total} 堂｜課程費 $${final.toLocaleString()}${total>=10?' (95折 -$'+disc+')':''}<br>`:'')+
       `場地費 $80/堂，上課當天收取<br>`+
-      (total>=10?`🏆 12/30–31 團體賽報名券已納入！<br>`:'')+
+      (total>=10?`🏆 已取得 12/30–31 網球團體賽免費資格！<br>`:'')+
       `<br>教練將於 5 個工作天內透過 LINE 確認班級與繳費 🎾`;
   } catch(e) {
     this.disabled=false; this.textContent='送出報名';
@@ -660,6 +725,21 @@ document.getElementById('btn-load-old').addEventListener('click', async function
     this.textContent = '帶入舊資料';
   }
 });
+// 團體賽報名意願
+document.getElementById('tournament-opts').addEventListener('click', function(e){
+  const opt = e.target.closest('.tournament-opt');
+  if(!opt) return;
+  tournamentIntent = opt.dataset.val;
+  document.querySelectorAll('.tournament-opt').forEach(o => {
+    o.style.borderColor='#e2e8f0';
+    o.style.background='#fff';
+    o.style.color='#1a1a1a';
+  });
+  opt.style.borderColor='#1d4ed8';
+  opt.style.background='#dbeafe';
+  opt.style.color='#1d4ed8';
+});
+
 // 初始化
 loadCounts();
 </script>
