@@ -586,7 +586,7 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   }
 });
 // =============================================
-// 新增：老學員帶入歷史資料功能
+// 修正後：老學員帶入歷史資料功能 (支援跳轉與跨域)
 // =============================================
 document.getElementById('btn-load-old').addEventListener('click', async function() {
   const searchLine = document.getElementById('f-search-line').value.trim();
@@ -602,30 +602,43 @@ document.getElementById('btn-load-old').addEventListener('click', async function
   msgEl.style.color = '#666';
   msgEl.textContent = '正在後台比對您的訂單紀錄...';
   
+  // 構建帶有 query parameter 的完整請求 URL
+  const targetUrl = `${GAS_URL}?action=getRegistration&line=${encodeURIComponent(searchLine)}`;
+  
   try {
-    const res = await fetch(`${GAS_URL}?action=getRegistration&line=${encodeURIComponent(searchLine)}`);
+    // 💡 關鍵修正：加入 redirect: 'follow' 允許瀏覽器處理 Google Apps Script 的 302 跳轉
+    const res = await fetch(targetUrl, {
+      method: 'GET',
+      redirect: 'follow',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!res.ok) throw new Error('網路回應不成功');
+    
     const result = await res.json();
     
     if (result.status === 'ok') {
       const d = result.data;
       
-      // 1. 填入文字欄位
+      // 1. 填入基本資料欄位
       document.getElementById('f-name').value = d.name || '';
       document.getElementById('f-line').value = d.line || '';
       document.getElementById('f-phone').value = d.phone || '';
       
-      // 2. 填入程度選擇
+      // 2. 填入並渲染課程程度選擇
       level = d.level || '';
       document.querySelectorAll('.lc').forEach(c => {
         c.classList.remove('sel');
         if (c.dataset.level === level) c.classList.add('sel');
       });
       
-      // 3. 還原已勾選的正選與候補狀態
+      // 3. 重置並還原已勾選的正選與候補狀態
       selSlots = new Set(d.slots || []);
       waitSlots = new Set(d.waitlist || []);
       
-      // 4. 重新刷洗畫面的計算顯示
+      // 4. 強制觸發網頁重新計算與渲染
       renderWaitlist();
       calcFee();
       updateSelInfo();
@@ -633,15 +646,15 @@ document.getElementById('btn-load-old').addEventListener('click', async function
       checkBtn();
       
       msgEl.style.color = '#166534';
-      msgEl.innerHTML = `✅ <b>成功帶入！</b>已為您開啟修改模式。送出表單後將直接更新原訂單。`;
+      msgEl.innerHTML = `✅ <b>成功帶入！</b>已為您開啟修改模式。調整完時段後，點擊最下方「送出報名」即可直接更新原訂單。`;
     } else {
       msgEl.style.color = '#dc2626';
-      msgEl.textContent = '❌ 找不到此 LINE ID 的報名紀錄，請確認輸入是否正確。';
+      msgEl.textContent = '❌ 找不到此 LINE ID 的報名紀錄，請確認輸入是否正確（大小寫需一致）。';
     }
   } catch (e) {
-    console.error(e);
+    console.error('查詢出錯:', e);
     msgEl.style.color = '#dc2626';
-    msgEl.textContent = '連線失敗，請稍後再試。';
+    msgEl.textContent = '連線失敗或權限不足，請確認後台部署是否選擇「任何人」並擁有存取權。';
   } finally {
     this.disabled = false;
     this.textContent = '帶入舊資料';
