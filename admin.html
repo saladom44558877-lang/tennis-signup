@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎾 教練後台</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #1a1a1a; padding: 1rem; }
+    .container { max-width: 720px; margin: 0 auto; }
+
+    /* 登入 */
+    .login-box { background: #fff; border-radius: 16px; padding: 2rem; max-width: 360px; margin: 4rem auto; box-shadow: 0 4px 16px rgba(0,0,0,.08); text-align: center; }
+    .login-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .login-sub { font-size: 13px; color: #888; margin-bottom: 20px; }
+    .login-input { width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 9px; font-size: 14px; outline: none; margin-bottom: 12px; }
+    .login-input:focus { border-color: #1d4ed8; }
+    .login-btn { width: 100%; padding: 11px; background: #1d4ed8; color: #fff; border: none; border-radius: 9px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .login-btn:hover { background: #1e40af; }
+    .login-err { color: #dc2626; font-size: 12px; margin-top: 8px; }
+
+    /* 後台主體 */
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .header-title { font-size: 20px; font-weight: 700; }
+    .logout-btn { font-size: 12px; color: #888; background: none; border: 1px solid #ddd; padding: 5px 12px; border-radius: 20px; cursor: pointer; }
+
+    /* 統計卡片 */
+    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1.5rem; }
+    .stat { background: #fff; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+    .stat-n { font-size: 26px; font-weight: 700; }
+    .stat-n.pending { color: #d97706; }
+    .stat-n.paid { color: #16a34a; }
+    .stat-n.cancel { color: #dc2626; }
+    .stat-l { font-size: 12px; color: #888; margin-top: 2px; }
+
+    /* 篩選 */
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .filter-btn { padding: 5px 14px; border-radius: 20px; border: 1.5px solid #e2e8f0; font-size: 12px; cursor: pointer; background: #fff; color: #666; font-weight: 500; }
+    .filter-btn.active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+
+    /* 報名卡片 */
+    .reg-card { background: #fff; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.05); border-left: 4px solid #e2e8f0; }
+    .reg-card.pending { border-left-color: #f59e0b; }
+    .reg-card.paid { border-left-color: #22c55e; }
+    .reg-card.cancel { border-left-color: #ef4444; opacity: .6; }
+    .reg-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .reg-name { font-size: 16px; font-weight: 700; }
+    .reg-status { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-paid { background: #dcfce7; color: #166534; }
+    .status-cancel { background: #fee2e2; color: #991b1b; }
+    .reg-info { font-size: 12px; color: #555; line-height: 2; }
+    .reg-info b { color: #1a1a1a; }
+    .reg-slots { font-size: 11px; color: #666; background: #f8fafc; border-radius: 8px; padding: 8px 10px; margin: 8px 0; line-height: 1.9; border: 1px solid #e2e8f0; }
+    .reg-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .btn-confirm { flex: 1; padding: 9px; background: #16a34a; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-confirm:hover { background: #15803d; }
+    .btn-cancel { flex: 1; padding: 9px; background: #fff; color: #dc2626; border: 1.5px solid #dc2626; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-cancel:hover { background: #fee2e2; }
+
+    .empty { text-align: center; padding: 3rem; color: #888; font-size: 14px; }
+    .refresh-btn { padding: 7px 16px; background: #1d4ed8; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .loading { text-align: center; padding: 2rem; color: #888; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 登入 -->
+  <div id="login-box" class="login-box">
+    <div style="font-size:36px;margin-bottom:10px;">🎾</div>
+    <div class="login-title">教練後台</div>
+    <div class="login-sub">請輸入管理密碼</div>
+    <input id="pass-input" class="login-input" type="password" placeholder="密碼" onkeydown="if(event.key==='Enter')login()">
+    <button class="login-btn" onclick="login()">登入</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+
+  <!-- 後台主體 -->
+  <div id="admin-body" style="display:none;">
+    <div class="header">
+      <div class="header-title">🎾 報名管理</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="refresh-btn" onclick="loadData()">🔄 重新整理</button>
+        <button class="logout-btn" onclick="logout()">登出</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-n pending" id="cnt-pending">-</div><div class="stat-l">⏳ 待確認</div></div>
+      <div class="stat"><div class="stat-n paid"    id="cnt-paid">-</div><div class="stat-l">✅ 已繳費</div></div>
+      <div class="stat"><div class="stat-n cancel"  id="cnt-cancel">-</div><div class="stat-l">❌ 已取消</div></div>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('all',this)">全部</button>
+      <button class="filter-btn" onclick="setFilter('pending',this)">⏳ 待確認</button>
+      <button class="filter-btn" onclick="setFilter('paid',this)">✅ 已繳費</button>
+      <button class="filter-btn" onclick="setFilter('cancel',this)">❌ 已取消</button>
+    </div>
+
+    <div id="reg-list"><div class="loading">載入中...</div></div>
+  </div>
+
+</div>
+
+<script>
+// ⚙️ 改成你的 Apps Script 網址
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxddtd_CFTtvDCBd1aLe9ve7MJ_tVLG-5Uy3XLyzL_DQjHgpElpcTPrFzZ6mDY90SzeoQ/exec";
+
+let adminPass = '';
+let allRows = [];
+let curFilter = 'all';
+
+function login() {
+  const pass = document.getElementById('pass-input').value.trim();
+  if (!pass) return;
+  adminPass = pass;
+  loadData();
+}
+
+function logout() {
+  adminPass = '';
+  allRows = [];
+  document.getElementById('login-box').style.display = 'block';
+  document.getElementById('admin-body').style.display = 'none';
+  document.getElementById('pass-input').value = '';
+}
+
+async function loadData() {
+  document.getElementById('reg-list').innerHTML = '<div class="loading">載入中...</div>';
+  try {
+    const res = await fetch(`${GAS_URL}?action=getAdmin&pass=${encodeURIComponent(adminPass)}`);
+    const data = await res.json();
+    if (data.error) {
+      document.getElementById('login-err').textContent = data.error;
+      return;
+    }
+    document.getElementById('login-box').style.display = 'none';
+    document.getElementById('admin-body').style.display = 'block';
+    document.getElementById('login-err').textContent = '';
+    allRows = data.rows || [];
+    renderStats();
+    renderList();
+  } catch(e) {
+    document.getElementById('reg-list').innerHTML = '<div class="empty">載入失敗，請重試</div>';
+  }
+}
+
+function renderStats() {
+  const pending = allRows.filter(r => r.status === '待確認').length;
+  const paid    = allRows.filter(r => r.status === '已繳費✅').length;
+  const cancel  = allRows.filter(r => r.status === '已取消❌').length;
+  document.getElementById('cnt-pending').textContent = pending;
+  document.getElementById('cnt-paid').textContent    = paid;
+  document.getElementById('cnt-cancel').textContent  = cancel;
+}
+
+function setFilter(f, btn) {
+  curFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+function renderList() {
+  const filtered = allRows.filter(r => {
+    if (curFilter === 'all') return true;
+    if (curFilter === 'pending') return r.status === '待確認';
+    if (curFilter === 'paid')    return r.status === '已繳費✅';
+    if (curFilter === 'cancel')  return r.status === '已取消❌';
+    return true;
+  }).reverse(); // 最新在最上面
+
+  if (filtered.length === 0) {
+    document.getElementById('reg-list').innerHTML = '<div class="empty">沒有符合的報名記錄</div>';
+    return;
+  }
+
+  const statusClass = { '待確認':'pending', '已繳費✅':'paid', '已取消❌':'cancel' };
+  const statusBadge = { '待確認':'status-pending', '已繳費✅':'status-paid', '已取消❌':'status-cancel' };
+
+  document.getElementById('reg-list').innerHTML = filtered.map(r => {
+    const sc = statusClass[r.status] || 'pending';
+    const sb = statusBadge[r.status] || 'status-pending';
+    const isPending = r.status === '待確認';
+    const isCancelled = r.status === '已取消❌';
+    return `<div class="reg-card ${sc}">
+      <div class="reg-top">
+        <div class="reg-name">${r.name}</div>
+        <span class="reg-status ${sb}">${r.status}</span>
+      </div>
+      <div class="reg-info">
+        <b>LINE：</b>${r.line || '—'} ｜ <b>電話：</b>${r.phone || '—'}<br>
+        <b>程度：</b>${r.level} ｜ <b>課程費：</b>${r.fee}${r.discount !== '—' ? '（折扣 '+r.discount+'）' : ''}<br>
+        <b>堂數：</b>小班 ${r.small} 堂・大班 ${r.big} 堂・對打 ${r.rally} 堂<br>
+        <b>團體賽：</b>${r.tournament || '—'} ｜ <b>報名時間：</b>${r.time}
+      </div>
+      ${r.slots && r.slots !== '—' ? `<div class="reg-slots"><b>正選時段：</b><br>${r.slots}</div>` : ''}
+      ${r.waitlist && r.waitlist !== '—' ? `<div class="reg-slots" style="background:#faf5ff;border-color:#e9d5ff;"><b>候補時段：</b><br>${r.waitlist}</div>` : ''}
+      ${!isCancelled ? `<div class="reg-actions">
+        ${isPending ? `<button class="btn-confirm" onclick="confirm(${r.rowIndex})">✅ 確認已繳費</button>` : '<div style="flex:1;"></div>'}
+        <button class="btn-cancel" onclick="cancelReg(${r.rowIndex})">${isPending ? '❌ 取消報名' : '🔄 標記取消'}</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function confirm(rowIndex) {
+  if (!window.confirm('確認這位學員已繳費？名額將正式扣除。')) return;
+  try {
+    const res = await fetch(`${GAS_URL}?action=confirm&rowIndex=${rowIndex}&pass=${encodeURIComponent(adminPass)}`);
+    const data = await res.json();
+    if (data.status === 'ok' || data.status === 'already_paid') {
+      await loadData();
+    }
+  } catch(e) { alert('操作失敗，請重試'); }
+}
+
+async function cancelReg(rowIndex) {
+  if (!window.confirm('確定要取消這筆報名？')) return;
+  try {
+    const res = await fetch(`${GAS_URL}?action=cancel&rowIndex=${rowIndex}&pass=${encodeURIComponent(adminPass)}`);
+    const data = await res.json();
+    if (data.status === 'ok') await loadData();
+  } catch(e) { alert('操作失敗，請重試'); }
+}
+</script>
+</body>
+</html>
