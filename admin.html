@@ -199,14 +199,14 @@ function renderList() {
       ${r.slots && r.slots !== '—' ? `<div class="reg-slots"><b>正選時段：</b><br>${r.slots}</div>` : ''}
       ${r.waitlist && r.waitlist !== '—' ? `<div class="reg-slots" style="background:#faf5ff;border-color:#e9d5ff;"><b>候補時段：</b><br>${r.waitlist}</div>` : ''}
       ${!isCancelled ? `<div class="reg-actions">
-        ${isPending ? `<button class="btn-confirm" onclick="confirm(${r.rowIndex})">✅ 確認已繳費</button>` : '<div style="flex:1;"></div>'}
+        ${isPending ? `<button class="btn-confirm" onclick="confirmPayment(${r.rowIndex})">✅ 確認已繳費</button>` : '<div style="flex:1;"></div>'}
         <button class="btn-cancel" onclick="cancelReg(${r.rowIndex})">${isPending ? '❌ 取消報名' : '🔄 標記取消'}</button>
       </div>` : ''}
     </div>`;
   }).join('');
 }
 
-async function confirm(rowIndex) {
+async function confirmPayment(rowIndex) {
   if (!window.confirm('確認這位學員已繳費？名額將正式扣除。')) return;
   try {
     const res = await fetch(`${GAS_URL}?action=confirm&rowIndex=${rowIndex}&pass=${encodeURIComponent(adminPass)}`);
