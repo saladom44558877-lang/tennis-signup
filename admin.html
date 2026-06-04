@@ -187,7 +187,10 @@ function renderList() {
     const isCancelled = r.status === '已取消❌';
     return `<div class="reg-card ${sc}">
       <div class="reg-top">
-        <div class="reg-name">${r.name}</div>
+        <div>
+          <div class="reg-name">${r.name}</div>
+          ${r.orderId ? `<div style="font-size:11px;color:#888;margin-top:2px;">${r.orderId}</div>` : ''}
+        </div>
         <span class="reg-status ${sb}">${r.status}</span>
       </div>
       <div class="reg-info">
