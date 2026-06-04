@@ -560,10 +560,12 @@ const MAX_S=5, MAX_B=10, MAX_W=3;
 let curM=7, level='', selSlots=new Set(), waitSlots=new Set();
 let tournamentIntent='';
 let counts={}, wcounts={};
-let bookedSlots=new Set(); // ★ 已有訂單的時段
-let autoCheckTimer=null;  // ★ 自動查詢計時器
-let isOrderLocked=false;  // ★ 訂單是否已繳費鎖定
-let currentOrderId='';    // ★ 目前操作的訂單編號
+let bookedPaid=new Set();    // ★ 已繳費訂單的時段（黃色不可點）
+let bookedPending=new Set(); // ★ 待確認訂單的時段（藍色可點，還原進 selSlots）
+let bookedSlots=new Set();   // ★ 相容舊邏輯（所有已報名時段聯集）
+let autoCheckTimer=null;     // ★ 自動查詢計時器
+let isOrderLocked=false;     // ★ 訂單是否已繳費鎖定
+let currentOrderId='';       // ★ 目前操作的訂單編號
 
 // =============================================
 // 從 Google Sheets 讀取名額
@@ -653,7 +655,7 @@ function renderSlots(){
     const cnt=counts[key]||0, wcnt=wcounts[wkey]||0;
     const full=cnt>=max, waitFull=wcnt>=MAX_W;
     const isSel=selSlots.has(key), isWait=waitSlots.has(wkey);
-    const isBooked=!isOrderLocked && bookedSlots.has(key); // ★ 已有訂單
+    const isPaidBooked=!isOrderLocked && bookedPaid.has(key); // ★ 已繳費時段（黃色）
     const price=s.cls==='big'?'$490':s.cls==='rally'?'$800':'$550';
     const pct=Math.min(cnt/max*100,100);
     let barCls=pct>=100?'bar-red':pct>=60?'bar-yellow':'bar-green';
@@ -672,14 +674,15 @@ function renderSlots(){
         }
         clickAction='none';
         barCls = isSel ? 'bar-green' : barCls;
-      } else if(isBooked){
-        // ★ 已有其他訂單報名此時段
+      } else if(isPaidBooked){
+        // ★ 已繳費時段 → 黃色不可點
         cardCls+=' is-booked';
-        statusTxt='此時段已有訂單';
+        statusTxt='此時段已有確認訂單';
         statusCls='s-warn';
         barCls='bar-yellow';
         clickAction='none';
       } else {
+        // 正常可選（包含待確認時段，已還原進 selSlots 顯示藍色）
         if(isSel) cardCls+=' is-sel';
         const rem=max-cnt;
         statusTxt=cnt===0?`可報名（0/${max}）`:`剩 ${rem} 位（${cnt}/${max}）`;
@@ -727,7 +730,7 @@ function renderSlots(){
     }
 
     const courtBadge=s.court?`<span class="badge" style="background:#e0f2fe;color:#075985;">第${s.court}面</span>`:'';
-    const bookedBadge=isBooked?'<span class="badge" style="background:#fef3c7;color:#92400e;">已報名</span>':'';
+    const bookedBadge=isPaidBooked?'<span class="badge" style="background:#fef3c7;color:#92400e;">已確認</span>':'';
 
     return `<div class="${cardCls}" data-click="${clickAction}">
       <div class="slot-date">${s.d}</div>
@@ -735,7 +738,7 @@ function renderSlots(){
       <div class="badges">
         ${courtBadge}
         ${bookedBadge}
-        ${isBooked?'':coachBadge}
+        ${isPaidBooked?'':coachBadge}
         ${levelBadge}
         <span class="badge b-price">${price}</span>
       </div>
@@ -874,18 +877,29 @@ async function checkExistingOrders(lineId){
       method:'GET',redirect:'follow',headers:{'Accept':'application/json'}
     });
     const result=await res.json();
+    bookedPaid.clear();
+    bookedPending.clear();
     bookedSlots.clear();
+
     if(result.status==='ok' && result.orders){
       result.orders.forEach(o=>{
-        (o.slots||[]).forEach(k=>bookedSlots.add(k));
-      });
-      if(bookedSlots.size>0){
-        // 顯示提示訊息（插在 search-msg 之前，或用獨立的提示區）
-        const el=document.getElementById('line-booked-hint');
-        if(el){
-          el.style.display='block';
-          el.textContent=`找到既有訂單，已有 ${bookedSlots.size} 個時段報名中（黃色標示），請勿重複選擇。`;
+        if(o.isPaid){
+          (o.slots||[]).forEach(k=>{ bookedPaid.add(k); bookedSlots.add(k); });
+        } else {
+          (o.slots||[]).forEach(k=>{ bookedPending.add(k); bookedSlots.add(k); });
         }
+      });
+
+      const el=document.getElementById('line-booked-hint');
+      if(el && bookedSlots.size>0){
+        el.style.display='block';
+        const paidCount=bookedPaid.size, pendCount=bookedPending.size;
+        let msg='找到既有訂單：';
+        if(paidCount>0) msg+=` 已確認 ${paidCount} 堂（黃色）`;
+        if(pendCount>0) msg+=` 待確認 ${pendCount} 堂（藍色可調整）`;
+        el.textContent=msg+'。';
+      } else if(el){
+        el.style.display='none';
       }
     } else {
       const el=document.getElementById('line-booked-hint');
@@ -1013,15 +1027,22 @@ document.getElementById('btn-load-old').addEventListener('click', async function
     });
     if (!res.ok) throw new Error('網路回應不成功');
     const result = await res.json();
-    bookedSlots.clear();
+    bookedPaid.clear(); bookedPending.clear(); bookedSlots.clear();
 
     if (result.status === 'ok' && result.orders && result.orders.length > 0) {
       const orders = result.orders;
-      orders.forEach(o => (o.slots||[]).forEach(k => bookedSlots.add(k)));
+      orders.forEach(o => {
+        if(o.isPaid) (o.slots||[]).forEach(k=>{ bookedPaid.add(k); bookedSlots.add(k); });
+        else         (o.slots||[]).forEach(k=>{ bookedPending.add(k); bookedSlots.add(k); });
+      });
       const hintEl = document.getElementById('line-booked-hint');
       if(hintEl && bookedSlots.size > 0){
         hintEl.style.display = 'block';
-        hintEl.textContent = `找到既有訂單，已有 ${bookedSlots.size} 個時段報名中（黃色標示），請勿重複選擇。`;
+        const paidCount=bookedPaid.size, pendCount=bookedPending.size;
+        let msg='找到既有訂單：';
+        if(paidCount>0) msg+=` 已確認 ${paidCount} 堂（黃色）`;
+        if(pendCount>0) msg+=` 待確認 ${pendCount} 堂（藍色可調整）`;
+        hintEl.textContent = msg+'。';
       }
       renderSlots();
       showOrderList(orders, msgEl);
@@ -1052,7 +1073,7 @@ function showOrderList(orders, msgEl) {
       : `<span style="background:#fef9c3;color:#92400e;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;">待確認</span>`;
     const action = isPaid
       ? `<span style="font-size:11px;color:#888;">已鎖定</span>`
-      : `<button onclick="loadOrderById(${idx})" style="background:#1d4ed8;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;">修改</button>`;
+      : `<button onclick="cancelOrder(${idx})" style="background:#fff;color:#dc2626;border:1.5px solid #dc2626;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;">取消訂單</button>`;
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:6px;background:#fff;">
       <div>
         <div style="font-size:12px;font-weight:700;color:#1a1a1a;">${o.orderId||'—'}</div>
@@ -1065,43 +1086,50 @@ function showOrderList(orders, msgEl) {
   msgEl.innerHTML = `<div style="margin-top:8px;">
     <div style="font-size:12px;font-weight:700;color:#1a1a1a;margin-bottom:8px;">找到 ${orders.length} 筆訂單：</div>
     ${listHtml}
-    <div style="font-size:11px;color:#888;margin-top:6px;">已繳費訂單已鎖定無法修改。若需新增訂單，請直接選擇時段後送出。</div>
+    <div style="font-size:11px;color:#888;margin-top:6px;">待確認訂單的時段已顯示為藍色，可直接調整後送出新訂單。</div>
   </div>`;
 }
 
-// 帶入待確認訂單到表單
+// 帶入待確認訂單時段（還原進 selSlots 顯示藍色）
 function loadOrderById(idx) {
   const o = window._pendingOrders && window._pendingOrders[idx];
   if (!o || o.isPaid) return;
-
   isOrderLocked = false;
   currentOrderId = o.orderId || '';
-
-  document.getElementById('f-name').value  = o.name  || '';
-  document.getElementById('f-line').value  = o.line  || '';
-  document.getElementById('f-phone').value = o.phone || '';
-
-  level = o.level || '';
-  document.querySelectorAll('.lc').forEach(c => {
-    c.classList.remove('sel');
-    if (c.dataset.level === level) c.classList.add('sel');
-  });
-
-  selSlots  = new Set(o.slots    || []);
-  waitSlots = new Set(o.waitlist || []);
-
-  ['f-name','f-line','f-phone'].forEach(id => document.getElementById(id).disabled = false);
-  document.querySelectorAll('.lc').forEach(c => c.style.pointerEvents = '');
-  document.getElementById('submit-btn').style.display = '';
-
+  (o.slots||[]).forEach(k => selSlots.add(k));
   renderWaitlist(); calcFee(); updateSelInfo(); renderSlots(); checkBtn();
+}
 
-  const msgEl = document.getElementById('search-msg');
-  msgEl.innerHTML = `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:10px 12px;margin-top:8px;">
-    <div style="font-size:11px;color:#888;margin-bottom:3px;">${currentOrderId}</div>
-    <div style="font-weight:700;font-size:13px;margin-bottom:3px;">📋 已帶入，可修改</div>
-    <div style="font-size:12px;color:#166534;">調整完時段後點擊「送出報名」即可更新。</div>
-  </div>`;
+// ★ 取消訂單
+async function cancelOrder(idx) {
+  const o = window._pendingOrders && window._pendingOrders[idx];
+  if (!o) return;
+  if (!confirm(`確定要取消訂單 ${o.orderId||''}？取消後需重新下訂。`)) return;
+
+  try {
+    const res = await fetch(`${GAS_URL}?action=cancel&rowIndex=${o.rowIndex}&pass=adam2026`);
+    const data = await res.json();
+    if (data.status === 'ok') {
+      // 從列表移除並更新 bookedSlots
+      window._pendingOrders.splice(idx, 1);
+      bookedPending.clear(); bookedPaid.clear(); bookedSlots.clear();
+      window._pendingOrders.forEach(ord => {
+        if(ord.isPaid) (ord.slots||[]).forEach(k=>{ bookedPaid.add(k); bookedSlots.add(k); });
+        else           (ord.slots||[]).forEach(k=>{ bookedPending.add(k); bookedSlots.add(k); });
+      });
+      // 清除已取消訂單的 selSlots
+      (o.slots||[]).forEach(k => selSlots.delete(k));
+      renderWaitlist(); calcFee(); updateSelInfo(); renderSlots(); checkBtn();
+      const msgEl = document.getElementById('search-msg');
+      if(window._pendingOrders.length > 0){
+        showOrderList(window._pendingOrders, msgEl);
+      } else {
+        msgEl.innerHTML = `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:12px;color:#166534;">✅ 訂單已取消，可重新選擇時段下訂。</div>`;
+      }
+    } else {
+      alert('取消失敗，請稍後再試');
+    }
+  } catch(e) { alert('取消失敗，請稍後再試'); }
 }
 
 // 團體賽報名意願
