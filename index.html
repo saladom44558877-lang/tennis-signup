@@ -843,15 +843,16 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   const payload = {
     action: 'register',
     name, line, phone, level,
-    slots: rawSlotsStr,        // 確保傳過去的是 s-7-0 這種代碼！
-    waitlist: rawWaitlistStr,  
-    smallCount: small, 
+    slots: rawSlotsStr,
+    waitlist: rawWaitlistStr,
+    smallCount: small,
     bigCount: big,
     rallyCount: rally,
-    totalFee: final, 
+    totalFee: final,
     discount: disc,
     time: new Date().toLocaleString('zh-TW'),
-    tournamentIntent: tournamentIntent
+    tournamentIntent: tournamentIntent,
+    orderId: currentOrderId  // ★ 帶入訂單編號（新單為空，修改單為原編號）
   };
 
   try {
@@ -900,9 +901,10 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   }
 });
 // =============================================
-// 老學員帶入歷史資料功能（支援待確認＆已繳費）
+// 老學員查詢訂單功能（支援一個 LINE ID 多筆訂單）
 // =============================================
-let isOrderLocked = false; // ★ 全域：訂單是否已鎖定（已繳費）
+let isOrderLocked = false;
+let currentOrderId = ''; // ★ 目前操作的訂單編號
 
 document.getElementById('btn-load-old').addEventListener('click', async function() {
   const searchLine = document.getElementById('f-search-line').value.trim();
@@ -917,6 +919,7 @@ document.getElementById('btn-load-old').addEventListener('click', async function
   this.textContent = '搜尋中...';
   msgEl.style.color = '#666';
   msgEl.textContent = '正在後台比對您的訂單紀錄...';
+  msgEl.innerHTML = '正在後台比對您的訂單紀錄...';
 
   const targetUrl = `${GAS_URL}?action=getRegistration&line=${encodeURIComponent(searchLine)}`;
 
@@ -930,68 +933,46 @@ document.getElementById('btn-load-old').addEventListener('click', async function
     if (!res.ok) throw new Error('網路回應不成功');
     const result = await res.json();
 
-    if (result.status === 'ok') {
-      const d = result.data;
-      isOrderLocked = result.isPaid; // ★ 是否已繳費鎖定
+    if (result.status === 'ok' && result.orders && result.orders.length > 0) {
+      const orders = result.orders;
 
-      // 1. 填入基本資料欄位
-      document.getElementById('f-name').value  = d.name  || '';
-      document.getElementById('f-line').value  = d.line  || '';
-      document.getElementById('f-phone').value = d.phone || '';
-
-      // 2. 填入程度
-      level = d.level || '';
-      document.querySelectorAll('.lc').forEach(c => {
-        c.classList.remove('sel');
-        if (c.dataset.level === level) c.classList.add('sel');
-      });
-
-      // 3. 還原時段勾選
-      selSlots  = new Set(d.slots    || []);
-      waitSlots = new Set(d.waitlist || []);
-
-      // 4. 重新渲染
-      renderWaitlist(); calcFee(); updateSelInfo(); renderSlots(); checkBtn();
-
-      if (isOrderLocked) {
-        // ★ 已繳費：鎖定所有欄位，隱藏送出按鈕
-        ['f-name','f-line','f-phone'].forEach(id => {
-          document.getElementById(id).disabled = true;
-        });
-        document.querySelectorAll('.lc').forEach(c => c.style.pointerEvents = 'none');
-        document.getElementById('submit-btn').style.display = 'none';
-
-        // 顯示鎖定提示
-        msgEl.style.color = '#92400e';
-        msgEl.innerHTML = `
-          <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:12px;margin-top:8px;">
-            <div style="font-weight:700;margin-bottom:4px;">✅ 訂單已確認繳費</div>
-            <div style="font-size:12px;line-height:1.8;color:#78350f;">
-              你的課程時段已鎖定，無法自行修改。<br>
-              如需調整，請直接聯繫 Adam 教練 🎾
+      if (orders.length === 1) {
+        // 只有一筆，直接帶入
+        loadOrder(orders[0], msgEl);
+      } else {
+        // 多筆：顯示列表讓學員選擇
+        const listHtml = orders.map((o, idx) => {
+          const isPaid = o.isPaid;
+          const statusBadge = isPaid
+            ? `<span style="background:#dcfce7;color:#166534;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700;">已繳費✅</span>`
+            : `<span style="background:#fef9c3;color:#92400e;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700;">待確認</span>`;
+          const btnLabel = isPaid ? '查看' : '修改';
+          const btnColor = isPaid ? '#888' : '#1d4ed8';
+          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:8px;background:#fff;">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#1a1a1a;margin-bottom:3px;">${o.orderId}</div>
+              <div style="font-size:11px;color:#888;">${o.fee}｜${o.totalSlots} 堂</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              ${statusBadge}
+              <button onclick="loadOrderById(${idx})" style="background:${btnColor};color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;">${btnLabel}</button>
             </div>
           </div>`;
-      } else {
-        // ★ 待確認：可修改，顯示提醒
-        ['f-name','f-line','f-phone'].forEach(id => {
-          document.getElementById(id).disabled = false;
-        });
-        document.querySelectorAll('.lc').forEach(c => c.style.pointerEvents = '');
-        document.getElementById('submit-btn').style.display = '';
+        }).join('');
 
-        msgEl.style.color = '#166534';
+        // 把訂單資料暫存到 window 供 loadOrderById 使用
+        window._pendingOrders = orders;
+
         msgEl.innerHTML = `
-          <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px;margin-top:8px;">
-            <div style="font-weight:700;margin-bottom:4px;">📋 訂單審核中，可以修改</div>
-            <div style="font-size:12px;line-height:1.8;color:#166534;">
-              你的訂單尚未確認繳費，仍可調整時段。<br>
-              修改完成後點擊「送出報名」即可更新。
-            </div>
+          <div style="margin-top:8px;">
+            <div style="font-size:12px;font-weight:700;color:#1a1a1a;margin-bottom:10px;">找到 ${orders.length} 筆訂單，請選擇要操作的訂單：</div>
+            ${listHtml}
           </div>`;
       }
 
     } else {
       isOrderLocked = false;
+      currentOrderId = '';
       msgEl.style.color = '#dc2626';
       msgEl.textContent = '❌ 找不到此 LINE ID 的報名紀錄，請確認輸入是否正確（大小寫需一致）。';
     }
@@ -1004,6 +985,73 @@ document.getElementById('btn-load-old').addEventListener('click', async function
     this.textContent = '帶入舊資料';
   }
 });
+
+// 從列表點選特定訂單
+function loadOrderById(idx) {
+  const order = window._pendingOrders && window._pendingOrders[idx];
+  if (!order) return;
+  const msgEl = document.getElementById('search-msg');
+  loadOrder(order, msgEl);
+}
+
+// 帶入單筆訂單資料到表單
+function loadOrder(o, msgEl) {
+  isOrderLocked = o.isPaid;
+  currentOrderId = o.orderId; // ★ 記住這筆訂單的編號
+
+  // 填入基本資料
+  document.getElementById('f-name').value  = o.name  || '';
+  document.getElementById('f-line').value  = o.line  || '';
+  document.getElementById('f-phone').value = o.phone || '';
+
+  // 填入程度
+  level = o.level || '';
+  document.querySelectorAll('.lc').forEach(c => {
+    c.classList.remove('sel');
+    if (c.dataset.level === level) c.classList.add('sel');
+  });
+
+  // 還原時段勾選
+  selSlots  = new Set(o.slots    || []);
+  waitSlots = new Set(o.waitlist || []);
+
+  // 重新渲染
+  renderWaitlist(); calcFee(); updateSelInfo(); renderSlots(); checkBtn();
+
+  if (isOrderLocked) {
+    ['f-name','f-line','f-phone'].forEach(id => {
+      document.getElementById(id).disabled = true;
+    });
+    document.querySelectorAll('.lc').forEach(c => c.style.pointerEvents = 'none');
+    document.getElementById('submit-btn').style.display = 'none';
+
+    msgEl.innerHTML = `
+      <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:12px;margin-top:8px;">
+        <div style="font-size:11px;color:#888;margin-bottom:4px;">${currentOrderId}</div>
+        <div style="font-weight:700;margin-bottom:4px;">✅ 訂單已確認繳費</div>
+        <div style="font-size:12px;line-height:1.8;color:#78350f;">
+          你的課程時段已鎖定，無法自行修改。<br>
+          如需調整，請直接聯繫 Adam 教練 🎾
+        </div>
+      </div>`;
+  } else {
+    ['f-name','f-line','f-phone'].forEach(id => {
+      document.getElementById(id).disabled = false;
+    });
+    document.querySelectorAll('.lc').forEach(c => c.style.pointerEvents = '');
+    document.getElementById('submit-btn').style.display = '';
+
+    msgEl.innerHTML = `
+      <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px;margin-top:8px;">
+        <div style="font-size:11px;color:#888;margin-bottom:4px;">${currentOrderId}</div>
+        <div style="font-weight:700;margin-bottom:4px;">📋 訂單審核中，可以修改</div>
+        <div style="font-size:12px;line-height:1.8;color:#166534;">
+          你的訂單尚未確認繳費，仍可調整時段。<br>
+          修改完成後點擊「送出報名」即可更新。
+        </div>
+      </div>`;
+  }
+}
 // 團體賽報名意願
 document.getElementById('tournament-opts').addEventListener('click', function(e){
   const opt = e.target.closest('.tournament-opt');
