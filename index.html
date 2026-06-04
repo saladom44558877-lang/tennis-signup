@@ -78,6 +78,9 @@
     .slot-card { border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; cursor: pointer; background: #fff; transition: all .15s; user-select: none; }
     .slot-card:hover:not(.is-full):not(.is-waitfull) { border-color: #378ADD; background: #f0f7ff; }
     .slot-card.is-sel { border-color: #1d4ed8; background: #dbeafe; }
+    .slot-card.is-locked { border-color: #16a34a; background: #dcfce7; cursor: default; pointer-events: none; }
+    .slot-card.is-locked:hover { border-color: #16a34a; background: #dcfce7; }
+    .slot-card.is-booked { border-color: #f59e0b; background: #fffbeb; cursor: default; pointer-events: none; }
     .slot-card.is-wait { border-color: #7c3aed; background: #f5f3ff; }
     .slot-card.is-full { cursor: default; }
     .slot-card.is-waitfull { cursor: default; opacity: .6; }
@@ -268,6 +271,7 @@
       <div class="sec-label">基本資料</div>
       <div class="field"><label>姓名 *</label><input id="f-name" placeholder="請輸入真實姓名"></div>
       <div class="field"><label>LINE ID *</label><input id="f-line" placeholder="確認入班後加入群組"></div>
+      <div id="line-booked-hint" style="display:none;font-size:12px;color:#92400e;background:#fffbeb;border:0.5px solid #fcd34d;border-radius:8px;padding:8px 12px;margin-top:-6px;margin-bottom:12px;"></div>
       <div class="field"><label>聯絡電話</label><input id="f-phone" placeholder="停課通知用"></div>
     </div>
 
@@ -376,7 +380,7 @@
         <div class="fee-row"><span>課程費合計</span><span id="ft" style="color:#1d4ed8">$0</span></div>
         <div id="fg" class="fee-gift" style="display:none">🏆 選滿10堂！免費參加 12/23–24 網球團體賽（免報名費 $600）</div>
         <div class="fee-note">
-          ・10堂套票95折（小班、大班、對打課皆可混搭）<br>
+          ・10堂套票95折（小班、大班可混搭，對打課不計折扣）<br>
           ・場地費 $80/堂，上課當天收取<br>
           ・候補確認入班後再計費<br>
           ・年底團體賽報名費 $600，報名滿10堂免費參加
@@ -553,6 +557,10 @@ const MAX_S=5, MAX_B=10, MAX_W=3;
 let curM=7, level='', selSlots=new Set(), waitSlots=new Set();
 let tournamentIntent='';
 let counts={}, wcounts={};
+let bookedSlots=new Set(); // ★ 已有訂單的時段
+let autoCheckTimer=null;  // ★ 自動查詢計時器
+let isOrderLocked=false;  // ★ 訂單是否已繳費鎖定
+let currentOrderId='';    // ★ 目前操作的訂單編號
 
 // =============================================
 // 從 Google Sheets 讀取名額
@@ -642,23 +650,53 @@ function renderSlots(){
     const cnt=counts[key]||0, wcnt=wcounts[wkey]||0;
     const full=cnt>=max, waitFull=wcnt>=MAX_W;
     const isSel=selSlots.has(key), isWait=waitSlots.has(wkey);
+    const isBooked=!isOrderLocked && bookedSlots.has(key); // ★ 已有訂單
     const price=s.cls==='big'?'$490':s.cls==='rally'?'$800':'$550';
     const pct=Math.min(cnt/max*100,100);
     let barCls=pct>=100?'bar-red':pct>=60?'bar-yellow':'bar-green';
     let cardCls='slot-card', statusTxt, statusCls, clickAction;
 
     if(!full){
-      if(isSel) cardCls+=' is-sel';
-      const rem=max-cnt;
-      statusTxt=cnt===0?`可報名（0/${max}）`:`剩 ${rem} 位（${cnt}/${max}）`;
-      statusCls=cnt/max>=0.6?'s-warn':'s-ok';
-      clickAction='sel:'+key;
+      if(isOrderLocked){
+        if(isSel){
+          cardCls+=' is-locked';
+          statusTxt='✅ 已確認';
+          statusCls='s-ok';
+        } else {
+          cardCls+=' is-full';
+          statusTxt='—';
+          statusCls='s-full';
+        }
+        clickAction='none';
+        barCls = isSel ? 'bar-green' : barCls;
+      } else if(isBooked){
+        // ★ 已有其他訂單報名此時段
+        cardCls+=' is-booked';
+        statusTxt='此時段已有訂單';
+        statusCls='s-warn';
+        barCls='bar-yellow';
+        clickAction='none';
+      } else {
+        if(isSel) cardCls+=' is-sel';
+        const rem=max-cnt;
+        statusTxt=cnt===0?`可報名（0/${max}）`:`剩 ${rem} 位（${cnt}/${max}）`;
+        statusCls=cnt/max>=0.6?'s-warn':'s-ok';
+        clickAction='sel:'+key;
+      }
     } else if(!waitFull){
-      if(isWait){ cardCls+=' is-wait'; barCls='bar-purple'; }
-      else cardCls+=' is-full';
-      statusTxt=isWait?`已候補（${wcnt}/${MAX_W}）`:`額滿｜可候補（${wcnt}/${MAX_W}）`;
-      statusCls='s-wait';
-      clickAction='wait:'+wkey;
+      if(isOrderLocked){
+        if(isWait){ cardCls+=' is-locked'; barCls='bar-green'; statusTxt='✅ 已確認候補'; }
+        else cardCls+=' is-full';
+        statusTxt = isWait ? '✅ 已確認候補' : '—';
+        statusCls='s-ok';
+        clickAction='none';
+      } else {
+        if(isWait){ cardCls+=' is-wait'; barCls='bar-purple'; }
+        else cardCls+=' is-full';
+        statusTxt=isWait?`已候補（${wcnt}/${MAX_W}）`:`額滿｜可候補（${wcnt}/${MAX_W}）`;
+        statusCls='s-wait';
+        clickAction='wait:'+wkey;
+      }
     } else {
       cardCls+=' is-full is-waitfull';
       barCls='bar-red';
@@ -686,13 +724,15 @@ function renderSlots(){
     }
 
     const courtBadge=s.court?`<span class="badge" style="background:#e0f2fe;color:#075985;">第${s.court}面</span>`:'';
+    const bookedBadge=isBooked?'<span class="badge" style="background:#fef3c7;color:#92400e;">已報名</span>':'';
 
     return `<div class="${cardCls}" data-click="${clickAction}">
       <div class="slot-date">${s.d}</div>
       <div class="slot-time">${timeLabel}</div>
       <div class="badges">
         ${courtBadge}
-        ${coachBadge}
+        ${bookedBadge}
+        ${isBooked?'':coachBadge}
         ${levelBadge}
         <span class="badge b-price">${price}</span>
       </div>
@@ -751,7 +791,7 @@ function calcFee(){
     }
   }
   const total=small+big+rally, raw=small*550+big*490+rally*800;
-  const is10=total>=10, disc=is10?Math.round((small*550+big*490+rally*800)*0.05):0, final=raw-disc;
+  const is10=total>=10, disc=is10?Math.round((small*550+big*490)*0.05):0, final=raw-disc;
   document.getElementById('fs').textContent=`${small} 堂 × $550 = $${(small*550).toLocaleString()}`;
   document.getElementById('fb').textContent=`${big} 堂 × $490 = $${(big*490).toLocaleString()}`;
   document.getElementById('fr').textContent=`${rally} 堂 × $800 = $${(rally*800).toLocaleString()}`;
@@ -798,8 +838,48 @@ document.getElementById('month-tabs').addEventListener('click', function(e){
 });
 
 document.getElementById('f-name').addEventListener('input', checkBtn);
-document.getElementById('f-line').addEventListener('input', checkBtn);
+document.getElementById('f-line').addEventListener('input', function(){
+  checkBtn();
+  clearTimeout(autoCheckTimer);
+  bookedSlots.clear();
+  const val=this.value.trim();
+  if(val.length < 3){
+    renderSlots();
+    const hintEl=document.getElementById('line-booked-hint');
+    if(hintEl) hintEl.style.display='none';
+    return;
+  }
+  autoCheckTimer=setTimeout(()=>checkExistingOrders(val), 800);
+});
 document.getElementById('agree').addEventListener('change', checkBtn);
+
+// ★ 自動查詢已有訂單
+async function checkExistingOrders(lineId){
+  try{
+    const res=await fetch(`${GAS_URL}?action=getRegistration&line=${encodeURIComponent(lineId)}`,{
+      method:'GET',redirect:'follow',headers:{'Accept':'application/json'}
+    });
+    const result=await res.json();
+    bookedSlots.clear();
+    if(result.status==='ok' && result.orders){
+      result.orders.forEach(o=>{
+        (o.slots||[]).forEach(k=>bookedSlots.add(k));
+      });
+      if(bookedSlots.size>0){
+        // 顯示提示訊息（插在 search-msg 之前，或用獨立的提示區）
+        const el=document.getElementById('line-booked-hint');
+        if(el){
+          el.style.display='block';
+          el.textContent=`找到既有訂單，已有 ${bookedSlots.size} 個時段報名中（黃色標示），請勿重複選擇。`;
+        }
+      }
+    } else {
+      const el=document.getElementById('line-booked-hint');
+      if(el) el.style.display='none';
+    }
+    renderSlots();
+  }catch(e){}
+}
   
 document.getElementById('level-filter').addEventListener('change', renderSlots);
 // =============================================
@@ -843,16 +923,16 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   const payload = {
     action: 'register',
     name, line, phone, level,
-    slots: rawSlotsStr,
-    waitlist: rawWaitlistStr,
-    smallCount: small,
+    slots: rawSlotsStr,        // 確保傳過去的是 s-7-0 這種代碼！
+    waitlist: rawWaitlistStr,  
+    smallCount: small, 
     bigCount: big,
     rallyCount: rally,
-    totalFee: final,
+    totalFee: final, 
     discount: disc,
     time: new Date().toLocaleString('zh-TW'),
     tournamentIntent: tournamentIntent,
-    orderId: currentOrderId  // ★ 帶入訂單編號（新單為空，修改單為原編號）
+    orderId: currentOrderId  // ★ 有值=修改舊單，空值=新單
   };
 
   try {
@@ -901,11 +981,8 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   }
 });
 // =============================================
-// 老學員查詢訂單功能（支援一個 LINE ID 多筆訂單）
+// 老學員帶入歷史資料功能（支援待確認＆已繳費）
 // =============================================
-let isOrderLocked = false;
-let currentOrderId = ''; // ★ 目前操作的訂單編號
-
 document.getElementById('btn-load-old').addEventListener('click', async function() {
   const searchLine = document.getElementById('f-search-line').value.trim();
   const msgEl = document.getElementById('search-msg');
@@ -919,7 +996,6 @@ document.getElementById('btn-load-old').addEventListener('click', async function
   this.textContent = '搜尋中...';
   msgEl.style.color = '#666';
   msgEl.textContent = '正在後台比對您的訂單紀錄...';
-  msgEl.innerHTML = '正在後台比對您的訂單紀錄...';
 
   const targetUrl = `${GAS_URL}?action=getRegistration&line=${encodeURIComponent(searchLine)}`;
 
@@ -935,38 +1011,68 @@ document.getElementById('btn-load-old').addEventListener('click', async function
 
     if (result.status === 'ok' && result.orders && result.orders.length > 0) {
       const orders = result.orders;
+      const o = orders[0]; // 先取第一筆（單筆情況）
+      isOrderLocked = o.isPaid;
+      currentOrderId = o.orderId || '';
 
-      if (orders.length === 1) {
-        // 只有一筆，直接帶入
-        loadOrder(orders[0], msgEl);
-      } else {
-        // 多筆：顯示列表讓學員選擇
-        const listHtml = orders.map((o, idx) => {
-          const isPaid = o.isPaid;
-          const statusBadge = isPaid
-            ? `<span style="background:#dcfce7;color:#166534;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700;">已繳費✅</span>`
-            : `<span style="background:#fef9c3;color:#92400e;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700;">待確認</span>`;
-          const btnLabel = isPaid ? '查看' : '修改';
-          const btnColor = isPaid ? '#888' : '#1d4ed8';
-          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:8px;background:#fff;">
-            <div>
-              <div style="font-size:12px;font-weight:700;color:#1a1a1a;margin-bottom:3px;">${o.orderId}</div>
-              <div style="font-size:11px;color:#888;">${o.fee}｜${o.totalSlots} 堂</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              ${statusBadge}
-              <button onclick="loadOrderById(${idx})" style="background:${btnColor};color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;">${btnLabel}</button>
+      // 清除 bookedSlots 避免黃色殘留
+      bookedSlots.clear();
+      const hintEl = document.getElementById('line-booked-hint');
+      if(hintEl) hintEl.style.display = 'none';
+
+      // 1. 填入基本資料欄位
+      document.getElementById('f-name').value  = o.name  || '';
+      document.getElementById('f-line').value  = o.line  || '';
+      document.getElementById('f-phone').value = o.phone || '';
+
+      // 2. 填入程度
+      level = o.level || '';
+      document.querySelectorAll('.lc').forEach(c => {
+        c.classList.remove('sel');
+        if (c.dataset.level === level) c.classList.add('sel');
+      });
+
+      // 3. 還原時段勾選
+      selSlots  = new Set(o.slots    || []);
+      waitSlots = new Set(o.waitlist || []);
+
+      // 4. 重新渲染
+      renderWaitlist(); calcFee(); updateSelInfo(); renderSlots(); checkBtn();
+
+      if (isOrderLocked) {
+        // ★ 已繳費：鎖定所有欄位，隱藏送出按鈕
+        ['f-name','f-line','f-phone'].forEach(id => {
+          document.getElementById(id).disabled = true;
+        });
+        document.querySelectorAll('.lc').forEach(c => c.style.pointerEvents = 'none');
+        document.getElementById('submit-btn').style.display = 'none';
+
+        // 顯示鎖定提示
+        msgEl.style.color = '#92400e';
+        msgEl.innerHTML = `
+          <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:12px;margin-top:8px;">
+            <div style="font-weight:700;margin-bottom:4px;">✅ 訂單已確認繳費</div>
+            <div style="font-size:12px;line-height:1.8;color:#78350f;">
+              你的課程時段已鎖定，無法自行修改。<br>
+              如需調整，請直接聯繫 Adam 教練 🎾
             </div>
           </div>`;
-        }).join('');
+      } else {
+        // ★ 待確認：可修改，顯示提醒
+        ['f-name','f-line','f-phone'].forEach(id => {
+          document.getElementById(id).disabled = false;
+        });
+        document.querySelectorAll('.lc').forEach(c => c.style.pointerEvents = '');
+        document.getElementById('submit-btn').style.display = '';
 
-        // 把訂單資料暫存到 window 供 loadOrderById 使用
-        window._pendingOrders = orders;
-
+        msgEl.style.color = '#166534';
         msgEl.innerHTML = `
-          <div style="margin-top:8px;">
-            <div style="font-size:12px;font-weight:700;color:#1a1a1a;margin-bottom:10px;">找到 ${orders.length} 筆訂單，請選擇要操作的訂單：</div>
-            ${listHtml}
+          <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px;margin-top:8px;">
+            <div style="font-weight:700;margin-bottom:4px;">📋 訂單審核中，可以修改</div>
+            <div style="font-size:12px;line-height:1.8;color:#166534;">
+              你的訂單尚未確認繳費，仍可調整時段。<br>
+              修改完成後點擊「送出報名」即可更新。
+            </div>
           </div>`;
       }
 
@@ -985,73 +1091,6 @@ document.getElementById('btn-load-old').addEventListener('click', async function
     this.textContent = '帶入舊資料';
   }
 });
-
-// 從列表點選特定訂單
-function loadOrderById(idx) {
-  const order = window._pendingOrders && window._pendingOrders[idx];
-  if (!order) return;
-  const msgEl = document.getElementById('search-msg');
-  loadOrder(order, msgEl);
-}
-
-// 帶入單筆訂單資料到表單
-function loadOrder(o, msgEl) {
-  isOrderLocked = o.isPaid;
-  currentOrderId = o.orderId; // ★ 記住這筆訂單的編號
-
-  // 填入基本資料
-  document.getElementById('f-name').value  = o.name  || '';
-  document.getElementById('f-line').value  = o.line  || '';
-  document.getElementById('f-phone').value = o.phone || '';
-
-  // 填入程度
-  level = o.level || '';
-  document.querySelectorAll('.lc').forEach(c => {
-    c.classList.remove('sel');
-    if (c.dataset.level === level) c.classList.add('sel');
-  });
-
-  // 還原時段勾選
-  selSlots  = new Set(o.slots    || []);
-  waitSlots = new Set(o.waitlist || []);
-
-  // 重新渲染
-  renderWaitlist(); calcFee(); updateSelInfo(); renderSlots(); checkBtn();
-
-  if (isOrderLocked) {
-    ['f-name','f-line','f-phone'].forEach(id => {
-      document.getElementById(id).disabled = true;
-    });
-    document.querySelectorAll('.lc').forEach(c => c.style.pointerEvents = 'none');
-    document.getElementById('submit-btn').style.display = 'none';
-
-    msgEl.innerHTML = `
-      <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:12px;margin-top:8px;">
-        <div style="font-size:11px;color:#888;margin-bottom:4px;">${currentOrderId}</div>
-        <div style="font-weight:700;margin-bottom:4px;">✅ 訂單已確認繳費</div>
-        <div style="font-size:12px;line-height:1.8;color:#78350f;">
-          你的課程時段已鎖定，無法自行修改。<br>
-          如需調整，請直接聯繫 Adam 教練 🎾
-        </div>
-      </div>`;
-  } else {
-    ['f-name','f-line','f-phone'].forEach(id => {
-      document.getElementById(id).disabled = false;
-    });
-    document.querySelectorAll('.lc').forEach(c => c.style.pointerEvents = '');
-    document.getElementById('submit-btn').style.display = '';
-
-    msgEl.innerHTML = `
-      <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px;margin-top:8px;">
-        <div style="font-size:11px;color:#888;margin-bottom:4px;">${currentOrderId}</div>
-        <div style="font-weight:700;margin-bottom:4px;">📋 訂單審核中，可以修改</div>
-        <div style="font-size:12px;line-height:1.8;color:#166534;">
-          你的訂單尚未確認繳費，仍可調整時段。<br>
-          修改完成後點擊「送出報名」即可更新。
-        </div>
-      </div>`;
-  }
-}
 // 團體賽報名意願
 document.getElementById('tournament-opts').addEventListener('click', function(e){
   const opt = e.target.closest('.tournament-opt');
