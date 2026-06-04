@@ -344,7 +344,7 @@
     <div class="card" id="tournament-card">
       <div class="sec-label">年底團體賽報名意願</div>
       <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:12px;margin-bottom:12px;">
-        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;">🏆 12/30–31 網球團體賽</div>
+        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;">🏆 12/23–24 網球團體賽</div>
         <div style="font-size:12px;color:#78350f;line-height:1.9;">
           報名費：<b>$600 元</b><br>
           🎁 <b>報名滿 10 堂課即可免費參賽！</b>（省 $600）
@@ -455,56 +455,97 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbxddtd_CFTtvDCBd1aLe9ve
 // =============================================
 const DEFS = {
   7:[
-    {d:"07/01(三)",t:"20-21",type:"wed",cls:"small"},{d:"07/02(四)",t:"19-20",type:"thu",cls:"small"},
-    {d:"07/02(四)",t:"20-21",type:"thu",cls:"rally"},{d:"07/08(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"07/08(三)",t:"20-21",type:"wed",cls:"small"},{d:"07/15(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"07/15(三)",t:"20-21",type:"wed",cls:"small"},{d:"07/22(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"07/23(四)",t:"19-20",type:"thu",cls:"small"},{d:"07/29(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"07/29(三)",t:"20-21",type:"wed",cls:"small"},{d:"07/30(四)",t:"19-20",type:"thu",cls:"small"},
-    {d:"07/30(四)",t:"20-21",type:"thu",cls:"rally"}
+    {d:"07/01(三)",t:"20-21",court:5,type:"wed",cls:"small"},
+    {d:"07/02(四)",t:"19-20",court:4,type:"thu",cls:"small"},
+    {d:"07/02(四)",t:"20-21",court:4,type:"thu",cls:"rally"},
+    {d:"07/08(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"07/08(三)",t:"20-21",court:6,type:"wed",cls:"small"},
+    {d:"07/15(三)",t:"19-20",court:5,type:"wed",cls:"small"},
+    {d:"07/15(三)",t:"20-21",court:4,type:"wed",cls:"small"},
+    {d:"07/22(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"07/23(四)",t:"19-20",court:5,type:"thu",cls:"small"},
+    {d:"07/29(三)",t:"19-20",court:5,type:"wed",cls:"small"},
+    {d:"07/29(三)",t:"20-21",court:5,type:"wed",cls:"small"},
+    {d:"07/30(四)",t:"19-20",court:6,type:"thu",cls:"small"},
+    {d:"07/30(四)",t:"20-21",court:4,type:"thu",cls:"rally"}
   ],
   8:[
-    {d:"08/04(二)",t:"20-21",type:"tue",cls:"small"},{d:"08/05(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"08/05(三)",t:"20-21",type:"wed",cls:"small"},{d:"08/06(四)",t:"20-21",type:"thu",cls:"rally"},
-    {d:"08/11(二)",t:"20-21",type:"tue",cls:"small"},{d:"08/12(三)",t:"20-21",type:"wed",cls:"small"},
-    {d:"08/13(四)",t:"19-20",type:"thu",cls:"small"},{d:"08/18(二)",t:"19-20",type:"tue",cls:"small"},
-    {d:"08/18(二)",t:"20-21",type:"tue",cls:"small"},{d:"08/25(二)",t:"19-20",type:"tue",cls:"small"},
-    {d:"08/25(二)",t:"20-21",type:"tue",cls:"small"},{d:"08/26(三)",t:"20-21",type:"wed",cls:"small"},
-    {d:"08/27(四)",t:"20-21",type:"thu",cls:"rally"}
+    {d:"08/04(二)",t:"20-21",court:4,type:"tue",cls:"small"},
+    {d:"08/05(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"08/05(三)",t:"20-21",court:5,type:"wed",cls:"small"},
+    {d:"08/06(四)",t:"20-21",court:6,type:"thu",cls:"rally"},
+    {d:"08/11(二)",t:"20-21",court:4,type:"tue",cls:"small"},
+    {d:"08/12(三)",t:"20-21",court:5,type:"wed",cls:"small"},
+    {d:"08/13(四)",t:"19-20",court:4,type:"thu",cls:"small"},
+    {d:"08/18(二)",t:"19-20",court:6,type:"tue",cls:"small"},
+    {d:"08/18(二)",t:"19-20",court:5,type:"tue",cls:"small"},
+    {d:"08/18(二)",t:"20-21",court:6,type:"tue",cls:"small"},
+    {d:"08/25(二)",t:"19-20",court:5,type:"tue",cls:"small"},
+    {d:"08/25(二)",t:"20-21",court:5,type:"tue",cls:"small"},
+    {d:"08/26(三)",t:"20-21",court:5,type:"wed",cls:"small"},
+    {d:"08/27(四)",t:"20-21",court:4,type:"thu",cls:"rally"}
   ],
   9:[
-    {d:"09/01(二)",t:"19-20",type:"tue",cls:"big"},{d:"09/02(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"09/03(四)",t:"19-20",type:"thu",cls:"small"},{d:"09/03(四)",t:"20-21",type:"thu",cls:"rally"},
-    {d:"09/08(二)",t:"20-21",type:"tue",cls:"big"},{d:"09/10(開)",t:"19-20",type:"thu",cls:"small"},
-    {d:"09/10(四)",t:"20-21",type:"thu",cls:"rally"},{d:"09/15(二)",t:"19-20",type:"tue",cls:"big"},
-    {d:"09/15(二)",t:"20-21",type:"tue",cls:"big"},{d:"09/16(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"09/16(三)",t:"20-21",type:"wed",cls:"small"},{d:"09/17(四)",t:"19-20",type:"thu",cls:"small"},
-    {d:"09/17(四)",t:"20-21",type:"thu",cls:"rally"},{d:"09/23(三)",t:"20-21",type:"wed",cls:"small"},
-    {d:"09/24(四)",t:"19-20",type:"thu",cls:"small"},{d:"09/24(四)",t:"20-21",type:"thu",cls:"rally"},
-    {d:"09/30(三)",t:"19-20",type:"wed",cls:"small"},{d:"09/30(三)",t:"20-21",type:"wed",cls:"small"}
+    {d:"09/01(二)",t:"19-20",court:6,type:"tue",cls:"big"},
+    {d:"09/01(二)",t:"19-20",court:5,type:"tue",cls:"big"},
+    {d:"09/02(三)",t:"19-20",court:5,type:"wed",cls:"small"},
+    {d:"09/03(四)",t:"19-20",court:5,type:"thu",cls:"small"},
+    {d:"09/03(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"09/08(二)",t:"20-21",court:6,type:"tue",cls:"big"},
+    {d:"09/10(四)",t:"19-20",court:6,type:"thu",cls:"small"},
+    {d:"09/10(四)",t:"20-21",court:4,type:"thu",cls:"rally"},
+    {d:"09/15(二)",t:"19-20",court:4,type:"tue",cls:"big"},
+    {d:"09/15(二)",t:"20-21",court:5,type:"tue",cls:"big"},
+    {d:"09/16(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"09/16(三)",t:"20-21",court:6,type:"wed",cls:"small"},
+    {d:"09/17(四)",t:"19-20",court:4,type:"thu",cls:"small"},
+    {d:"09/17(四)",t:"20-21",court:6,type:"thu",cls:"rally"},
+    {d:"09/23(三)",t:"20-21",court:4,type:"wed",cls:"small"},
+    {d:"09/24(四)",t:"19-20",court:6,type:"thu",cls:"small"},
+    {d:"09/24(四)",t:"20-21",court:4,type:"thu",cls:"rally"},
+    {d:"09/30(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"09/30(三)",t:"20-21",court:6,type:"wed",cls:"small"}
   ],
   10:[
-    {d:"10/01(四)",t:"19-20",type:"thu",cls:"small"},{d:"10/06(二)",t:"19-20",type:"tue",cls:"big"},
-    {d:"10/07(三)",t:"19-20",type:"wed",cls:"small"},{d:"10/08(四)",t:"19-20",type:"thu",cls:"small"},
-    {d:"10/08(四)",t:"20-21",type:"thu",cls:"rally"},{d:"10/14(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"10/15(四)",t:"19-20",type:"thu",cls:"small"},{d:"10/20(二)",t:"20-21",type:"tue",cls:"big"},
-    {d:"10/22(四)",t:"19-20",type:"thu",cls:"small"},{d:"10/27(二)",t:"20-21",type:"tue",cls:"big"},
-    {d:"10/29(四)",t:"19-20",type:"thu",cls:"small"}
+    {d:"10/01(四)",t:"19-20",court:5,type:"thu",cls:"small"},
+    {d:"10/06(二)",t:"19-20",court:5,type:"tue",cls:"big"},
+    {d:"10/07(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"10/08(四)",t:"19-20",court:6,type:"thu",cls:"small"},
+    {d:"10/08(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"10/14(三)",t:"19-20",court:5,type:"wed",cls:"small"},
+    {d:"10/15(四)",t:"19-20",court:6,type:"thu",cls:"small"},
+    {d:"10/20(二)",t:"20-21",court:4,type:"tue",cls:"big"},
+    {d:"10/22(四)",t:"19-20",court:5,type:"thu",cls:"small"},
+    {d:"10/27(二)",t:"20-21",court:6,type:"tue",cls:"big"},
+    {d:"10/29(四)",t:"19-20",court:5,type:"thu",cls:"small"}
   ],
   11:[
-    {d:"11/03(二)",t:"19-20",type:"tue",cls:"big"},{d:"11/04(三)",t:"20-21",type:"wed",cls:"small"},
-    {d:"11/12(四)",t:"20-21",type:"thu",cls:"rally"},{d:"11/17(二)",t:"19-20",type:"tue",cls:"big"},
-    {d:"11/17(二)",t:"20-21",type:"tue",cls:"big"},{d:"11/19(四)",t:"20-21",type:"thu",cls:"rally"},
-    {d:"11/24(二)",t:"20-21",type:"tue",cls:"big"}
+    {d:"11/03(二)",t:"19-20",court:4,type:"tue",cls:"big"},
+    {d:"11/04(三)",t:"20-21",court:6,type:"wed",cls:"small"},
+    {d:"11/12(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"11/17(二)",t:"19-20",court:4,type:"tue",cls:"big"},
+    {d:"11/17(二)",t:"20-21",court:6,type:"tue",cls:"big"},
+    {d:"11/19(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"11/24(二)",t:"20-21",court:5,type:"tue",cls:"big"}
   ],
   12:[
-    {d:"12/02(三)",t:"19-20",type:"wed",cls:"small"},{d:"12/02(三)",t:"20-21",type:"wed",cls:"small"},
-    {d:"12/03(四)",t:"20-21",type:"thu",cls:"rally"},{d:"12/09(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"12/10(四)",t:"20-21",type:"thu",cls:"rally"},{d:"12/16(三)",t:"19-20",type:"wed",cls:"small"},
-    {d:"12/17(四)",t:"19-20",type:"thu",cls:"small"},{d:"12/17(四)",t:"20-21",type:"thu",cls:"rally"},
-    {d:"12/23(三)",t:"19-20",type:"wed",cls:"small"},{d:"12/24(四)",t:"19-20",type:"thu",cls:"small"},
-    {d:"12/24(四)",t:"20-21",type:"thu",cls:"rally"},{d:"12/30(三)",t:"19-20",type:"wed",cls:"small",special:"tournament"},
-    {d:"12/30(三)",t:"20-21",type:"wed",cls:"small",special:"tournament"},{d:"12/31(四)",t:"19-20",type:"thu",cls:"small",special:"tournament"}
+    {d:"12/02(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"12/02(三)",t:"20-21",court:6,type:"wed",cls:"small"},
+    {d:"12/03(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"12/09(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"12/10(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"12/16(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"12/17(四)",t:"19-20",court:5,type:"thu",cls:"small"},
+    {d:"12/17(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"12/23(三)",t:"19-20",court:4,type:"wed",cls:"small",special:"tournament"},
+    {d:"12/23(三)",t:"19-20",court:5,type:"wed",cls:"small",special:"tournament"},
+    {d:"12/23(三)",t:"19-20",court:6,type:"wed",cls:"small",special:"tournament"},
+    {d:"12/24(四)",t:"19-20",court:4,type:"thu",cls:"small",special:"tournament"},
+    {d:"12/24(四)",t:"19-20",court:6,type:"thu",cls:"small",special:"tournament"},
+    {d:"12/24(四)",t:"20-21",court:5,type:"thu",cls:"rally",special:"tournament"},
+    {d:"12/24(四)",t:"20-21",court:6,type:"thu",cls:"rally",special:"tournament"},
+    {d:"12/30(三)",t:"19-20",court:5,type:"wed",cls:"small",special:"tournament"},
+    {d:"12/31(四)",t:"19-20",court:6,type:"thu",cls:"small",special:"tournament"}
   ]
 };
 
@@ -550,20 +591,51 @@ function renderSlots(){
       return true;
     });
   const grid = document.getElementById('slot-grid');
-  grid.innerHTML = defs.map((s) => {
-    const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
 
-    if(s.special==='tournament'){
-      return `<div class="slot-card" style="cursor:default;background:#fffbeb;border-color:#fcd34d;opacity:0.85;">
-        <div class="slot-date">${s.d}</div>
-        <div class="slot-time">${timeLabel}</div>
-        <div class="badges">
-          <span class="badge" style="background:#fef3c7;color:#92400e;">🏆 團體賽</span>
-        </div>
-        <div style="height:5px;border-radius:20px;background:#fcd34d;margin-bottom:4px;"></div>
-        <div class="slot-status" style="color:#b45309;font-size:10px;font-weight:600;">年末團體賽時段・不開放報名</div>
+  // 把 tournament 依日期分組，同一天合併成一個大方塊
+  function renderTournamentGroup(slots){
+    const dateLabel = slots[0].d.slice(0,5); // e.g. 12/23
+    const wd = slots[0].d.match(/\((.)\)/)?.[1] || '';
+    const rows = slots.map(s => {
+      const tl = s.t==='19-20'?'19:00–20:00':'20:00–21:00';
+      const courtBadge = s.court ? `<span class="badge" style="background:#e0f2fe;color:#075985;">第${s.court}面</span>` : '';
+      const coachBadge = s.type==='tue' ? '<span class="badge b-coach">雙教練</span>' : '<span class="badge b-coach">Adam教練</span>';
+      return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:0.5px solid #fde68a;flex-wrap:wrap;">
+        <span style="font-size:12px;font-weight:600;color:#78350f;min-width:90px;">${tl}</span>
+        ${courtBadge}${coachBadge}
       </div>`;
+    }).join('');
+    return `<div style="grid-column:1/-1;cursor:default;background:#fffbeb;border:2px solid #fcd34d;border-radius:10px;padding:12px;opacity:0.9;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:13px;font-weight:700;color:#92400e;">${dateLabel}（${wd}）</span>
+        <span class="badge" style="background:#fef3c7;color:#92400e;">🏆 年末比賽</span>
+      </div>
+      ${rows}
+      <div style="margin-top:8px;font-size:10px;font-weight:600;color:#b45309;">年末團體賽時段・不開放報名</div>
+    </div>`;
+  }
+
+  // 先把 defs 分成 tournament 和一般，tournament 依日期分組
+  const groups = [];
+  let i = 0;
+  while(i < defs.length){
+    const s = defs[i];
+    if(s.special === 'tournament'){
+      const dateKey = s.d.slice(0,5);
+      const group = [];
+      while(i < defs.length && defs[i].special === 'tournament' && defs[i].d.slice(0,5) === dateKey){
+        group.push(defs[i]); i++;
+      }
+      groups.push({type:'tournament', slots:group});
+    } else {
+      groups.push({type:'normal', slot:s}); i++;
     }
+  }
+
+  grid.innerHTML = groups.map((g) => {
+    if(g.type === 'tournament') return renderTournamentGroup(g.slots);
+    const s = g.slot;
+    const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
 
     const key=sk(curM,s.origIdx), wkey=wk(curM,s.origIdx);
     const max=maxOf(s.cls);
@@ -609,12 +681,17 @@ function renderSlots(){
       coachBadge='<span class="badge b-coach">Miguel教練</span>';
     } else if(s.cls==='big'){
       coachBadge='<span class="badge b-coach">雙教練</span>';
+    } else {
+      coachBadge='<span class="badge b-coach">Adam教練</span>';
     }
+
+    const courtBadge=s.court?`<span class="badge" style="background:#e0f2fe;color:#075985;">第${s.court}面</span>`:'';
 
     return `<div class="${cardCls}" data-click="${clickAction}">
       <div class="slot-date">${s.d}</div>
       <div class="slot-time">${timeLabel}</div>
       <div class="badges">
+        ${courtBadge}
         ${coachBadge}
         ${levelBadge}
         <span class="badge b-price">${price}</span>
