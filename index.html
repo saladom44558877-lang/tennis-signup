@@ -855,6 +855,7 @@ document.getElementById('month-tabs').addEventListener('click', function(e){
   tab.classList.add('active');
   curM=parseInt(tab.dataset.m);
   renderSlots();
+  document.getElementById('deadline-hint').style.display = curM === 7 ? 'block' : 'none';
 });
 
 document.getElementById('f-name').addEventListener('input', checkBtn);
