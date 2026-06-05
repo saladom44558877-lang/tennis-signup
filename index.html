@@ -385,7 +385,7 @@
         <div class="fee-row"><span>課程費合計</span><span id="ft" style="color:#1d4ed8">$0</span></div>
         <div id="fg" class="fee-gift" style="display:none">🏆 選滿10堂！免費參加 12/23–24 網球團體賽（免報名費 $600）</div>
         <div class="fee-note">
-          ・10堂套票95折（小班、大班可混搭，對打課不計折扣）<br>
+          ・10堂套票95折（小班、大班、對打課皆可混搭）<br>
           ・場地費 $80/堂，上課當天收取<br>
           ・候補確認入班後再計費<br>
           ・年底團體賽報名費 $600，報名滿10堂免費參加
@@ -800,7 +800,7 @@ function calcFee(){
     }
   }
   const total=small+big+rally, raw=small*550+big*490+rally*800;
-  const is10=total>=10, disc=is10?Math.round((small*550+big*490)*0.05):0, final=raw-disc;
+  const is10=total>=10, disc=is10?Math.round((small*550+big*490+rally*800)*0.05):0, final=raw-disc;
   document.getElementById('fs').textContent=`${small} 堂 × $550 = $${(small*550).toLocaleString()}`;
   document.getElementById('fb').textContent=`${big} 堂 × $490 = $${(big*490).toLocaleString()}`;
   document.getElementById('fr').textContent=`${rally} 堂 × $800 = $${(rally*800).toLocaleString()}`;
