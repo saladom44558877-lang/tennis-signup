@@ -1067,7 +1067,44 @@ document.getElementById('btn-load-old').addEventListener('click', async function
   }
 });
 
-// 顯示訂單列表
+// 解析 slot key → 時段詳細資料
+function slotKeyToDetail(key) {
+  const parts = key.split('-');
+  const m = parseInt(parts[1]), i = parseInt(parts[2]);
+  const s = DEFS[m] && DEFS[m][i];
+  if (!s) return null;
+  const timeLabel = s.t === '19-20' ? '19:00–20:00' : s.t === '20-21' ? '20:00–21:00' : s.t;
+  let classLabel, levelLabel, coachLabel;
+  if (s.cls === 'big')         { classLabel = '大班'; levelLabel = '初階'; }
+  else if (s.cls === 'rally')  { classLabel = '對打課'; levelLabel = '—'; }
+  else if (s.type === 'thu' && s.t === '19-20') { classLabel = '小班'; levelLabel = '中階'; }
+  else                         { classLabel = '小班'; levelLabel = '初階'; }
+  if (s.type === 'tue')        coachLabel = 'Adam + Miguel';
+  else if (s.cls === 'rally')  coachLabel = 'Miguel';
+  else                         coachLabel = 'Adam';
+  return { date: s.d, time: timeLabel, cls: classLabel, level: levelLabel, coach: coachLabel };
+}
+
+// 產生時段總表 HTML（卡片格狀）
+function buildSlotTable(slots) {
+  if (!slots || slots.length === 0) return '<div style="font-size:11px;color:#aaa;padding:8px 0;">（無時段資料）</div>';
+  const cards = slots.map(key => {
+    const d = slotKeyToDetail(key);
+    if (!d) return '';
+    return `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;">
+      <div style="font-size:12px;font-weight:700;color:#1a1a1a;">${d.date}</div>
+      <div style="font-size:11px;color:#6b7280;margin-top:1px;">${d.time}</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;">
+        <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:#eff6ff;color:#1d4ed8;">${d.cls}</span>
+        <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:#f0fdf4;color:#166534;">${d.level}</span>
+        <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:#faf5ff;color:#6b21a8;">${d.coach}</span>
+      </div>
+    </div>`;
+  }).filter(Boolean).join('');
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;">${cards}</div>`;
+}
+
+// 顯示訂單列表（展開式時段卡片）
 function showOrderList(orders, msgEl) {
   window._pendingOrders = orders;
   const listHtml = orders.map((o, idx) => {
@@ -1078,12 +1115,24 @@ function showOrderList(orders, msgEl) {
     const action = isPaid
       ? `<span style="font-size:11px;color:#888;">已鎖定</span>`
       : `<button onclick="cancelOrder(${idx})" style="background:#fff;color:#dc2626;border:1.5px solid #dc2626;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;">取消訂單</button>`;
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:6px;background:#fff;">
-      <div>
-        <div style="font-size:12px;font-weight:700;color:#1a1a1a;">${o.orderId||'—'}</div>
-        <div style="font-size:11px;color:#888;margin-top:2px;">${o.fee||''}｜${o.totalSlots||0} 堂</div>
+    const panelId = `slot-panel-${idx}`;
+    const iconId = `slot-icon-${idx}`;
+    const slotCount = (o.slots||[]).length;
+    const cardsHtml = buildSlotTable(o.slots||[]);
+    return `<div style="border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:8px;background:#fff;overflow:hidden;">
+      <div onclick="toggleSlotTable('${panelId}','${iconId}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;user-select:none;">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#1a1a1a;">${o.orderId||'—'}</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">${o.fee||''}｜${slotCount} 堂
+            <span id="${iconId}" style="font-size:10px;color:#93c5fd;margin-left:4px;">▼ 點擊查看時段</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">${badge}${action}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">${badge}${action}</div>
+      <div id="${panelId}" style="display:none;border-top:1px solid #f1f5f9;padding:10px 12px 12px;background:#f8fafc;">
+        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:7px;">已選時段（共 ${slotCount} 堂）</div>
+        ${cardsHtml}
+      </div>
     </div>`;
   }).join('');
 
@@ -1092,6 +1141,16 @@ function showOrderList(orders, msgEl) {
     ${listHtml}
     <div style="font-size:11px;color:#888;margin-top:6px;">待確認訂單的時段已顯示為藍色，可直接調整後送出新訂單。</div>
   </div>`;
+}
+
+// 展開／收合時段卡片
+function toggleSlotTable(panelId, iconId) {
+  const panel = document.getElementById(panelId);
+  const icon  = document.getElementById(iconId);
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (icon) icon.textContent = isOpen ? '▼ 點擊查看時段' : '▲ 收合';
 }
 
 // 帶入待確認訂單時段（還原進 selSlots 顯示藍色）
