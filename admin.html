@@ -1,3 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎾 教練後台</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #1a1a1a; padding: 1rem; }
+    .container { max-width: 720px; margin: 0 auto; }
+
+    /* 登入 */
+    .login-box { background: #fff; border-radius: 16px; padding: 2rem; max-width: 360px; margin: 4rem auto; box-shadow: 0 4px 16px rgba(0,0,0,.08); text-align: center; }
+    .login-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .login-sub { font-size: 13px; color: #888; margin-bottom: 20px; }
+    .login-input { width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 9px; font-size: 14px; outline: none; margin-bottom: 12px; }
+    .login-input:focus { border-color: #1d4ed8; }
+    .login-btn { width: 100%; padding: 11px; background: #1d4ed8; color: #fff; border: none; border-radius: 9px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .login-btn:hover { background: #1e40af; }
+    .login-err { color: #dc2626; font-size: 12px; margin-top: 8px; }
+
+    /* 後台主體 */
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .header-title { font-size: 20px; font-weight: 700; }
+    .logout-btn { font-size: 12px; color: #888; background: none; border: 1px solid #ddd; padding: 5px 12px; border-radius: 20px; cursor: pointer; }
+
+    /* 統計卡片 */
+    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1.5rem; }
+    .stat { background: #fff; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+    .stat-n { font-size: 26px; font-weight: 700; }
+    .stat-n.pending { color: #d97706; }
+    .stat-n.paid { color: #16a34a; }
+    .stat-n.cancel { color: #dc2626; }
+    .stat-l { font-size: 12px; color: #888; margin-top: 2px; }
+
+    /* 篩選 */
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+    .filter-btn { padding: 5px 14px; border-radius: 20px; border: 1.5px solid #e2e8f0; font-size: 12px; cursor: pointer; background: #fff; color: #666; font-weight: 500; }
+    .filter-btn.active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+
+    /* 報名卡片 */
+    .reg-card { background: #fff; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.05); border-left: 4px solid #e2e8f0; }
+    .reg-card.pending { border-left-color: #f59e0b; }
+    .reg-card.paid { border-left-color: #22c55e; }
+    .reg-card.cancel { border-left-color: #ef4444; opacity: .6; }
+    .reg-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .reg-name { font-size: 16px; font-weight: 700; }
+    .reg-status { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-paid { background: #dcfce7; color: #166534; }
+    .status-cancel { background: #fee2e2; color: #991b1b; }
+    .reg-info { font-size: 12px; color: #555; line-height: 2; }
+    .reg-info b { color: #1a1a1a; }
+    .reg-slots { font-size: 11px; color: #666; background: #f8fafc; border-radius: 8px; padding: 8px 10px; margin: 8px 0; line-height: 1.9; border: 1px solid #e2e8f0; }
+    .reg-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .btn-confirm { flex: 1; padding: 9px; background: #16a34a; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-confirm:hover { background: #15803d; }
+    .btn-cancel { flex: 1; padding: 9px; background: #fff; color: #dc2626; border: 1.5px solid #dc2626; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-cancel:hover { background: #fee2e2; }
+
+    .empty { text-align: center; padding: 3rem; color: #888; font-size: 14px; }
+    .refresh-btn { padding: 7px 16px; background: #1d4ed8; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .loading { text-align: center; padding: 2rem; color: #888; }
+
+    /* 繳費單按鈕 */
+    .btn-invoice { flex: 1; padding: 9px; background: #fff; color: #7c3aed; border: 1.5px solid #7c3aed; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-invoice:hover { background: #f5f3ff; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 999; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: #fff; border-radius: 16px; width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,.25); }
+    .modal-hd { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; background: #fff; z-index: 1; border-radius: 16px 16px 0 0; }
+    .modal-hd-title { font-size: 14px; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: #aaa; }
+    .modal-close:hover { color: #555; }
+    .inv { padding: 18px; }
+    .inv-hero { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .inv-icon { width: 44px; height: 44px; background: linear-gradient(135deg,#4f46e5,#7c3aed); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .inv-title { font-size: 16px; font-weight: 800; color: #111; }
+    .inv-subtitle { font-size: 11px; color: #888; margin-top: 2px; }
+    .inv-block { background: #f8fafc; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+    .inv-block-title { font-size: 10px; font-weight: 700; color: #6b7280; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 9px; }
+    .inv-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; margin-bottom: 6px; }
+    .inv-row:last-child { margin-bottom: 0; }
+    .inv-label { color: #6b7280; flex-shrink: 0; margin-right: 8px; }
+    .inv-val { font-weight: 600; color: #111; text-align: right; }
+    .inv-val.accent { color: #7c3aed; }
+    .inv-total { background: linear-gradient(135deg,#4f46e5,#7c3aed); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .inv-total-label { font-size: 13px; color: rgba(255,255,255,.85); font-weight: 600; }
+    .inv-total-amount { font-size: 24px; font-weight: 800; color: #fff; }
+    .inv-bank { background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+    .inv-bank-title { font-size: 10px; font-weight: 700; color: #1d4ed8; letter-spacing: .08em; margin-bottom: 9px; }
+    .inv-bank-row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 6px; }
+    .inv-bank-row:last-child { margin-bottom: 0; }
+    .inv-bank-label { color: #3b82f6; }
+    .inv-bank-val { font-weight: 700; color: #1e3a8a; font-family: 'Courier New', monospace; letter-spacing: .04em; }
+    .inv-note { background: #fef9c3; border-radius: 8px; padding: 10px 13px; font-size: 12px; color: #78350f; line-height: 1.7; }
+    .modal-ft { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid #f1f5f9; position: sticky; bottom: 0; background: #fff; border-radius: 0 0 16px 16px; }
+    .modal-ft button { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; }
+    .btn-copy-inv { background: #f1f5f9; color: #374151; }
+    .btn-copy-inv:hover { background: #e2e8f0; }
+    .btn-print-inv { background: linear-gradient(135deg,#4f46e5,#7c3aed); color: #fff; }
+    @media print {
+      body > *:not(#invoice-modal) { display: none !important; }
+      #invoice-modal { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
+      .modal-box { box-shadow: none !important; max-height: none !important; }
+      .modal-hd, .modal-ft { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 繳費單 Modal -->
+<div class="modal-overlay" id="invoice-modal" onclick="if(event.target===this)closeInvoice()">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <div class="modal-hd-title">📋 繳費單</div>
+      <button class="modal-close" onclick="closeInvoice()">×</button>
+    </div>
+    <div id="invoice-content"></div>
+    <div class="modal-ft">
+      <button class="btn-copy-inv" onclick="copyInvoiceText()">📋 複製文字</button>
+      <button class="btn-print-inv" onclick="window.print()">🖨️ 列印</button>
+    </div>
+  </div>
+</div>
+<div class="container">
+
+  <!-- 登入 -->
+  <div id="login-box" class="login-box">
+    <div style="font-size:36px;margin-bottom:10px;">🎾</div>
+    <div class="login-title">教練後台</div>
+    <div class="login-sub">請輸入管理密碼</div>
+    <input id="pass-input" class="login-input" type="password" placeholder="密碼" onkeydown="if(event.key==='Enter')login()">
+    <button class="login-btn" onclick="login()">登入</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+
+  <!-- 後台主體 -->
+  <div id="admin-body" style="display:none;">
+    <div class="header">
+      <div class="header-title">🎾 報名管理</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="refresh-btn" onclick="loadData()">🔄 重新整理</button>
+        <button class="logout-btn" onclick="logout()">登出</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-n pending" id="cnt-pending">-</div><div class="stat-l">⏳ 待確認</div></div>
+      <div class="stat"><div class="stat-n paid"    id="cnt-paid">-</div><div class="stat-l">✅ 已繳費</div></div>
+      <div class="stat"><div class="stat-n cancel"  id="cnt-cancel">-</div><div class="stat-l">❌ 已取消</div></div>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('all',this)">全部</button>
+      <button class="filter-btn" onclick="setFilter('pending',this)">⏳ 待確認</button>
+      <button class="filter-btn" onclick="setFilter('paid',this)">✅ 已繳費</button>
+      <button class="filter-btn" onclick="setFilter('cancel',this)">❌ 已取消</button>
+    </div>
+
+    <div id="reg-list"><div class="loading">載入中...</div></div>
+  </div>
+
+</div>
+
+<script>
+// ⚙️ 改成你的 Apps Script 網址
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxddtd_CFTtvDCBd1aLe9ve7MJ_tVLG-5Uy3XLyzL_DQjHgpElpcTPrFzZ6mDY90SzeoQ/exec";
+
 // ── 時段完整資訊（與 index.html DEFS 完全對應）──
 const SLOT_INFO = {
   's-7-0': {label:'07/01(三) 20:00-21:00', date:'07/01(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
@@ -81,192 +252,26 @@ const SLOT_INFO = {
   's-12-15':{label:'12/30(三) 19:00-20:00',date:'12/30(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-12-16':{label:'12/31(四) 19:00-20:00',date:'12/31(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
 };
-// 向下相容：後台卡片顯示用
 const SLOT_LABELS = Object.fromEntries(Object.entries(SLOT_INFO).map(([k,v])=>[k,v.label]));
 
-// 雙教練課<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎾 教練後台</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #1a1a1a; padding: 1rem; }
-    .container { max-width: 720px; margin: 0 auto; }
+// 雙教練課：第二個 court 的 key alias 到第一個 court（顯示時合併為同一堂）
+const SLOT_ALIAS = {
+  's-9-1': 's-9-0',  // 09/01(二) 19:00-20:00 court5 → 同堂為 court6
+};
 
-    /* 登入 */
-    .login-box { background: #fff; border-radius: 16px; padding: 2rem; max-width: 360px; margin: 4rem auto; box-shadow: 0 4px 16px rgba(0,0,0,.08); text-align: center; }
-    .login-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-    .login-sub { font-size: 13px; color: #888; margin-bottom: 20px; }
-    .login-input { width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 9px; font-size: 14px; outline: none; margin-bottom: 12px; }
-    .login-input:focus { border-color: #1d4ed8; }
-    .login-btn { width: 100%; padding: 11px; background: #1d4ed8; color: #fff; border: none; border-radius: 9px; font-size: 15px; font-weight: 700; cursor: pointer; }
-    .login-btn:hover { background: #1e40af; }
-    .login-err { color: #dc2626; font-size: 12px; margin-top: 8px; }
-
-    /* 後台主體 */
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-    .header-title { font-size: 20px; font-weight: 700; }
-    .logout-btn { font-size: 12px; color: #888; background: none; border: 1px solid #ddd; padding: 5px 12px; border-radius: 20px; cursor: pointer; }
-
-    /* 統計卡片 */
-    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1.5rem; }
-    .stat { background: #fff; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
-    .stat-n { font-size: 26px; font-weight: 700; }
-    .stat-n.pending { color: #d97706; }
-    .stat-n.paid { color: #16a34a; }
-    .stat-n.cancel { color: #dc2626; }
-    .stat-l { font-size: 12px; color: #888; margin-top: 2px; }
-
-    /* 篩選 */
-    .filter-bar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
-    .filter-btn { padding: 5px 14px; border-radius: 20px; border: 1.5px solid #e2e8f0; font-size: 12px; cursor: pointer; background: #fff; color: #666; font-weight: 500; }
-    .filter-btn.active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
-
-    /* 報名卡片 */
-    .reg-card { background: #fff; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.05); border-left: 4px solid #e2e8f0; }
-    .reg-card.pending { border-left-color: #f59e0b; }
-    .reg-card.paid { border-left-color: #22c55e; }
-    .reg-card.cancel { border-left-color: #ef4444; opacity: .6; }
-    .reg-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .reg-name { font-size: 16px; font-weight: 700; }
-    .reg-status { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
-    .status-pending { background: #fef3c7; color: #92400e; }
-    .status-paid { background: #dcfce7; color: #166534; }
-    .status-cancel { background: #fee2e2; color: #991b1b; }
-    .reg-info { font-size: 12px; color: #555; line-height: 2; }
-    .reg-info b { color: #1a1a1a; }
-    .reg-slots { font-size: 11px; color: #666; background: #f8fafc; border-radius: 8px; padding: 8px 10px; margin: 8px 0; line-height: 1.9; border: 1px solid #e2e8f0; }
-    .reg-actions { display: flex; gap: 8px; margin-top: 10px; }
-    .btn-confirm { flex: 1; padding: 9px; background: #16a34a; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
-    .btn-confirm:hover { background: #15803d; }
-    .btn-cancel { flex: 1; padding: 9px; background: #fff; color: #dc2626; border: 1.5px solid #dc2626; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
-    .btn-cancel:hover { background: #fee2e2; }
-
-    .empty { text-align: center; padding: 3rem; color: #888; font-size: 14px; }
-    .refresh-btn { padding: 7px 16px; background: #1d4ed8; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .loading { text-align: center; padding: 2rem; color: #888; }
-
-    /* 繳費單按鈕 */
-    .btn-invoice { flex: 1; padding: 9px; background: #fff; color: #7c3aed; border: 1.5px solid #7c3aed; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
-    .btn-invoice:hover { background: #f5f3ff; }
-
-    /* Modal 遮罩 */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 999; align-items: center; justify-content: center; padding: 1rem; }
-    .modal-overlay.open { display: flex; }
-    .modal-box { background: #fff; border-radius: 16px; width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,.25); }
-
-    /* Modal header */
-    .modal-hd { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; background: #fff; z-index: 1; border-radius: 16px 16px 0 0; }
-    .modal-hd-title { font-size: 14px; font-weight: 700; color: #1a1a1a; }
-    .modal-close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: #aaa; padding: 0 2px; }
-    .modal-close:hover { color: #555; }
-
-    /* 繳費單本體 */
-    .inv { padding: 18px; }
-    .inv-hero { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-    .inv-icon { width: 44px; height: 44px; background: linear-gradient(135deg,#4f46e5,#7c3aed); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-    .inv-title { font-size: 16px; font-weight: 800; color: #111; }
-    .inv-subtitle { font-size: 11px; color: #888; margin-top: 2px; }
-
-    .inv-block { background: #f8fafc; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
-    .inv-block-title { font-size: 10px; font-weight: 700; color: #6b7280; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 9px; }
-    .inv-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; margin-bottom: 6px; }
-    .inv-row:last-child { margin-bottom: 0; }
-    .inv-label { color: #6b7280; flex-shrink: 0; margin-right: 8px; }
-    .inv-val { font-weight: 600; color: #111; text-align: right; }
-    .inv-val.accent { color: #7c3aed; }
-
-    .inv-total { background: linear-gradient(135deg,#4f46e5,#7c3aed); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-    .inv-total-label { font-size: 13px; color: rgba(255,255,255,.85); font-weight: 600; }
-    .inv-total-amount { font-size: 24px; font-weight: 800; color: #fff; }
-
-    .inv-bank { background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
-    .inv-bank-title { font-size: 10px; font-weight: 700; color: #1d4ed8; letter-spacing: .08em; margin-bottom: 9px; }
-    .inv-bank-row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 6px; }
-    .inv-bank-row:last-child { margin-bottom: 0; }
-    .inv-bank-label { color: #3b82f6; }
-    .inv-bank-val { font-weight: 700; color: #1e3a8a; font-family: 'Courier New', monospace; letter-spacing: .04em; }
-
-    .inv-note { background: #fef9c3; border-radius: 8px; padding: 10px 13px; font-size: 12px; color: #78350f; line-height: 1.7; }
-    .inv-note b { color: #92400e; }
-
-    /* Modal footer */
-    .modal-ft { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid #f1f5f9; position: sticky; bottom: 0; background: #fff; border-radius: 0 0 16px 16px; }
-    .modal-ft button { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; }
-    .btn-copy-inv { background: #f1f5f9; color: #374151; }
-    .btn-copy-inv:hover { background: #e2e8f0; }
-    .btn-print-inv { background: linear-gradient(135deg,#4f46e5,#7c3aed); color: #fff; }
-    .btn-print-inv:hover { opacity: .9; }
-
-    @media print {
-      body > *:not(#invoice-modal) { display: none !important; }
-      #invoice-modal { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
-      .modal-box { box-shadow: none !important; max-height: none !important; }
-      .modal-hd, .modal-ft { display: none !important; }
-    }
-  </style>
-</head>
-<body>
-<div class="container">
-
-  <!-- 登入 -->
-  <div id="login-box" class="login-box">
-    <div style="font-size:36px;margin-bottom:10px;">🎾</div>
-    <div class="login-title">教練後台</div>
-    <div class="login-sub">請輸入管理密碼</div>
-    <input id="pass-input" class="login-input" type="password" placeholder="密碼" onkeydown="if(event.key==='Enter')login()">
-    <button class="login-btn" onclick="login()">登入</button>
-    <div class="login-err" id="login-err"></div>
-  </div>
-
-  <!-- 後台主體 -->
-  <div id="admin-body" style="display:none;">
-    <div class="header">
-      <div class="header-title">🎾 報名管理</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="refresh-btn" onclick="loadData()">🔄 重新整理</button>
-        <button class="logout-btn" onclick="logout()">登出</button>
-      </div>
-    </div>
-
-    <div class="stats">
-      <div class="stat"><div class="stat-n pending" id="cnt-pending">-</div><div class="stat-l">⏳ 待確認</div></div>
-      <div class="stat"><div class="stat-n paid"    id="cnt-paid">-</div><div class="stat-l">✅ 已繳費</div></div>
-      <div class="stat"><div class="stat-n cancel"  id="cnt-cancel">-</div><div class="stat-l">❌ 已取消</div></div>
-    </div>
-
-    <div class="filter-bar">
-      <button class="filter-btn active" onclick="setFilter('all',this)">全部</button>
-      <button class="filter-btn" onclick="setFilter('pending',this)">⏳ 待確認</button>
-      <button class="filter-btn" onclick="setFilter('paid',this)">✅ 已繳費</button>
-      <button class="filter-btn" onclick="setFilter('cancel',this)">❌ 已取消</button>
-    </div>
-
-    <div id="reg-list"><div class="loading">載入中...</div></div>
-  </div>
-
-</div>
-
-<!-- 繳費單 Modal -->
-<div class="modal-overlay" id="invoice-modal" onclick="if(event.target===this)closeInvoice()">
-  <div class="modal-box">
-    <div class="modal-hd">
-      <div class="modal-hd-title">📋 繳費單</div>
-      <button class="modal-close" onclick="closeInvoice()">×</button>
-    </div>
-    <div id="invoice-content"></div>
-    <div class="modal-ft">
-      <button class="btn-copy-inv" onclick="copyInvoiceText()">📋 複製文字</button>
-      <button class="btn-print-inv" onclick="window.print()">🖨️ 列印</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ⚙️ 改成你的 Apps Script 網址
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxddtd_CFTtvDCBd1aLe9ve7MJ_tVLG-5Uy3XLyzL_DQjHgpElpcTPrFzZ6mDY90SzeoQ/exec";
+// 將時段字串中的 key 解碼為可讀標籤，雙教練重複時段自動去重
+function decodeSlotStr(str) {
+  if (!str || str === '—') return str;
+  const seen = new Set();
+  return str.split(/\n|,/).map(s => {
+    const raw = s.trim();
+    const k = SLOT_ALIAS[raw] || raw;   // alias 替換
+    const label = SLOT_LABELS[k] || k;
+    if (seen.has(label)) return null;   // 去重：同標籤只顯示一次
+    seen.add(label);
+    return label;
+  }).filter(Boolean).join('\n');
+}
 
 let adminPass = '';
 let allRows = [];
@@ -345,6 +350,9 @@ function renderList() {
     const sb = statusBadge[r.status] || 'status-pending';
     const isPending = r.status === '待確認';
     const isCancelled = r.status === '已取消❌';
+    // 解碼時段 key → 可讀格式
+    const slotsDisplay   = decodeSlotStr(r.slots   || '');
+    const waitlistDisplay = decodeSlotStr(r.waitlist || '');
     return `<div class="reg-card ${sc}">
       <div class="reg-top">
         <div>
@@ -359,8 +367,8 @@ function renderList() {
         <b>堂數：</b>小班 ${r.small} 堂・大班 ${r.big} 堂・對打 ${r.rally} 堂<br>
         <b>團體賽：</b>${r.tournament || '—'} ｜ <b>報名時間：</b>${r.time}
       </div>
-      ${r.slots && r.slots !== '—' ? `<div class="reg-slots"><b>正選時段：</b><br>${r.slots}</div>` : ''}
-      ${r.waitlist && r.waitlist !== '—' ? `<div class="reg-slots" style="background:#faf5ff;border-color:#e9d5ff;"><b>候補時段：</b><br>${r.waitlist}</div>` : ''}
+      ${slotsDisplay ? `<div class="reg-slots"><b>正選時段：</b><br>${slotsDisplay.replace(/\n/g,'<br>')}</div>` : ''}
+      ${waitlistDisplay ? `<div class="reg-slots" style="background:#faf5ff;border-color:#e9d5ff;"><b>候補時段：</b><br>${waitlistDisplay.replace(/\n/g,'<br>')}</div>` : ''}
       ${!isCancelled ? `<div class="reg-actions">
         ${isPending ? `<button class="btn-confirm" onclick="confirmPayment(${r.rowIndex})">✅ 確認已繳費</button>` : '<div style="flex:1;"></div>'}
         <button class="btn-invoice" onclick='showInvoice(${JSON.stringify(r).replace(/'/g,"&#39;")})'>📋 繳費單</button>
@@ -390,7 +398,7 @@ async function cancelReg(rowIndex) {
   } catch(e) { alert('操作失敗，請重試'); }
 }
 
-// ── 繳費單相關 ──────────────────────────────────────
+// ── 繳費單 ─────────────────────────────────────────────
 
 let invoiceTextCache = '';
 
@@ -422,7 +430,6 @@ function showInvoice(r) {
   const wantsTournament = tournamentVal === 'yes' || tournamentVal === 'maybe';
 
   // 時段：解碼成物件陣列，含班別/教練
-  // 反查表：中文標籤 → SLOT_INFO 物件（因為 Sheets 存的是中文字串）
   const SLOT_BY_LABEL = {};
   Object.values(SLOT_INFO).forEach(v => { if (!SLOT_BY_LABEL[v.label]) SLOT_BY_LABEL[v.label] = v; });
 
@@ -431,7 +438,6 @@ function showInvoice(r) {
     const seen = new Set();
     return str.split(/\n|,/).map(s => {
       const raw  = s.trim();
-      // 先試 key 查法（s-9-0），再試中文標籤反查（09/01(二) 19:00-20:00）
       const k    = SLOT_ALIAS[raw] || raw;
       const info = SLOT_INFO[k] || SLOT_BY_LABEL[raw];
       if (!info) return { label: raw, date: raw, time: '', cls: '', coach: '' };
@@ -467,7 +473,6 @@ function showInvoice(r) {
   const slotsTxt = slotItems.length
     ? slotItems.map(s => `  ・${s.date} ${s.time} ${s.cls}・${s.coach}`).join('\n')
     : '  —';
-
   const tournamentTxt = hasDiscount && wantsTournament
     ? '\n🎾 符合免費參加 12/23-24 團體賽資格！'
     : hasDiscount && !wantsTournament
@@ -558,6 +563,7 @@ ${slotsTxt}
 
   document.getElementById('invoice-modal').classList.add('open');
 }
+
 function closeInvoice() {
   document.getElementById('invoice-modal').classList.remove('open');
 }
@@ -569,7 +575,6 @@ function copyInvoiceText() {
     btn.textContent = '✅ 已複製！';
     setTimeout(() => btn.textContent = orig, 1800);
   }).catch(() => {
-    // fallback
     const ta = document.createElement('textarea');
     ta.value = invoiceTextCache;
     document.body.appendChild(ta);
