@@ -61,6 +61,65 @@
     .empty { text-align: center; padding: 3rem; color: #888; font-size: 14px; }
     .refresh-btn { padding: 7px 16px; background: #1d4ed8; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
     .loading { text-align: center; padding: 2rem; color: #888; }
+
+    /* 繳費單按鈕 */
+    .btn-invoice { flex: 1; padding: 9px; background: #fff; color: #7c3aed; border: 1.5px solid #7c3aed; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-invoice:hover { background: #f5f3ff; }
+
+    /* Modal 遮罩 */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 999; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: #fff; border-radius: 16px; width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,.25); }
+
+    /* Modal header */
+    .modal-hd { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; background: #fff; z-index: 1; border-radius: 16px 16px 0 0; }
+    .modal-hd-title { font-size: 14px; font-weight: 700; color: #1a1a1a; }
+    .modal-close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: #aaa; padding: 0 2px; }
+    .modal-close:hover { color: #555; }
+
+    /* 繳費單本體 */
+    .inv { padding: 18px; }
+    .inv-hero { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .inv-icon { width: 44px; height: 44px; background: linear-gradient(135deg,#4f46e5,#7c3aed); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .inv-title { font-size: 16px; font-weight: 800; color: #111; }
+    .inv-subtitle { font-size: 11px; color: #888; margin-top: 2px; }
+
+    .inv-block { background: #f8fafc; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+    .inv-block-title { font-size: 10px; font-weight: 700; color: #6b7280; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 9px; }
+    .inv-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; margin-bottom: 6px; }
+    .inv-row:last-child { margin-bottom: 0; }
+    .inv-label { color: #6b7280; flex-shrink: 0; margin-right: 8px; }
+    .inv-val { font-weight: 600; color: #111; text-align: right; }
+    .inv-val.accent { color: #7c3aed; }
+
+    .inv-total { background: linear-gradient(135deg,#4f46e5,#7c3aed); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .inv-total-label { font-size: 13px; color: rgba(255,255,255,.85); font-weight: 600; }
+    .inv-total-amount { font-size: 24px; font-weight: 800; color: #fff; }
+
+    .inv-bank { background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+    .inv-bank-title { font-size: 10px; font-weight: 700; color: #1d4ed8; letter-spacing: .08em; margin-bottom: 9px; }
+    .inv-bank-row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 6px; }
+    .inv-bank-row:last-child { margin-bottom: 0; }
+    .inv-bank-label { color: #3b82f6; }
+    .inv-bank-val { font-weight: 700; color: #1e3a8a; font-family: 'Courier New', monospace; letter-spacing: .04em; }
+
+    .inv-note { background: #fef9c3; border-radius: 8px; padding: 10px 13px; font-size: 12px; color: #78350f; line-height: 1.7; }
+    .inv-note b { color: #92400e; }
+
+    /* Modal footer */
+    .modal-ft { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid #f1f5f9; position: sticky; bottom: 0; background: #fff; border-radius: 0 0 16px 16px; }
+    .modal-ft button { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; }
+    .btn-copy-inv { background: #f1f5f9; color: #374151; }
+    .btn-copy-inv:hover { background: #e2e8f0; }
+    .btn-print-inv { background: linear-gradient(135deg,#4f46e5,#7c3aed); color: #fff; }
+    .btn-print-inv:hover { opacity: .9; }
+
+    @media print {
+      body > *:not(#invoice-modal) { display: none !important; }
+      #invoice-modal { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
+      .modal-box { box-shadow: none !important; max-height: none !important; }
+      .modal-hd, .modal-ft { display: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -102,6 +161,21 @@
     <div id="reg-list"><div class="loading">載入中...</div></div>
   </div>
 
+</div>
+
+<!-- 繳費單 Modal -->
+<div class="modal-overlay" id="invoice-modal" onclick="if(event.target===this)closeInvoice()">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <div class="modal-hd-title">📋 繳費單</div>
+      <button class="modal-close" onclick="closeInvoice()">×</button>
+    </div>
+    <div id="invoice-content"></div>
+    <div class="modal-ft">
+      <button class="btn-copy-inv" onclick="copyInvoiceText()">📋 複製文字</button>
+      <button class="btn-print-inv" onclick="window.print()">🖨️ 列印</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -203,6 +277,7 @@ function renderList() {
       ${r.waitlist && r.waitlist !== '—' ? `<div class="reg-slots" style="background:#faf5ff;border-color:#e9d5ff;"><b>候補時段：</b><br>${r.waitlist}</div>` : ''}
       ${!isCancelled ? `<div class="reg-actions">
         ${isPending ? `<button class="btn-confirm" onclick="confirmPayment(${r.rowIndex})">✅ 確認已繳費</button>` : '<div style="flex:1;"></div>'}
+        <button class="btn-invoice" onclick='showInvoice(${JSON.stringify(r).replace(/'/g,"&#39;")})'>📋 繳費單</button>
         <button class="btn-cancel" onclick="cancelReg(${r.rowIndex})">${isPending ? '❌ 取消報名' : '🔄 標記取消'}</button>
       </div>` : ''}
     </div>`;
@@ -227,6 +302,177 @@ async function cancelReg(rowIndex) {
     const data = await res.json();
     if (data.status === 'ok') await loadData();
   } catch(e) { alert('操作失敗，請重試'); }
+}
+
+// ── 繳費單相關 ──────────────────────────────────────
+
+let invoiceTextCache = '';
+
+function showInvoice(r) {
+  // 班別對應
+  const levelMap = { 'beginner':'初學班', 'intermediate':'中級班', 'advanced':'進階班', 'rally':'對打課' };
+  const levelLabel = levelMap[r.level] || r.level || '—';
+
+  // 堂數統計
+  const small = parseInt(r.small) || 0;
+  const big   = parseInt(r.big)   || 0;
+  const rally = parseInt(r.rally) || 0;
+  const totalClasses = small + big + rally;
+  const parts = [];
+  if (small > 0) parts.push(`小班 ${small} 堂`);
+  if (big   > 0) parts.push(`大班 ${big} 堂`);
+  if (rally > 0) parts.push(`對打 ${rally} 堂`);
+  const classCount = parts.join('・') || '—';
+
+  // 折扣計算
+  const feeRaw = parseFloat(String(r.fee).replace(/[^0-9.]/g, '')) || 0;
+  const hasDiscount = totalClasses >= 6;
+  const discountAmt = hasDiscount ? Math.round(feeRaw * 0.05) : 0;
+  const finalFee    = hasDiscount ? Math.round(feeRaw * 0.95) : feeRaw;
+  const feeDisplay     = `NT$ ${feeRaw.toLocaleString()}`;
+  const discountDisplay = `- NT$ ${discountAmt.toLocaleString()}（95折）`;
+  const finalDisplay   = `NT$ ${finalFee.toLocaleString()}`;
+
+  // 團體賽資格
+  const hasTournamentQual = hasDiscount;
+  const tournamentVal = (r.tournament || '').toLowerCase();
+  const wantsTournament = tournamentVal === 'yes' || tournamentVal === 'maybe';
+
+  // 正選時段（換行轉成清單）
+  const slotsHtml = r.slots && r.slots !== '—'
+    ? r.slots.split(/\n|<br>/).map(s => s.trim()).filter(Boolean)
+        .map(s => `<div class="inv-row"><span class="inv-label">・</span><span class="inv-val">${s}</span></div>`).join('')
+    : '<div class="inv-row"><span class="inv-val">—</span></div>';
+
+  // 候補時段
+  const waitHtml = r.waitlist && r.waitlist !== '—'
+    ? r.waitlist.split(/\n|<br>/).map(s => s.trim()).filter(Boolean)
+        .map(s => `<div class="inv-row"><span class="inv-label">・</span><span class="inv-val">${s}</span></div>`).join('')
+    : null;
+
+  // 純文字版（複製用）
+  const slotsTxt = r.slots && r.slots !== '—'
+    ? r.slots.replace(/<br>/g,'\n').split('\n').map(s=>'  ・'+s.trim()).filter(s=>s.trim()!=='・').join('\n')
+    : '  —';
+
+  const tournamentTxt = hasTournamentQual && wantsTournament
+    ? '\n🎾 符合免費參加 12/23-24 團體賽資格！'
+    : hasTournamentQual && !wantsTournament
+    ? '\n（已達6堂，可免費參加 12/23-24 團體賽，如有意願請告知教練）'
+    : '';
+
+  invoiceTextCache = `🎾 網球課程繳費單
+━━━━━━━━━━━━━━━
+學員姓名：${r.name}
+訂單編號：${r.orderId || '—'}
+━━━━━━━━━━━━━━━
+【課程資訊】
+班別：${levelLabel}
+堂數：${classCount}（共 ${totalClasses} 堂）
+報名時段：
+${slotsTxt}
+━━━━━━━━━━━━━━━
+【費用明細】
+課程原價：${feeDisplay}${hasDiscount ? `\n95折優惠：${discountDisplay}` : ''}
+應繳總額：${finalDisplay}${tournamentTxt}
+━━━━━━━━━━━━━━━
+【轉帳資訊】
+銀行：(013) 國泰世華銀行
+帳號：068506241972
+━━━━━━━━━━━━━━━
+⚠️ 轉帳完成後請截圖傳給教練確認，謝謝！`;
+
+  document.getElementById('invoice-content').innerHTML = `
+  <div class="inv">
+    <div class="inv-hero">
+      <div class="inv-icon">🎾</div>
+      <div>
+        <div class="inv-title">網球課程繳費單</div>
+        <div class="inv-subtitle">訂單編號：${r.orderId || '—'}</div>
+      </div>
+    </div>
+
+    <div class="inv-block">
+      <div class="inv-block-title">學員資訊</div>
+      <div class="inv-row"><span class="inv-label">姓名</span><span class="inv-val">${r.name}</span></div>
+      <div class="inv-row"><span class="inv-label">LINE ID</span><span class="inv-val">${r.line || '—'}</span></div>
+      <div class="inv-row"><span class="inv-label">電話</span><span class="inv-val">${r.phone || '—'}</span></div>
+    </div>
+
+    <div class="inv-block">
+      <div class="inv-block-title">課程資訊</div>
+      <div class="inv-row"><span class="inv-label">班別</span><span class="inv-val accent">${levelLabel}</span></div>
+      <div class="inv-row"><span class="inv-label">堂數</span><span class="inv-val">${classCount}（共 ${totalClasses} 堂）</span></div>
+    </div>
+
+    <div class="inv-block">
+      <div class="inv-block-title">報名時段</div>
+      ${slotsHtml}
+    </div>
+
+    ${waitHtml ? `<div class="inv-block" style="background:#faf5ff;border:1px solid #e9d5ff;">
+      <div class="inv-block-title" style="color:#7c3aed;">候補時段</div>
+      ${waitHtml}
+    </div>` : ''}
+
+    <div class="inv-block">
+      <div class="inv-block-title">費用明細</div>
+      <div class="inv-row"><span class="inv-label">課程原價</span><span class="inv-val">${feeDisplay}</span></div>
+      ${hasDiscount ? `<div class="inv-row"><span class="inv-label">95折優惠</span><span class="inv-val" style="color:#16a34a;">${discountDisplay}</span></div>` : ''}
+    </div>
+
+    <div class="inv-total">
+      <div class="inv-total-label">應繳總額</div>
+      <div class="inv-total-amount">${finalDisplay}</div>
+    </div>
+
+    ${hasTournamentQual && wantsTournament ? `
+    <div style="background:#dcfce7;border:1.5px solid #86efac;border-radius:10px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:20px;">🎾</span>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#166534;">符合免費團體賽資格！</div>
+        <div style="font-size:11px;color:#15803d;margin-top:2px;">12/23–24 團體賽報名名額已為您保留</div>
+      </div>
+    </div>` : hasTournamentQual && !wantsTournament ? `
+    <div style="background:#fef9c3;border:1.5px solid #fde68a;border-radius:10px;padding:11px 14px;margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:700;color:#92400e;">🎾 已達6堂，具備免費參加資格</div>
+      <div style="font-size:11px;color:#78350f;margin-top:3px;">12/23–24 團體賽可免費參加，如有意願請告知教練</div>
+    </div>` : ''}
+
+    <div class="inv-bank">
+      <div class="inv-bank-title">💳 轉帳資訊</div>
+      <div class="inv-bank-row"><span class="inv-bank-label">銀行代碼</span><span class="inv-bank-val">(013) 國泰世華</span></div>
+      <div class="inv-bank-row"><span class="inv-bank-label">帳號</span><span class="inv-bank-val">068506241972</span></div>
+    </div>
+
+    <div class="inv-note">
+      <b>⚠️ 注意事項</b><br>
+      轉帳完成後，請截圖並傳給教練確認，待確認後報名即完成。謝謝！
+    </div>
+  </div>`;
+
+  document.getElementById('invoice-modal').classList.add('open');
+}
+
+function closeInvoice() {
+  document.getElementById('invoice-modal').classList.remove('open');
+}
+
+function copyInvoiceText() {
+  navigator.clipboard.writeText(invoiceTextCache).then(() => {
+    const btn = document.querySelector('.btn-copy-inv');
+    const orig = btn.textContent;
+    btn.textContent = '✅ 已複製！';
+    setTimeout(() => btn.textContent = orig, 1800);
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = invoiceTextCache;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
 }
 </script>
 </body>
