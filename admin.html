@@ -402,8 +402,10 @@ async function cancelReg(rowIndex) {
 // ── 繳費單 ─────────────────────────────────────────────
 
 let invoiceTextCache = '';
-
+let currentInvoiceName = '';  
+  
 function showInvoice(r) {
+  currentInvoiceName = r.name || '學員';
   const levelMap = { 'beginner':'初階班', 'mid':'中階班', '1v1':'對打班' };
   const levelLabel = levelMap[r.level] || r.level || '—';
 
@@ -572,7 +574,7 @@ function saveInvoiceImage() {
     backgroundColor: '#ffffff',
   }).then(canvas => {
     const link = document.createElement('a');
-    link.download = '網球課程繳費單.png';
+    link.download = `${currentInvoiceName}_繳費單.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();       // 自動下載
   });
