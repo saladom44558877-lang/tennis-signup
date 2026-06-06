@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎾 教練後台</title>
@@ -121,7 +122,7 @@
     <div id="invoice-content"></div>
     <div class="modal-ft">
       <button class="btn-copy-inv" onclick="copyInvoiceText()">📋 複製文字</button>
-      <button class="btn-print-inv" onclick="window.print()">🖨️ 列印</button>
+      <button class="btn-print-inv" onclick="saveInvoiceImage()">📸 儲存圖片</button>
     </div>
   </div>
 </div>
@@ -563,7 +564,19 @@ ${slotsTxt}
 
   document.getElementById('invoice-modal').classList.add('open');
 }
-
+function saveInvoiceImage() {
+  const target = document.getElementById('invoice-content');
+  // 按鈕變成「處理中...」
+  html2canvas(target, {
+    scale: 2,           // 2x 高解析度
+    backgroundColor: '#ffffff',
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = '網球課程繳費單.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();       // 自動下載
+  });
+}
 function closeInvoice() {
   document.getElementById('invoice-modal').classList.remove('open');
 }
