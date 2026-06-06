@@ -380,15 +380,15 @@
         <div class="fee-row"><span>小班</span><span id="fs">0 堂 × $550 = $0</span></div>
         <div class="fee-row"><span>大班</span><span id="fb">0 堂 × $490 = $0</span></div>
         <div class="fee-row"><span>對打課</span><span id="fr">0 堂 × $800 = $0</span></div>
-        <div class="fee-row" id="fd" style="display:none"><span class="fee-disc">🎉 10堂95折優惠</span><span class="fee-disc" id="fd-amt"></span></div>
+        <div class="fee-row" id="fd" style="display:none"><span class="fee-disc">🎉 6堂95折優惠</span><span class="fee-disc" id="fd-amt"></span></div>
         <div class="fee-row"><span>場地費（上課當天收）</span><span>$80 × <span id="fc">0</span> 堂</span></div>
         <div class="fee-row"><span>課程費合計</span><span id="ft" style="color:#1d4ed8">$0</span></div>
-        <div id="fg" class="fee-gift" style="display:none">🏆 選滿10堂！免費參加 12/23–24 網球團體賽（免報名費 $600）</div>
+        <div id="fg" class="fee-gift" style="display:none">🏆 選滿6堂！免費參加 12/23–24 網球團體賽（免報名費 $600）</div>
         <div class="fee-note">
-          ・10堂套票95折（小班、大班、對打課皆可混搭）<br>
+          ・6堂套票95折（小班、大班、對打課皆可混搭）<br>
           ・場地費 $80/堂，上課當天收取<br>
           ・候補確認入班後再計費<br>
-          ・年底團體賽報名費 $600，報名滿10堂免費參加
+          ・年底團體賽報名費 $600，報名滿6堂免費參加
         </div>
       </div>
     </div>
@@ -487,7 +487,6 @@ const DEFS = {
     {d:"08/12(三)",t:"20-21",court:5,type:"wed",cls:"small"},
     {d:"08/13(四)",t:"19-20",court:4,type:"thu",cls:"small"},
     {d:"08/18(二)",t:"19-20",court:6,type:"tue",cls:"small"},
-    {d:"08/18(二)",t:"19-20",court:5,type:"tue",cls:"small"},
     {d:"08/18(二)",t:"20-21",court:6,type:"tue",cls:"small"},
     {d:"08/25(二)",t:"19-20",court:5,type:"tue",cls:"small"},
     {d:"08/25(二)",t:"20-21",court:5,type:"tue",cls:"small"},
@@ -596,14 +595,19 @@ function wk(m,i){ return 'w-'+m+'-'+i; }
 
 function renderSlots(){
   const filterVal = document.getElementById('level-filter').value;
+
+  // 09/01 雙教練合併：s-9-1（court5）由 s-9-0（court6）那張卡代表，渲染時跳過
+  const tueDoubleKeys = new Set(['s-9-1']);
+
   const defs = (DEFS[curM] || [])
     .map((s, origIdx) => ({...s, origIdx}))
     .filter(s => {
+      if(tueDoubleKeys.has(sk(curM, s.origIdx))) return false;
       if(!filterVal) return true;
       if(s.special === 'tournament') return false;
       if(filterVal === 'rally')    return s.type === 'thu' && s.t === '20-21';
       if(filterVal === 'mid')      return s.type === 'thu' && s.t === '19-20';
-      if(filterVal === 'beginner') return s.type !== 'thu' || (s.t !== '20-21' && s.t !== '19-20');
+      if(filterVal === 'beginner') return s.type === 'tue' || s.type === 'wed' || (s.type === 'thu' && s.cls === 'small' && s.t === '19-20');
       return true;
     });
   const grid = document.getElementById('slot-grid');
@@ -732,7 +736,11 @@ function renderSlots(){
       coachBadge='<span class="badge b-coach">Adam教練</span>';
     }
 
-    const courtBadge=s.court?`<span class="badge" style="background:#e0f2fe;color:#075985;">第${s.court}面</span>`:'';
+    // 09/01 雙教練：s-9-0 代表兩面，顯示「第5面 第6面」
+    const isDualCourt = sk(curM, s.origIdx) === 's-9-0';
+    const courtBadge = isDualCourt
+      ? '<span class="badge" style="background:#e0f2fe;color:#075985;">第5面</span><span class="badge" style="background:#e0f2fe;color:#075985;">第6面</span>'
+      : s.court ? `<span class="badge" style="background:#e0f2fe;color:#075985;">第${s.court}面</span>` : '';
     const bookedBadge=isPaidBooked?'<span class="badge" style="background:#fef3c7;color:#92400e;">已確認</span>':'';
 
     return `<div class="${cardCls}" data-click="${clickAction}">
@@ -800,7 +808,7 @@ function calcFee(){
     }
   }
   const total=small+big+rally, raw=small*550+big*490+rally*800;
-  const is10=total>=10, disc=is10?Math.round((small*550+big*490+rally*800)*0.05):0, final=raw-disc;
+  const is10=total>=6, disc=is10?Math.round((small*550+big*490+rally*800)*0.05):0, final=raw-disc;
   document.getElementById('fs').textContent=`${small} 堂 × $550 = $${(small*550).toLocaleString()}`;
   document.getElementById('fb').textContent=`${big} 堂 × $490 = $${(big*490).toLocaleString()}`;
   document.getElementById('fr').textContent=`${rally} 堂 × $800 = $${(rally*800).toLocaleString()}`;
@@ -948,7 +956,7 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   const rawWaitlistStr = [...waitSlots].join(',');     // 例如: "w-7-2"
 
   const total = small + big + rally, raw = small * 550 + big * 490 + rally * 800;
-  const disc = total >= 10 ? Math.round((small * 550 + big * 490) * 0.05) : 0;
+  const disc = total >= 6 ? Math.round((small * 550 + big * 490 + rally * 800) * 0.05) : 0;
   const final = raw - disc;
 
   // 3. 打包傳給後端的資料（Payload）
@@ -1002,10 +1010,10 @@ document.getElementById('submit-btn').addEventListener('click', async function()
     document.getElementById('success-msg').innerHTML=
       `<b>${name}</b> 你好！<br><br>`+
       `程度：${levelMap[level]}<br>`+
-      (selSlots.size?`正選時段：<br>${formattedSlots}<br>共 ${total} 堂｜課程費 $${final.toLocaleString()}${total>=10?' (95折 -$'+disc+')':''}<br>`:'')+
+      (selSlots.size?`正選時段：<br>${formattedSlots}<br>共 ${total} 堂｜課程費 $${final.toLocaleString()}${total>=6?' (95折 -$'+disc+')':''}<br>`:'')+
       (waitSlots.size?`<br>候補時段：<br>${formattedWaitlist}<br>`:'')+
       `場地費 $80/堂，上課當天收取<br>`+
-      (total>=10?`🏆 已取得 12/23–24 網球團體賽免費資格！<br>`:'')+
+      (total>=6?`🏆 已取得 12/23–24 網球團體賽免費資格！<br>`:'')+
       `<br>教練將於 6 月底確認訂單後，透過 LINE 與您確認課程訂單＆繳費資訊 🎾`;
   } catch(e) {
     this.disabled=false; this.textContent='送出報名';
