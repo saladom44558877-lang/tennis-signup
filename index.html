@@ -3,592 +3,1229 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎾 教練後台</title>
+  <title>🎾 Adam & Miguel 網球課程報名表</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #1a1a1a; padding: 1rem; }
-    .container { max-width: 720px; margin: 0 auto; }
+    body { background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a1a1a; padding: 1rem; }
+    .container { max-width: 560px; margin: 0 auto; padding-bottom: 3rem; }
 
-    /* 登入 */
-    .login-box { background: #fff; border-radius: 16px; padding: 2rem; max-width: 360px; margin: 4rem auto; box-shadow: 0 4px 16px rgba(0,0,0,.08); text-align: center; }
-    .login-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-    .login-sub { font-size: 13px; color: #888; margin-bottom: 20px; }
-    .login-input { width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 9px; font-size: 14px; outline: none; margin-bottom: 12px; }
-    .login-input:focus { border-color: #1d4ed8; }
-    .login-btn { width: 100%; padding: 11px; background: #1d4ed8; color: #fff; border: none; border-radius: 9px; font-size: 15px; font-weight: 700; cursor: pointer; }
-    .login-btn:hover { background: #1e40af; }
-    .login-err { color: #dc2626; font-size: 12px; margin-top: 8px; }
+    .hero { background: linear-gradient(135deg, #1d4ed8, #378ADD); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; color: #fff; }
+    .hero-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .hero-sub { font-size: 13px; opacity: .85; line-height: 1.8; }
+    .class-types { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .ct { border-radius: 10px; padding: 10px 12px; font-size: 12px; line-height: 1.6; }
+    .ct-small { background: rgba(255,255,255,.2); }
+    .ct-big { background: rgba(255,255,255,.15); }
+    .ct-title { font-weight: 700; margin-bottom: 2px; }
 
-    /* 後台主體 */
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-    .header-title { font-size: 20px; font-weight: 700; }
-    .logout-btn { font-size: 12px; color: #888; background: none; border: 1px solid #ddd; padding: 5px 12px; border-radius: 20px; cursor: pointer; }
+    .card { background: #fff; border-radius: 14px; padding: 1.25rem; margin-bottom: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .feature-grid { display: flex; flex-direction: column; gap: 14px; }
+    .feature-item { display: flex; gap: 12px; align-items: flex-start; }
+    .feature-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+    .feature-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; color: #1d4ed8; }
+    .feature-desc { font-size: 12px; color: #555; line-height: 1.7; }
+    .course-content { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .cc-item { display: flex; gap: 8px; align-items: flex-start; }
+    .cc-tag { background: #dbeafe; color: #1d4ed8; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; margin-top: 1px; white-space: nowrap; }
+    .cc-desc { font-size: 12px; color: #555; line-height: 1.7; }
 
-    /* 統計卡片 */
-    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1.5rem; }
-    .stat { background: #fff; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
-    .stat-n { font-size: 26px; font-weight: 700; }
-    .stat-n.pending { color: #d97706; }
-    .stat-n.paid { color: #16a34a; }
-    .stat-n.cancel { color: #dc2626; }
-    .stat-l { font-size: 12px; color: #888; margin-top: 2px; }
+    /* 教練介紹 */
+    .coach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .coach-card { border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; background: #fafafa; }
+    .coach-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg,#1d4ed8,#378ADD); display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 10px; }
+    .coach-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+    .coach-years { font-size: 11px; color: #378ADD; font-weight: 600; margin-bottom: 8px; }
+    .coach-section { font-size: 10px; font-weight: 700; color: #888; letter-spacing: .06em; text-transform: uppercase; margin: 8px 0 4px; }
+    .coach-item { font-size: 11px; color: #555; line-height: 1.7; display: flex; gap: 5px; }
+    .coach-item::before { content: "·"; color: #378ADD; flex-shrink: 0; }
+    .coach-achievement { font-size: 11px; color: #555; line-height: 1.8; display: flex; gap: 5px; }
+    .coach-achievement::before { content: "🥇"; flex-shrink: 0; font-size: 10px; margin-top: 2px; }
 
-    /* 篩選 */
-    .filter-bar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
-    .filter-btn { padding: 5px 14px; border-radius: 20px; border: 1.5px solid #e2e8f0; font-size: 12px; cursor: pointer; background: #fff; color: #666; font-weight: 500; }
-    .filter-btn.active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+    /* 程度介紹 */
+    .level-desc-box { margin-top: 12px; display: none; background: #f0f7ff; border-radius: 10px; padding: 12px 14px; border: 1.5px solid #bfdbfe; }
+    .level-desc-box.show { display: block; }
+    .level-desc-title { font-size: 12px; font-weight: 700; color: #1d4ed8; margin-bottom: 6px; }
+    .level-desc-content { font-size: 12px; color: #444; line-height: 1.9; }
+    .level-tag { display: inline-block; background: #dbeafe; color: #1e40af; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px; margin: 2px 2px 2px 0; }
+    .payment-box { background: #f8fafc; border-radius: 10px; padding: 1rem; border: 1.5px solid #e2e8f0; }
+    .payment-notice { font-size: 12px; color: #555; line-height: 1.7; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; }
+    .payment-info { display: flex; flex-direction: column; gap: 8px; }
+    .payment-row { display: flex; gap: 12px; align-items: center; font-size: 13px; }
+    .payment-label { color: #888; font-size: 12px; min-width: 36px; flex-shrink: 0; }
+    .payment-val { color: #1a1a1a; font-weight: 500; }
+    .payment-account { font-size: 16px; font-weight: 700; color: #1d4ed8; letter-spacing: 1px; }
+    .sec-label { font-size: 11px; font-weight: 700; color: #888; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 12px; }
 
-    /* 報名卡片 */
-    .reg-card { background: #fff; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.05); border-left: 4px solid #e2e8f0; }
-    .reg-card.pending { border-left-color: #f59e0b; }
-    .reg-card.paid { border-left-color: #22c55e; }
-    .reg-card.cancel { border-left-color: #ef4444; opacity: .6; }
-    .reg-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-    .reg-name { font-size: 16px; font-weight: 700; }
-    .reg-status { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
-    .status-pending { background: #fef3c7; color: #92400e; }
-    .status-paid { background: #dcfce7; color: #166534; }
-    .status-cancel { background: #fee2e2; color: #991b1b; }
-    .reg-info { font-size: 12px; color: #555; line-height: 2; }
-    .reg-info b { color: #1a1a1a; }
-    .reg-slots { font-size: 11px; color: #666; background: #f8fafc; border-radius: 8px; padding: 8px 10px; margin: 8px 0; line-height: 1.9; border: 1px solid #e2e8f0; }
-    .reg-actions { display: flex; gap: 8px; margin-top: 10px; }
-    .btn-confirm { flex: 1; padding: 9px; background: #16a34a; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
-    .btn-confirm:hover { background: #15803d; }
-    .btn-cancel { flex: 1; padding: 9px; background: #fff; color: #dc2626; border: 1.5px solid #dc2626; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
-    .btn-cancel:hover { background: #fee2e2; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 13px; color: #555; margin-bottom: 5px; }
+    .field input { width: 100%; padding: 10px 12px; border-radius: 9px; border: 1.5px solid #e2e8f0; font-size: 14px; color: #1a1a1a; background: #fff; transition: border .15s; outline: none; }
+    .field input:focus { border-color: #378ADD; }
 
-    .empty { text-align: center; padding: 3rem; color: #888; font-size: 14px; }
-    .refresh-btn { padding: 7px 16px; background: #1d4ed8; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .loading { text-align: center; padding: 2rem; color: #888; }
+    .level-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .lc { border: 2px solid #e2e8f0; border-radius: 12px; padding: 14px 8px; cursor: pointer; text-align: center; background: #fff; transition: all .15s; user-select: none; }
+    .lc:hover { border-color: #378ADD; background: #f0f7ff; }
+    .lc.sel { border-color: #1d4ed8; background: #dbeafe; }
+    .lc-icon { font-size: 24px; margin-bottom: 6px; }
+    .lc-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .lc-desc { font-size: 11px; color: #888; }
 
-    /* 繳費單按鈕 */
-    .btn-invoice { flex: 1; padding: 9px; background: #fff; color: #7c3aed; border: 1.5px solid #7c3aed; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
-    .btn-invoice:hover { background: #f5f3ff; }
+    .month-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .mtab { padding: 5px 14px; border-radius: 20px; border: 1.5px solid #e2e8f0; font-size: 12px; cursor: pointer; color: #888; background: #fff; transition: all .15s; user-select: none; }
+    .mtab:hover { border-color: #378ADD; color: #378ADD; }
+    .mtab.active { background: #dbeafe; color: #1d4ed8; border-color: #1d4ed8; font-weight: 700; }
 
-    /* Modal */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 999; align-items: center; justify-content: center; padding: 1rem; }
-    .modal-overlay.open { display: flex; }
-    .modal-box { background: #fff; border-radius: 16px; width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,.25); }
-    .modal-hd { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; background: #fff; z-index: 1; border-radius: 16px 16px 0 0; }
-    .modal-hd-title { font-size: 14px; font-weight: 700; }
-    .modal-close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: #aaa; }
-    .modal-close:hover { color: #555; }
-    .inv { padding: 18px; }
-    .inv-hero { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-    .inv-icon { width: 44px; height: 44px; background: linear-gradient(135deg,#4f46e5,#7c3aed); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-    .inv-title { font-size: 16px; font-weight: 800; color: #111; }
-    .inv-subtitle { font-size: 11px; color: #888; margin-top: 2px; }
-    .inv-block { background: #f8fafc; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
-    .inv-block-title { font-size: 10px; font-weight: 700; color: #6b7280; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 9px; }
-    .inv-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; margin-bottom: 6px; }
-    .inv-row:last-child { margin-bottom: 0; }
-    .inv-label { color: #6b7280; flex-shrink: 0; margin-right: 8px; }
-    .inv-val { font-weight: 600; color: #111; text-align: right; }
-    .inv-val.accent { color: #7c3aed; }
-    .inv-total { background: linear-gradient(135deg,#4f46e5,#7c3aed); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-    .inv-total-label { font-size: 13px; color: rgba(255,255,255,.85); font-weight: 600; }
-    .inv-total-amount { font-size: 24px; font-weight: 800; color: #fff; }
-    .inv-bank { background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
-    .inv-bank-title { font-size: 10px; font-weight: 700; color: #1d4ed8; letter-spacing: .08em; margin-bottom: 9px; }
-    .inv-bank-row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 6px; }
-    .inv-bank-row:last-child { margin-bottom: 0; }
-    .inv-bank-label { color: #3b82f6; }
-    .inv-bank-val { font-weight: 700; color: #1e3a8a; font-family: 'Courier New', monospace; letter-spacing: .04em; }
-    .inv-note { background: #fef9c3; border-radius: 8px; padding: 10px 13px; font-size: 12px; color: #78350f; line-height: 1.7; }
-    .modal-ft { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid #f1f5f9; position: sticky; bottom: 0; background: #fff; border-radius: 0 0 16px 16px; }
-    .modal-ft button { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; }
-    .btn-copy-inv { background: #f1f5f9; color: #374151; }
-    .btn-copy-inv:hover { background: #e2e8f0; }
-    .btn-print-inv { background: linear-gradient(135deg,#4f46e5,#7c3aed); color: #fff; }
-    @media print {
-      body > *:not(#invoice-modal) { display: none !important; }
-      #invoice-modal { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
-      .modal-box { box-shadow: none !important; max-height: none !important; }
-      .modal-hd, .modal-ft { display: none !important; }
-    }
+    .slot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .slot-card { border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; cursor: pointer; background: #fff; transition: all .15s; user-select: none; }
+    .slot-card:hover:not(.is-full):not(.is-waitfull) { border-color: #378ADD; background: #f0f7ff; }
+    .slot-card.is-sel { border-color: #1d4ed8; background: #dbeafe; }
+    .slot-card.is-locked { border-color: #16a34a; background: #dcfce7; cursor: default; pointer-events: none; }
+    .slot-card.is-locked:hover { border-color: #16a34a; background: #dcfce7; }
+    .slot-card.is-booked { border-color: #f59e0b; background: #fffbeb; cursor: default; pointer-events: none; }
+    .slot-card.is-wait { border-color: #7c3aed; background: #f5f3ff; }
+    .slot-card.is-full { cursor: default; }
+    .slot-card.is-waitfull { cursor: default; opacity: .6; }
+    .slot-date { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+    .slot-time { font-size: 11px; color: #666; margin-bottom: 6px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 6px; }
+    .badge { font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 600; }
+    .b-wed { background: #dbeafe; color: #1e40af; }
+    .b-thu { background: #dcfce7; color: #166534; }
+    .b-tue { background: #fef3c7; color: #92400e; }
+    .b-coach { background: #f3e8ff; color: #6b21a8; }
+    .b-price { background: #fef9c3; color: #854d0e; }
+    .slot-bar-bg { background: #e5e7eb; border-radius: 20px; height: 5px; overflow: hidden; margin-bottom: 4px; }
+    .slot-bar-fill { height: 100%; border-radius: 20px; transition: width .4s; }
+    .bar-green { background: #22c55e; }
+    .bar-yellow { background: #f59e0b; }
+    .bar-red { background: #ef4444; }
+    .bar-purple { background: #8b5cf6; }
+    .slot-status { font-size: 10px; font-weight: 600; }
+    .s-ok { color: #166534; } .s-warn { color: #b45309; } .s-full { color: #dc2626; } .s-wait { color: #6b21a8; }
+
+    .sel-info { font-size: 12px; color: #666; margin-top: 8px; padding: 8px 12px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
+
+    .waitlist-box { background: #faf5ff; border: 1.5px solid #c4b5fd; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; display: none; }
+    .waitlist-title { font-size: 13px; font-weight: 700; color: #6b21a8; margin-bottom: 4px; }
+    .waitlist-sub { font-size: 12px; color: #7c3aed; margin-bottom: 10px; line-height: 1.6; }
+    .wl-item { display: flex; justify-content: space-between; align-items: center; background: #fff; border-radius: 6px; padding: 7px 10px; margin-bottom: 4px; font-size: 12px; border: 1px solid #e9d5ff; }
+    .wl-remove { background: none; border: none; color: #dc2626; font-size: 11px; cursor: pointer; font-weight: 600; }
+
+    .fee-box { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 1rem; }
+    .fee-title { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+    .fee-row { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
+    .fee-row:last-of-type { border: none; font-weight: 700; font-size: 15px; padding-top: 8px; }
+    .fee-disc { color: #dc2626; font-size: 12px; font-weight: 600; }
+    .fee-gift { background: #dcfce7; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #166534; margin-top: 10px; font-weight: 600; }
+    .fee-note { font-size: 11px; color: #888; margin-top: 10px; line-height: 1.9; }
+
+    .rules { border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 1rem; font-size: 12px; color: #555; line-height: 1; margin-bottom: 14px; background: #f8fafc; }
+    .rule-row { display: flex; gap: 8px; padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
+    .rule-row:last-child { border: none; }
+    .r-icon { flex-shrink: 0; width: 20px; }
+
+    .chk { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; cursor: pointer; margin-bottom: 14px; }
+    .chk input { margin-top: 3px; width: 16px; height: 16px; cursor: pointer; accent-color: #1d4ed8; }
+
+    .submit-btn { width: 100%; padding: 14px; border-radius: 10px; border: none; background: #1d4ed8; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; transition: background .15s; }
+    .submit-btn:hover:not(:disabled) { background: #1e40af; }
+    .submit-btn:disabled { opacity: .4; cursor: not-allowed; background: #9ca3af; }
+
+    .loading-bar { display: none; text-align: center; padding: 1rem; color: #888; font-size: 13px; }
+
+    .success-box { background: #dcfce7; border-radius: 16px; padding: 2rem; text-align: center; display: none; }
+    .success-icon { font-size: 48px; margin-bottom: 12px; }
+    .success-title { font-size: 20px; font-weight: 700; color: #166534; margin-bottom: 10px; }
+    .success-sub { font-size: 13px; color: #166534; line-height: 2; }
+
+    .notice { background: #fef3c7; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #92400e; margin-bottom: 1rem; }
   </style>
 </head>
 <body>
-
-<!-- 繳費單 Modal -->
-<div class="modal-overlay" id="invoice-modal" onclick="if(event.target===this)closeInvoice()">
-  <div class="modal-box">
-    <div class="modal-hd">
-      <div class="modal-hd-title">📋 繳費單</div>
-      <button class="modal-close" onclick="closeInvoice()">×</button>
+<div class="container">
+  <div class="hero">
+    <div class="hero-title">🎾 Adam & Miguel網球課程報名</div>
+    <div class="hero-sub">中正河濱公園網球場｜教練逐一調整動作｜名額有限</div>
+    <div style="margin-top:8px;font-size:12px;background:rgba(255,255,255,0.2);border-radius:8px;padding:6px 12px;display:inline-block;">⏰ 7月課程報名將於 <b>6/25</b> 截止！</div>
+    
+      <div class="class-types">
+  <div class="ct ct-small">
+    <div class="ct-title">📌 小班</div>
+    <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">
+      週三／四<br>
+      👤 1–5人<br>
+      🧑‍🏫 Adam教練<br>
+      💰 $550／堂
     </div>
-    <div id="invoice-content"></div>
-    <div class="modal-ft">
-      <button class="btn-copy-inv" onclick="copyInvoiceText()">📋 複製文字</button>
-      <button class="btn-print-inv" onclick="window.print()">🖨️ 列印</button>
+  </div>
+  <div class="ct ct-big">
+    <div class="ct-title">📌 大班</div>
+    <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">
+      週二（9月起）<br>
+      👤 4–10人<br>
+      🧑‍🏫 Adam＋Miguel<br>
+      💰 $490／堂
+    </div>
+  </div>
+  <div class="ct" style="background:rgba(255,255,255,.12);">
+    <div class="ct-title">🎾 對打課</div>
+    <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">
+      週四 20-21<br>
+      👤 1–3人<br>
+      🧑‍🏫 Adam教練<br>
+      💰 $800／堂
     </div>
   </div>
 </div>
-<div class="container">
-
-  <!-- 登入 -->
-  <div id="login-box" class="login-box">
-    <div style="font-size:36px;margin-bottom:10px;">🎾</div>
-    <div class="login-title">教練後台</div>
-    <div class="login-sub">請輸入管理密碼</div>
-    <input id="pass-input" class="login-input" type="password" placeholder="密碼" onkeydown="if(event.key==='Enter')login()">
-    <button class="login-btn" onclick="login()">登入</button>
-    <div class="login-err" id="login-err"></div>
+</div>
+    
+  <div class="card">
+    <div class="sec-label">課程特色</div>
+    <div class="feature-grid">
+      <div class="feature-item">
+        <div class="feature-icon">🌱</div>
+        <div class="feature-text">
+          <div class="feature-title">建立信心，從零開始</div>
+          <div class="feature-desc">不管有沒有基礎，教練會在每一堂課中逐一觀察並調整你的動作。課程內容涵蓋以下四大核心：</div>
+          <div class="course-content">
+            <div class="cc-item">
+              <span class="cc-tag">正＆反拍</span>
+              <span class="cc-desc">從握拍姿勢、站位到重心轉移，建立順暢的發力動作。</span>
+            </div>
+            <div class="cc-item">
+              <span class="cc-tag">發球</span>
+              <span class="cc-desc">從下手的穩定發球到上手發球循序漸進，練出漂亮的發球姿勢。</span>
+            </div>
+            <div class="cc-item">
+              <span class="cc-tag">比賽模擬</span>
+              <span class="cc-desc">實際對打與情境演練，讓練習與比賽做結合！</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-text">
+          <div class="feature-title">培養運動習慣</div>
+          <div class="feature-desc">固定的上課節奏搭配小班制教學，讓網球成為你生活中最期待的一件事，動起來不再是難事。</div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">❤️</div>
+        <div class="feature-text">
+          <div class="feature-title">愛上網球這項運動</div>
+          <div class="feature-desc">網球不只是技術，更是一種生活態度。在球場上揮拍的那一刻，你會發現它有多令人上癮。</div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🏆</div>
+        <div class="feature-text">
+          <div class="feature-title">12月網球團體賽</div>
+          <div class="feature-desc">學期末將為所有學員舉辦團體賽，在球場上展現你這段時間的學習成果，見證自己的蛻變！</div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- 後台主體 -->
-  <div id="admin-body" style="display:none;">
-    <div class="header">
-      <div class="header-title">🎾 報名管理</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="refresh-btn" onclick="loadData()">🔄 重新整理</button>
-        <button class="logout-btn" onclick="logout()">登出</button>
+  <!-- 教練介紹 -->
+  <div class="card">
+    <div class="sec-label">你的教練</div>
+    <div class="coach-grid">
+      <div class="coach-card">
+        <div class="coach-avatar">🎾</div>
+        <div class="coach-name">Adam 王楷敦</div>
+        <div class="coach-years">球齡 14 年</div>
+        <div class="coach-section">學歷／球隊</div>
+        <div class="coach-item">淡江大學網球校隊</div>
+        <div class="coach-item">國立彰化師範大學網球校隊</div>
+        <div class="coach-section">比賽成績</div>
+        <div class="coach-achievement">109全國大專盃混雙北區 亞軍</div>
+        <div class="coach-achievement">107全國大專盃男子單打 八強</div>
+        <div class="coach-achievement">106全國大專盃男子雙打 八強</div>
+        <div class="coach-achievement">105淡江大學新生盃單打 冠軍</div>
+        <div class="coach-section">教學經歷</div>
+        <div class="coach-item">教學經驗 5 年</div>
+        <div class="coach-item">中正河濱私人班教練 </div>
+        <div class="coach-item">台北歐洲學校 網球助教（2023–2025）</div>
+        <div class="coach-item">蘇澳網球暑期夏令營教練（2024–2026）</div>
+      </div>
+      <div class="coach-card">
+        <div class="coach-avatar">🎾</div>
+        <div class="coach-name">Miguel</div>
+        <div class="coach-years">球齡 10 年</div>
+        <div class="coach-section">學歷／球隊</div>
+        <div class="coach-item">福林國小</div>
+        <div class="coach-item">三民國高中</div>
+        <div class="coach-item">淡江大學</div>
+        <div class="coach-section">教學經歷</div>
+        <div class="coach-item">教學經驗 2 年</div>
+        <div class="coach-item">海南三亞大成網球俱樂部</div>
+        <div class="coach-item">台北歐洲學校</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-bar" id="loading-bar">⏳ 讀取最新名額中...</div>
+
+  <div id="form-main">
+
+    <div class="card">
+      <div class="sec-label">基本資料</div>
+      <div class="field"><label>姓名 *</label><input id="f-name" placeholder="請輸入真實姓名"></div>
+      <div class="field"><label>LINE ID *</label><input id="f-line" placeholder="確認入班後加入群組"></div>
+      <div id="line-booked-hint" style="display:none;font-size:12px;color:#92400e;background:#fffbeb;border:0.5px solid #fcd34d;border-radius:8px;padding:8px 12px;margin-top:-6px;margin-bottom:12px;"></div>
+      <div class="field"><label>聯絡電話</label><input id="f-phone" placeholder="停課通知用"></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">課程程度 *</div>
+      <div class="level-grid" id="level-grid">
+        <div class="lc" data-level="beginner"><div class="lc-icon">🌱</div><div class="lc-name">初階班</div><div class="lc-desc">從零開始</div></div>
+        <div class="lc" data-level="mid"><div class="lc-icon">🔥</div><div class="lc-name">中階班</div><div class="lc-desc">提升穩定度</div></div>
+        <div class="lc" data-level="1v1"><div class="lc-icon">⚡</div><div class="lc-name">對打班</div><div class="lc-desc">純對打訓練</div></div>
+      </div>
+
+      <!-- 程度說明：點選後顯示 -->
+      <div class="level-desc-box" id="desc-beginner">
+        <div class="level-desc-title">🌱 初階班 — 從零開始打好基礎</div>
+        <div class="level-desc-content">
+          適合完全沒有基礎或剛接觸網球的學員，會有大量的動作練習。<br><br>
+          <span class="level-tag">正＆反拍</span> 學習握拍姿勢與基本動作，建立穩定的揮拍動作<br>
+          <span class="level-tag">下手發球</span> 掌握發球節奏，建立穩定的發球基礎<br>
+          <span class="level-tag">上手發球</span> 循序漸進學習上手發球，掌握正確發力方式<br>
+          <span class="level-tag">比賽規則</span> 熟悉基本計分與規則，為實際對打做準備
+        </div>
+      </div>
+      <div class="level-desc-box" id="desc-mid">
+        <div class="level-desc-title">🔥 中階班 — 提升穩定度與球種多樣性</div>
+        <div class="level-desc-content">
+          適合已有基礎、正反拍可對打的學員，著重技術提升。<br><br>
+          <span class="level-tag">站位與重心</span> 更穩定的站位與重心轉移，提升擊球品質<br>
+          <span class="level-tag">長短球</span> 學習底線對打的長球與短球不同處理方式<br>
+          <span class="level-tag">截擊</span> 網前截擊技術訓練<br>
+          <span class="level-tag">上旋＆側旋發球</span> 發球旋轉控制，讓發球更具威脅性<br>
+          <span class="level-tag">小格對打</span> 小場地密集對打，提升手感與反應速度
+        </div>
+      </div>
+      <div class="level-desc-box" id="desc-1v1">
+        <div class="level-desc-title">⚡ 對打班 — 純對打，磨練手感</div>
+        <div class="level-desc-content">
+          適合已有一定程度、想透過大量對打提升穩定度的學員。<br><br>
+          <span class="level-tag">底線對打</span> 著重底線來回抽球的穩定度<br>
+          <span class="level-tag">擊球品質</span> 提升每一球的落點控制與擊球質量<br>
+          <span class="level-tag">實戰訓練</span> 在對打中累積比賽節奏與臨場感
+        </div>
       </div>
     </div>
 
-    <div class="stats">
-      <div class="stat"><div class="stat-n pending" id="cnt-pending">-</div><div class="stat-l">⏳ 待確認</div></div>
-      <div class="stat"><div class="stat-n paid"    id="cnt-paid">-</div><div class="stat-l">✅ 已繳費</div></div>
-      <div class="stat"><div class="stat-n cancel"  id="cnt-cancel">-</div><div class="stat-l">❌ 已取消</div></div>
+    <div class="card">
+      <div class="sec-label">選擇時段（想上幾堂選幾個）</div>
+      <div style="margin-bottom:12px;">
+  <select id="level-filter" style="width:100%;padding:8px 12px;border-radius:9px;border:1.5px solid #e2e8f0;font-size:13px;color:#1a1a1a;background:#fff;outline:none;">
+    <option value="">全部時段</option>
+    <option value="beginner">🟢 初階班（週二、週三）</option>
+    <option value="mid">🔵 中階班（週四 19-20）</option>
+    <option value="rally">🩷 對打課（週四 20-21）</option>
+  </select>
+</div>
+      <div class="month-tabs" id="month-tabs" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <div class="mtab active" data-m="7">7月</div>
+          <div class="mtab" data-m="8">8月</div>
+          <div class="mtab" data-m="9">9月</div>
+          <div class="mtab" data-m="10">10月</div>
+          <div class="mtab" data-m="11">11月</div>
+          <div class="mtab" data-m="12">12月</div>
+        </div>
+        <button id="btn-clear-slots" onclick="clearAllSlots()" style="display:none;padding:4px 12px;font-size:11px;font-weight:600;color:#dc2626;background:#fff;border:1.5px solid #dc2626;border-radius:20px;cursor:pointer;white-space:nowrap;">清除全部時段</button>
+      </div>
+      <div id="deadline-hint" style="display:block;background:#fffbeb;border:0.5px solid #fcd34d;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#92400e;">⏰ 7月課程報名將於 <b>6/25</b> 截止！</div>
+      <div class="slot-grid" id="slot-grid"></div>
+      <div class="sel-info" id="sel-info">已選 0 個正選時段・0 個候補時段</div>
     </div>
 
-    <div class="filter-bar">
-      <button class="filter-btn active" onclick="setFilter('all',this)">全部</button>
-      <button class="filter-btn" onclick="setFilter('pending',this)">⏳ 待確認</button>
-      <button class="filter-btn" onclick="setFilter('paid',this)">✅ 已繳費</button>
-      <button class="filter-btn" onclick="setFilter('cancel',this)">❌ 已取消</button>
+    <div id="waitlist-box" class="waitlist-box">
+      <div class="waitlist-title">🟣 候補名單</div>
+      <div class="waitlist-sub">以下時段額滿，你已加入候補。有名額釋出時教練會優先聯繫你。</div>
+      <div id="waitlist-items"></div>
     </div>
 
-    <div id="reg-list"><div class="loading">載入中...</div></div>
+
+    <div class="card" id="tournament-card">
+      <div class="sec-label">年底團體賽報名意願</div>
+      <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:12px;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;">🏆 12/23–24 網球團體賽</div>
+        <div style="font-size:12px;color:#78350f;line-height:1.9;">
+          報名費：<b>$600 元</b><br>
+          🎁 <b>報名滿 10 堂課即可免費參賽！</b>（省 $600）
+        </div>
+      </div>
+      <div style="font-size:13px;color:#555;margin-bottom:10px;">請問您是否有意願報名年底的團體賽？</div>
+      <div style="display:flex;gap:8px;" id="tournament-opts">
+        <div class="tournament-opt" data-val="yes" style="flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;user-select:none;">
+          <div style="font-size:18px;margin-bottom:4px;">✅</div>有意願
+        </div>
+        <div class="tournament-opt" data-val="maybe" style="flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;user-select:none;">
+          <div style="font-size:18px;margin-bottom:4px;">🤔</div>考慮中
+        </div>
+        <div class="tournament-opt" data-val="no" style="flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;user-select:none;">
+          <div style="font-size:18px;margin-bottom:4px;">❌</div>暫不考慮
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">費用試算</div>
+      <div class="fee-box">
+        <div class="fee-title">📊 你的報名費用</div>
+        <div class="fee-row"><span>小班</span><span id="fs">0 堂 × $550 = $0</span></div>
+        <div class="fee-row"><span>大班</span><span id="fb">0 堂 × $490 = $0</span></div>
+        <div class="fee-row"><span>對打課</span><span id="fr">0 堂 × $800 = $0</span></div>
+        <div class="fee-row" id="fd" style="display:none"><span class="fee-disc">🎉 6堂95折優惠</span><span class="fee-disc" id="fd-amt"></span></div>
+        <div class="fee-row"><span>場地費（上課當天收）</span><span>$80 × <span id="fc">0</span> 堂</span></div>
+        <div class="fee-row"><span>課程費合計</span><span id="ft" style="color:#1d4ed8">$0</span></div>
+        <div id="fg" class="fee-gift" style="display:none">🏆 選滿6堂！免費參加 12/23–24 網球團體賽（免報名費 $600）</div>
+        <div class="fee-note">
+          ・6堂套票95折（小班、大班、對打課皆可混搭）<br>
+          ・場地費 $80/堂，上課當天收取<br>
+          ・候補確認入班後再計費<br>
+          ・年底團體賽報名費 $600，報名滿6堂免費參加
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+     <div class="sec-label">注意事項</div>
+
+<!-- 報名流程 -->
+<div style="background:#eff6ff;border-radius:10px;padding:12px 14px;margin-bottom:12px;border:1.5px solid #bfdbfe;">
+  <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:8px;">📋 報名流程</div>
+  <div style="display:flex;gap:0;flex-direction:column;">
+    <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;padding:4px 0;">
+      <span style="background:#1d4ed8;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">1</span>
+      <span style="color:#1e40af;">填寫報名表並送出，選擇偏好的上課時段</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;padding:4px 0;">
+      <span style="background:#1d4ed8;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</span>
+      <span style="color:#1e40af;">教練確認班級與時段後，透過 LINE 傳送正式繳費單</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;padding:4px 0;">
+      <span style="background:#1d4ed8;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</span>
+      <span style="color:#1e40af;">完成繳費後，訂單正式成立，名額確認！</span>
+    </div>
+  </div>
+</div>
+
+<div class="rules">
+  <div class="rule-row"><span class="r-icon">🎾</span><span>課表於報名完成後，由教練確認並統一公告給學員</span></div>
+  <div class="rule-row"><span class="r-icon">🌧️</span><span>下雨天停課，退費不補課</span></div>
+  <div class="rule-row"><span class="r-icon">🙋</span><span>請假仍需負擔當堂場地費 $80，請於上課前 1 小時告知</span></div>
+  <div class="rule-row"><span class="r-icon">👥</span><span>小班 1–5 人｜大班 4–10 人｜對打課 1–3 人，未達最低人數不開課</span></div>
+  <div class="rule-row"><span class="r-icon">🟣</span><span>額滿可填候補，每時段上限 3 位，有名額時優先通知</span></div>
+</div>
+      </div>
+      <label class="chk">
+        <input type="checkbox" id="agree">
+        我已閱讀並同意以上所有規則與費用說明
+      </label>
+      <button class="submit-btn" id="submit-btn" disabled>送出報名</button>
+    </div>
+
+    <!-- 修改已送出的報名（移到最後） -->
+    <div class="card" style="border: 1.5px dashed #cbd5e1; background: #f8fafc;">
+      <div class="sec-label">修改已送出的報名</div>
+      <div style="font-size:12px;color:#888;margin-bottom:10px;line-height:1.7;">已送出報名後想更改選課時段？輸入當初填寫的 LINE ID 或聯絡電話，系統會帶入舊資料讓你重新選擇。</div>
+      <div style="display:flex; gap:6px;">
+        <input id="f-search-line" placeholder="輸入 LINE ID 或聯絡電話" style="flex:1; padding:8px 12px; font-size:13px; border-radius:8px; border:1.5px solid #e2e8f0; outline:none; background:#fff;">
+        <button id="btn-load-old" type="button" style="background:#64748b; color:#fff; border:none; padding:8px 14px; font-size:13px; border-radius:8px; cursor:pointer; font-weight:700; white-space:nowrap;">帶入舊資料</button>
+      </div>
+      <span id="search-msg" style="font-size:11px; color:#888; display:block; margin-top:6px;"></span>
+    </div>
+
+  </div>
+
+  <div class="success-box" id="success-box">
+    <div class="success-icon">🎾</div>
+    <div class="success-title">🎉報名成功🎉</div>
+    <div class="success-sub" id="success-msg"></div>
   </div>
 
 </div>
 
 <script>
-// ⚙️ 改成你的 Apps Script 網址
+// =============================================
+// ⚙️ 設定區 — 只需要改這裡！
+// =============================================
+
+// 第一步：把你的 Google Apps Script 網址貼在這裡
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxddtd_CFTtvDCBd1aLe9ve7MJ_tVLG-5Uy3XLyzL_DQjHgpElpcTPrFzZ6mDY90SzeoQ/exec";
 
-// ── 時段完整資訊（與 index.html DEFS 完全對應）──
-// {label: 日期+時間, date: 日期, time: 時間, cls: 班別, coach: 教練}
-const SLOT_INFO = {
-  's-7-0': {label:'07/01(三) 20:00-21:00', date:'07/01(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-7-1': {label:'07/02(四) 19:00-20:00', date:'07/02(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-7-2': {label:'07/02(四) 20:00-21:00', date:'07/02(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-7-3': {label:'07/08(三) 19:00-20:00', date:'07/08(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-7-4': {label:'07/08(三) 20:00-21:00', date:'07/08(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-7-5': {label:'07/15(三) 19:00-20:00', date:'07/15(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-7-6': {label:'07/15(三) 20:00-21:00', date:'07/15(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-7-7': {label:'07/22(三) 19:00-20:00', date:'07/22(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-7-8': {label:'07/23(四) 19:00-20:00', date:'07/23(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-7-9': {label:'07/29(三) 19:00-20:00', date:'07/29(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-7-10':{label:'07/29(三) 20:00-21:00', date:'07/29(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-7-11':{label:'07/30(四) 19:00-20:00', date:'07/30(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-7-12':{label:'07/30(四) 20:00-21:00', date:'07/30(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-8-0': {label:'08/04(二) 20:00-21:00', date:'08/04(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Miguel'},
-  's-8-1': {label:'08/05(三) 19:00-20:00', date:'08/05(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-8-2': {label:'08/05(三) 20:00-21:00', date:'08/05(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-8-3': {label:'08/06(四) 20:00-21:00', date:'08/06(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-8-4': {label:'08/11(二) 20:00-21:00', date:'08/11(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Miguel'},
-  's-8-5': {label:'08/12(三) 20:00-21:00', date:'08/12(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-8-6': {label:'08/13(四) 19:00-20:00', date:'08/13(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-8-7': {label:'08/18(二) 19:00-20:00', date:'08/18(二)', time:'19:00-20:00', cls:'小班・初階', coach:'Miguel'},
-  's-8-8': {label:'08/18(二) 20:00-21:00', date:'08/18(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Miguel'},
-  's-8-9': {label:'08/25(二) 19:00-20:00', date:'08/25(二)', time:'19:00-20:00', cls:'小班・初階', coach:'Miguel'},
-  's-8-10':{label:'08/25(二) 20:00-21:00', date:'08/25(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Miguel'},
-  's-8-11':{label:'08/26(三) 20:00-21:00', date:'08/26(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-8-12':{label:'08/27(四) 20:00-21:00', date:'08/27(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-9-0': {label:'09/01(二) 19:00-20:00', date:'09/01(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
-  's-9-1': {label:'09/01(二) 19:00-20:00', date:'09/01(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
-  's-9-2': {label:'09/02(三) 19:00-20:00', date:'09/02(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-9-3': {label:'09/03(四) 19:00-20:00', date:'09/03(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-9-4': {label:'09/03(四) 20:00-21:00', date:'09/03(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-9-5': {label:'09/08(二) 20:00-21:00', date:'09/08(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
-  's-9-6': {label:'09/10(四) 19:00-20:00', date:'09/10(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-9-7': {label:'09/10(四) 20:00-21:00', date:'09/10(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-9-8': {label:'09/15(二) 19:00-20:00', date:'09/15(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
-  's-9-9': {label:'09/15(二) 20:00-21:00', date:'09/15(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
-  's-9-10':{label:'09/16(三) 19:00-20:00', date:'09/16(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-9-11':{label:'09/16(三) 20:00-21:00', date:'09/16(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-9-12':{label:'09/17(四) 19:00-20:00', date:'09/17(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-9-13':{label:'09/17(四) 20:00-21:00', date:'09/17(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-9-14':{label:'09/23(三) 20:00-21:00', date:'09/23(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-9-15':{label:'09/24(四) 19:00-20:00', date:'09/24(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-9-16':{label:'09/24(四) 20:00-21:00', date:'09/24(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-9-17':{label:'09/30(三) 19:00-20:00', date:'09/30(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-9-18':{label:'09/30(三) 20:00-21:00', date:'09/30(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-10-0':{label:'10/01(四) 19:00-20:00', date:'10/01(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-10-1':{label:'10/06(二) 19:00-20:00', date:'10/06(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
-  's-10-2':{label:'10/07(三) 19:00-20:00', date:'10/07(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-10-3':{label:'10/08(四) 19:00-20:00', date:'10/08(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-10-4':{label:'10/08(四) 20:00-21:00', date:'10/08(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-10-5':{label:'10/14(三) 19:00-20:00', date:'10/14(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-10-6':{label:'10/15(四) 19:00-20:00', date:'10/15(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-10-7':{label:'10/20(二) 20:00-21:00', date:'10/20(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
-  's-10-8':{label:'10/22(四) 19:00-20:00', date:'10/22(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-10-9':{label:'10/27(二) 20:00-21:00', date:'10/27(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
-  's-10-10':{label:'10/29(四) 19:00-20:00',date:'10/29(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-11-0':{label:'11/03(二) 19:00-20:00', date:'11/03(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
-  's-11-1':{label:'11/04(三) 20:00-21:00', date:'11/04(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-11-2':{label:'11/12(四) 20:00-21:00', date:'11/12(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-11-3':{label:'11/17(二) 19:00-20:00', date:'11/17(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
-  's-11-4':{label:'11/17(二) 20:00-21:00', date:'11/17(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
-  's-11-5':{label:'11/19(四) 20:00-21:00', date:'11/19(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-11-6':{label:'11/24(二) 20:00-21:00', date:'11/24(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
-  's-12-0':{label:'12/02(三) 19:00-20:00', date:'12/02(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-12-1':{label:'12/02(三) 20:00-21:00', date:'12/02(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-12-2':{label:'12/03(四) 20:00-21:00', date:'12/03(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-12-3':{label:'12/09(三) 19:00-20:00', date:'12/09(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-12-4':{label:'12/10(四) 20:00-21:00', date:'12/10(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-12-5':{label:'12/16(三) 19:00-20:00', date:'12/16(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-12-6':{label:'12/17(四) 19:00-20:00', date:'12/17(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-12-7':{label:'12/17(四) 20:00-21:00', date:'12/17(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-12-8':{label:'12/23(三) 19:00-20:00', date:'12/23(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-12-9':{label:'12/23(三) 19:00-20:00', date:'12/23(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-12-10':{label:'12/23(三) 19:00-20:00',date:'12/23(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-12-11':{label:'12/24(四) 19:00-20:00',date:'12/24(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-12-12':{label:'12/24(四) 19:00-20:00',date:'12/24(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-12-13':{label:'12/24(四) 20:00-21:00',date:'12/24(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-12-14':{label:'12/24(四) 20:00-21:00',date:'12/24(四)', time:'20:00-21:00', cls:'對打課', coach:'Adam'},
-  's-12-15':{label:'12/30(三) 19:00-20:00',date:'12/30(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-12-16':{label:'12/31(四) 19:00-20:00',date:'12/31(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+// =============================================
+// 課程時段資料
+// =============================================
+const DEFS = {
+  7:[
+    {d:"07/01(三)",t:"20-21",court:5,type:"wed",cls:"small"},
+    {d:"07/02(四)",t:"19-20",court:4,type:"thu",cls:"small"},
+    {d:"07/02(四)",t:"20-21",court:4,type:"thu",cls:"rally"},
+    {d:"07/08(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"07/08(三)",t:"20-21",court:6,type:"wed",cls:"small"},
+    {d:"07/15(三)",t:"19-20",court:5,type:"wed",cls:"small"},
+    {d:"07/15(三)",t:"20-21",court:4,type:"wed",cls:"small"},
+    {d:"07/22(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"07/23(四)",t:"19-20",court:5,type:"thu",cls:"small"},
+    {d:"07/29(三)",t:"19-20",court:5,type:"wed",cls:"small"},
+    {d:"07/29(三)",t:"20-21",court:5,type:"wed",cls:"small"},
+    {d:"07/30(四)",t:"19-20",court:6,type:"thu",cls:"small"},
+    {d:"07/30(四)",t:"20-21",court:4,type:"thu",cls:"rally"}
+  ],
+  8:[
+    {d:"08/04(二)",t:"20-21",court:4,type:"tue",cls:"small"},
+    {d:"08/05(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"08/05(三)",t:"20-21",court:5,type:"wed",cls:"small"},
+    {d:"08/06(四)",t:"20-21",court:6,type:"thu",cls:"rally"},
+    {d:"08/11(二)",t:"20-21",court:4,type:"tue",cls:"small"},
+    {d:"08/12(三)",t:"20-21",court:5,type:"wed",cls:"small"},
+    {d:"08/13(四)",t:"19-20",court:4,type:"thu",cls:"small"},
+    {d:"08/18(二)",t:"19-20",court:6,type:"tue",cls:"small"},
+    {d:"08/18(二)",t:"20-21",court:6,type:"tue",cls:"small"},
+    {d:"08/25(二)",t:"19-20",court:5,type:"tue",cls:"small"},
+    {d:"08/25(二)",t:"20-21",court:5,type:"tue",cls:"small"},
+    {d:"08/26(三)",t:"20-21",court:5,type:"wed",cls:"small"},
+    {d:"08/27(四)",t:"20-21",court:4,type:"thu",cls:"rally"}
+  ],
+  9:[
+    {d:"09/01(二)",t:"19-20",court:6,type:"tue",cls:"big"},
+    {d:"09/01(二)",t:"19-20",court:5,type:"tue",cls:"big"},
+    {d:"09/02(三)",t:"19-20",court:5,type:"wed",cls:"small"},
+    {d:"09/03(四)",t:"19-20",court:5,type:"thu",cls:"small"},
+    {d:"09/03(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"09/08(二)",t:"20-21",court:6,type:"tue",cls:"big"},
+    {d:"09/10(四)",t:"19-20",court:6,type:"thu",cls:"small"},
+    {d:"09/10(四)",t:"20-21",court:4,type:"thu",cls:"rally"},
+    {d:"09/15(二)",t:"19-20",court:4,type:"tue",cls:"big"},
+    {d:"09/15(二)",t:"20-21",court:5,type:"tue",cls:"big"},
+    {d:"09/16(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"09/16(三)",t:"20-21",court:6,type:"wed",cls:"small"},
+    {d:"09/17(四)",t:"19-20",court:4,type:"thu",cls:"small"},
+    {d:"09/17(四)",t:"20-21",court:6,type:"thu",cls:"rally"},
+    {d:"09/23(三)",t:"20-21",court:4,type:"wed",cls:"small"},
+    {d:"09/24(四)",t:"19-20",court:6,type:"thu",cls:"small"},
+    {d:"09/24(四)",t:"20-21",court:4,type:"thu",cls:"rally"},
+    {d:"09/30(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"09/30(三)",t:"20-21",court:6,type:"wed",cls:"small"}
+  ],
+  10:[
+    {d:"10/01(四)",t:"19-20",court:5,type:"thu",cls:"small"},
+    {d:"10/06(二)",t:"19-20",court:5,type:"tue",cls:"big"},
+    {d:"10/07(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"10/08(四)",t:"19-20",court:6,type:"thu",cls:"small"},
+    {d:"10/08(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"10/14(三)",t:"19-20",court:5,type:"wed",cls:"small"},
+    {d:"10/15(四)",t:"19-20",court:6,type:"thu",cls:"small"},
+    {d:"10/20(二)",t:"20-21",court:4,type:"tue",cls:"big"},
+    {d:"10/22(四)",t:"19-20",court:5,type:"thu",cls:"small"},
+    {d:"10/27(二)",t:"20-21",court:6,type:"tue",cls:"big"},
+    {d:"10/29(四)",t:"19-20",court:5,type:"thu",cls:"small"}
+  ],
+  11:[
+    {d:"11/03(二)",t:"19-20",court:4,type:"tue",cls:"big"},
+    {d:"11/04(三)",t:"20-21",court:6,type:"wed",cls:"small"},
+    {d:"11/12(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"11/17(二)",t:"19-20",court:4,type:"tue",cls:"big"},
+    {d:"11/17(二)",t:"20-21",court:6,type:"tue",cls:"big"},
+    {d:"11/19(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"11/24(二)",t:"20-21",court:5,type:"tue",cls:"big"}
+  ],
+  12:[
+    {d:"12/02(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"12/02(三)",t:"20-21",court:6,type:"wed",cls:"small"},
+    {d:"12/03(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"12/09(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"12/10(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"12/16(三)",t:"19-20",court:6,type:"wed",cls:"small"},
+    {d:"12/17(四)",t:"19-20",court:5,type:"thu",cls:"small"},
+    {d:"12/17(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
+    {d:"12/23(三)",t:"19-20",court:4,type:"wed",cls:"small",special:"tournament"},
+    {d:"12/23(三)",t:"19-20",court:5,type:"wed",cls:"small",special:"tournament"},
+    {d:"12/23(三)",t:"19-20",court:6,type:"wed",cls:"small",special:"tournament"},
+    {d:"12/24(四)",t:"19-20",court:4,type:"thu",cls:"small",special:"tournament"},
+    {d:"12/24(四)",t:"19-20",court:6,type:"thu",cls:"small",special:"tournament"},
+    {d:"12/24(四)",t:"20-21",court:5,type:"thu",cls:"rally",special:"tournament"},
+    {d:"12/24(四)",t:"20-21",court:6,type:"thu",cls:"rally",special:"tournament"},
+    {d:"12/30(三)",t:"19-20",court:5,type:"wed",cls:"small"},
+    {d:"12/31(四)",t:"19-20",court:6,type:"thu",cls:"small"}
+  ]
 };
 
-// 向下相容：SLOT_LABELS 從 SLOT_INFO 產生（供 decodeSlotStr 的後台卡片顯示用）
-const SLOT_LABELS = Object.fromEntries(Object.entries(SLOT_INFO).map(([k,v])=>[k,v.label]));
+const MAX_S=5, MAX_B=10, MAX_W=3;
+let curM=7, level='', selSlots=new Set(), waitSlots=new Set();
+let tournamentIntent='';
+let counts={}, wcounts={};
+let bookedPaid=new Set();    // ★ 已繳費訂單的時段（黃色不可點）
+let bookedPending=new Set(); // ★ 待確認訂單的時段（藍色可點，還原進 selSlots）
+let bookedSlots=new Set();   // ★ 相容舊邏輯（所有已報名時段聯集）
+let autoCheckTimer=null;     // ★ 自動查詢計時器
+let isOrderLocked=false;     // ★ 訂單是否已繳費鎖定
+let currentOrderId='';       // ★ 目前操作的訂單編號
 
-// 雙教練課：第二個 court 的 key alias 到第一個 court（顯示時合併為同一堂）
-const SLOT_ALIAS = {
-  's-9-1': 's-9-0',  // 09/01(二) 19:00-20:00 court5 → 同堂為 court6
-};
-
-// 將時段字串中的 key 解碼為可讀標籤，雙教練重複時段自動去重
-function decodeSlotStr(str) {
-  if (!str || str === '—') return str;
-  const seen = new Set();
-  return str.split(/\n|,/).map(s => {
-    const raw = s.trim();
-    const k = SLOT_ALIAS[raw] || raw;   // alias 替換
-    const label = SLOT_LABELS[k] || k;
-    if (seen.has(label)) return null;   // 去重：同標籤只顯示一次
-    seen.add(label);
-    return label;
-  }).filter(Boolean).join('\n');
-}
-
-let adminPass = '';
-let allRows = [];
-let curFilter = 'all';
-
-function login() {
-  const pass = document.getElementById('pass-input').value.trim();
-  if (!pass) return;
-  adminPass = pass;
-  loadData();
-}
-
-function logout() {
-  adminPass = '';
-  allRows = [];
-  document.getElementById('login-box').style.display = 'block';
-  document.getElementById('admin-body').style.display = 'none';
-  document.getElementById('pass-input').value = '';
-}
-
-async function loadData() {
-  document.getElementById('reg-list').innerHTML = '<div class="loading">載入中...</div>';
+// =============================================
+// 從 Google Sheets 讀取名額
+// =============================================
+async function loadCounts() {
+  document.getElementById('loading-bar').style.display = 'block';
   try {
-    const res = await fetch(`${GAS_URL}?action=getAdmin&pass=${encodeURIComponent(adminPass)}`);
+    const res = await fetch(GAS_URL + "?action=getCounts");
     const data = await res.json();
-    if (data.error) {
-      document.getElementById('login-err').textContent = data.error;
-      return;
-    }
-    document.getElementById('login-box').style.display = 'none';
-    document.getElementById('admin-body').style.display = 'block';
-    document.getElementById('login-err').textContent = '';
-    allRows = data.rows || [];
-    renderStats();
-    renderList();
+    counts = data.counts || {};
+    wcounts = data.wcounts || {};
   } catch(e) {
-    document.getElementById('reg-list').innerHTML = '<div class="empty">載入失敗，請重試</div>';
+    console.log('讀取名額失敗，使用本地快取');
   }
+  document.getElementById('loading-bar').style.display = 'none';
+  renderSlots();
+  document.getElementById('deadline-hint').style.display = curM === 7 ? 'block' : 'none';
 }
 
-function renderStats() {
-  const pending = allRows.filter(r => r.status === '待確認').length;
-  const paid    = allRows.filter(r => r.status === '已繳費✅').length;
-  const cancel  = allRows.filter(r => r.status === '已取消❌').length;
-  document.getElementById('cnt-pending').textContent = pending;
-  document.getElementById('cnt-paid').textContent    = paid;
-  document.getElementById('cnt-cancel').textContent  = cancel;
-}
+// =============================================
+// 渲染時段
+// =============================================
+function maxOf(cls){ return cls==='big'? MAX_B : cls==='rally'? 3 : MAX_S; }
+function sk(m,i){ return 's-'+m+'-'+i; }
+function wk(m,i){ return 'w-'+m+'-'+i; }
 
-function setFilter(f, btn) {
-  curFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderList();
-}
+function renderSlots(){
+  const filterVal = document.getElementById('level-filter').value;
 
-function renderList() {
-  const filtered = allRows.filter(r => {
-    if (curFilter === 'all') return true;
-    if (curFilter === 'pending') return r.status === '待確認';
-    if (curFilter === 'paid')    return r.status === '已繳費✅';
-    if (curFilter === 'cancel')  return r.status === '已取消❌';
-    return true;
-  }).reverse(); // 最新在最上面
+  // 09/01 雙教練合併：s-9-1（court5）由 s-9-0（court6）那張卡代表，渲染時跳過
+  const tueDoubleKeys = new Set(['s-9-1']);
 
-  if (filtered.length === 0) {
-    document.getElementById('reg-list').innerHTML = '<div class="empty">沒有符合的報名記錄</div>';
-    return;
+  const defs = (DEFS[curM] || [])
+    .map((s, origIdx) => ({...s, origIdx}))
+    .filter(s => {
+      if(tueDoubleKeys.has(sk(curM, s.origIdx))) return false;
+      if(!filterVal) return true;
+      if(s.special === 'tournament') return false;
+      if(filterVal === 'rally')    return s.type === 'thu' && s.t === '20-21';
+      if(filterVal === 'mid')      return s.type === 'thu' && s.t === '19-20';
+      if(filterVal === 'beginner') return s.type === 'tue' || s.type === 'wed' || (s.type === 'thu' && s.cls === 'small' && s.t === '19-20');
+      return true;
+    });
+  const grid = document.getElementById('slot-grid');
+
+  // 把 tournament 依日期分組，同一天合併成一個大方塊
+  function renderTournamentGroup(slots){
+    const dateLabel = slots[0].d.slice(0,5); // e.g. 12/23
+    const wd = slots[0].d.match(/\((.)\)/)?.[1] || '';
+    const rows = slots.map(s => {
+      const tl = s.t==='19-20'?'19:00–20:00':'20:00–21:00';
+      const courtBadge = s.court ? `<span class="badge" style="background:#e0f2fe;color:#075985;">第${s.court}面</span>` : '';
+      const coachBadge = s.type==='tue' ? '<span class="badge b-coach">雙教練</span>' : '<span class="badge b-coach">Adam教練</span>';
+      return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:0.5px solid #fde68a;flex-wrap:wrap;">
+        <span style="font-size:12px;font-weight:600;color:#78350f;min-width:90px;">${tl}</span>
+        ${courtBadge}${coachBadge}
+      </div>`;
+    }).join('');
+    return `<div style="grid-column:1/-1;cursor:default;background:#fffbeb;border:2px solid #fcd34d;border-radius:10px;padding:12px;opacity:0.9;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:13px;font-weight:700;color:#92400e;">${dateLabel}（${wd}）</span>
+        <span class="badge" style="background:#fef3c7;color:#92400e;">🏆 年末比賽</span>
+      </div>
+      ${rows}
+      <div style="margin-top:8px;font-size:10px;font-weight:600;color:#b45309;">年末團體賽時段・不開放報名</div>
+    </div>`;
   }
 
-  const statusClass = { '待確認':'pending', '已繳費✅':'paid', '已取消❌':'cancel' };
-  const statusBadge = { '待確認':'status-pending', '已繳費✅':'status-paid', '已取消❌':'status-cancel' };
+  // 先把 defs 分成 tournament 和一般，tournament 依日期分組
+  const groups = [];
+  let i = 0;
+  while(i < defs.length){
+    const s = defs[i];
+    if(s.special === 'tournament'){
+      const dateKey = s.d.slice(0,5);
+      const group = [];
+      while(i < defs.length && defs[i].special === 'tournament' && defs[i].d.slice(0,5) === dateKey){
+        group.push(defs[i]); i++;
+      }
+      groups.push({type:'tournament', slots:group});
+    } else {
+      groups.push({type:'normal', slot:s}); i++;
+    }
+  }
 
-  document.getElementById('reg-list').innerHTML = filtered.map(r => {
-    const sc = statusClass[r.status] || 'pending';
-    const sb = statusBadge[r.status] || 'status-pending';
-    const isPending = r.status === '待確認';
-    const isCancelled = r.status === '已取消❌';
-    // 解碼時段 key → 可讀格式
-    const slotsDisplay   = decodeSlotStr(r.slots   || '');
-    const waitlistDisplay = decodeSlotStr(r.waitlist || '');
-    return `<div class="reg-card ${sc}">
-      <div class="reg-top">
-        <div>
-          <div class="reg-name">${r.name}</div>
-          ${r.orderId ? `<div style="font-size:11px;color:#888;margin-top:2px;">${r.orderId}</div>` : ''}
-        </div>
-        <span class="reg-status ${sb}">${r.status}</span>
+  grid.innerHTML = groups.map((g) => {
+    if(g.type === 'tournament') return renderTournamentGroup(g.slots);
+    const s = g.slot;
+    const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
+
+    const key=sk(curM,s.origIdx), wkey=wk(curM,s.origIdx);
+    const max=maxOf(s.cls);
+    const cnt=counts[key]||0, wcnt=wcounts[wkey]||0;
+    const full=cnt>=max, waitFull=wcnt>=MAX_W;
+    const isSel=selSlots.has(key), isWait=waitSlots.has(wkey);
+    const isPaidBooked=!isOrderLocked && bookedPaid.has(key); // ★ 已繳費時段（黃色）
+    const price=s.cls==='big'?'$490':s.cls==='rally'?'$800':'$550';
+    const pct=Math.min(cnt/max*100,100);
+    let barCls=pct>=100?'bar-red':pct>=60?'bar-yellow':'bar-green';
+    let cardCls='slot-card', statusTxt, statusCls, clickAction;
+
+    if(!full){
+      if(isOrderLocked){
+        if(isSel){
+          cardCls+=' is-locked';
+          statusTxt='✅ 已確認';
+          statusCls='s-ok';
+        } else {
+          cardCls+=' is-full';
+          statusTxt='—';
+          statusCls='s-full';
+        }
+        clickAction='none';
+        barCls = isSel ? 'bar-green' : barCls;
+      } else if(isPaidBooked){
+        // ★ 已繳費時段 → 黃色不可點
+        cardCls+=' is-booked';
+        statusTxt='此時段已有確認訂單';
+        statusCls='s-warn';
+        barCls='bar-yellow';
+        clickAction='none';
+      } else {
+        // 正常可選（包含待確認時段，已還原進 selSlots 顯示藍色）
+        if(isSel) cardCls+=' is-sel';
+        const rem=max-cnt;
+        statusTxt=cnt===0?`可報名（0/${max}）`:`剩 ${rem} 位（${cnt}/${max}）`;
+        statusCls=cnt/max>=0.6?'s-warn':'s-ok';
+        clickAction='sel:'+key;
+      }
+    } else if(!waitFull){
+      if(isOrderLocked){
+        if(isWait){ cardCls+=' is-locked'; barCls='bar-green'; statusTxt='✅ 已確認候補'; }
+        else cardCls+=' is-full';
+        statusTxt = isWait ? '✅ 已確認候補' : '—';
+        statusCls='s-ok';
+        clickAction='none';
+      } else {
+        if(isWait){ cardCls+=' is-wait'; barCls='bar-purple'; }
+        else cardCls+=' is-full';
+        statusTxt=isWait?`已候補（${wcnt}/${MAX_W}）`:`額滿｜可候補（${wcnt}/${MAX_W}）`;
+        statusCls='s-wait';
+        clickAction='wait:'+wkey;
+      }
+    } else {
+      cardCls+=' is-full is-waitfull';
+      barCls='bar-red';
+      statusTxt=`額滿｜候補已滿`;
+      statusCls='s-full';
+      clickAction='none';
+    }
+
+    let levelBadge;
+    if(s.type==='thu' && s.t==='20-21'){
+      levelBadge='<span class="badge" style="background:#fce7f3;color:#9d174d;">對打課</span>';
+    } else if(s.type==='thu'){
+      levelBadge='<span class="badge" style="background:#dbeafe;color:#1e40af;">中階班</span>';
+    } else {
+      levelBadge='<span class="badge" style="background:#dcfce7;color:#166534;">初階班</span>';
+    }
+
+    let coachBadge='';
+    if(curM===8 && s.type==='tue'){
+      coachBadge='<span class="badge b-coach">Miguel教練</span>';
+    } else if(s.cls==='big'){
+      coachBadge='<span class="badge b-coach">雙教練</span>';
+    } else {
+      coachBadge='<span class="badge b-coach">Adam教練</span>';
+    }
+
+    // 09/01 雙教練：s-9-0 代表兩面，顯示「第5面 第6面」
+    const isDualCourt = sk(curM, s.origIdx) === 's-9-0';
+    const courtBadge = isDualCourt
+      ? '<span class="badge" style="background:#e0f2fe;color:#075985;">第5面</span><span class="badge" style="background:#e0f2fe;color:#075985;">第6面</span>'
+      : s.court ? `<span class="badge" style="background:#e0f2fe;color:#075985;">第${s.court}面</span>` : '';
+    const bookedBadge=isPaidBooked?'<span class="badge" style="background:#fef3c7;color:#92400e;">已確認</span>':'';
+
+    return `<div class="${cardCls}" data-click="${clickAction}">
+      <div class="slot-date">${s.d}</div>
+      <div class="slot-time">${timeLabel}</div>
+      <div class="badges">
+        ${courtBadge}
+        ${bookedBadge}
+        ${isPaidBooked?'':coachBadge}
+        ${levelBadge}
+        <span class="badge b-price">${price}</span>
       </div>
-      <div class="reg-info">
-        <b>LINE：</b>${r.line || '—'} ｜ <b>電話：</b>${r.phone || '—'}<br>
-        <b>程度：</b>${r.level} ｜ <b>課程費：</b>${r.fee}${r.discount !== '—' ? '（折扣 '+r.discount+'）' : ''}<br>
-        <b>堂數：</b>小班 ${r.small} 堂・大班 ${r.big} 堂・對打 ${r.rally} 堂<br>
-        <b>團體賽：</b>${r.tournament || '—'} ｜ <b>報名時間：</b>${r.time}
-      </div>
-      ${slotsDisplay ? `<div class="reg-slots"><b>正選時段：</b><br>${slotsDisplay.replace(/\n/g,'<br>')}</div>` : ''}
-      ${waitlistDisplay ? `<div class="reg-slots" style="background:#faf5ff;border-color:#e9d5ff;"><b>候補時段：</b><br>${waitlistDisplay.replace(/\n/g,'<br>')}</div>` : ''}
-      ${!isCancelled ? `<div class="reg-actions">
-        ${isPending ? `<button class="btn-confirm" onclick="confirmPayment(${r.rowIndex})">✅ 確認已繳費</button>` : '<div style="flex:1;"></div>'}
-        <button class="btn-invoice" onclick='showInvoice(${JSON.stringify(r).replace(/'/g,"&#39;")})'>📋 繳費單</button>
-        <button class="btn-cancel" onclick="cancelReg(${r.rowIndex})">${isPending ? '❌ 取消報名' : '🔄 標記取消'}</button>
-      </div>` : ''}
+      <div class="slot-bar-bg"><div class="slot-bar-fill ${barCls}" style="width:${pct}%"></div></div>
+      <div class="slot-status ${statusCls}">${statusTxt}</div>
     </div>`;
   }).join('');
-}
 
-async function confirmPayment(rowIndex) {
-  if (!window.confirm('確認這位學員已繳費？名額將正式扣除。')) return;
-  try {
-    const res = await fetch(`${GAS_URL}?action=confirm&rowIndex=${rowIndex}&pass=${encodeURIComponent(adminPass)}`);
-    const data = await res.json();
-    if (data.status === 'ok' || data.status === 'already_paid') {
-      await loadData();
-    }
-  } catch(e) { alert('操作失敗，請重試'); }
-}
-
-async function cancelReg(rowIndex) {
-  if (!window.confirm('確定要取消這筆報名？')) return;
-  try {
-    const res = await fetch(`${GAS_URL}?action=cancel&rowIndex=${rowIndex}&pass=${encodeURIComponent(adminPass)}`);
-    const data = await res.json();
-    if (data.status === 'ok') await loadData();
-  } catch(e) { alert('操作失敗，請重試'); }
-}
-
-// ── 繳費單 ─────────────────────────────────────────────
-
-let invoiceTextCache = '';
-
-function showInvoice(r) {
-  const levelMap = { 'beginner':'初階班', 'mid':'中階班', '1v1':'對打班' };
-  const levelLabel = levelMap[r.level] || r.level || '—';
-
-  const small = parseInt(r.small) || 0;
-  const big   = parseInt(r.big)   || 0;
-  const rally = parseInt(r.rally) || 0;
-  const totalClasses = small + big + rally;
-  const parts = [];
-  if (small > 0) parts.push(`小班 ${small} 堂`);
-  if (big   > 0) parts.push(`大班 ${big} 堂`);
-  if (rally > 0) parts.push(`對打 ${rally} 堂`);
-  const classCount = parts.join('・') || '—';
-
-  // 費用與折扣計算
-  const feeRaw = parseFloat(String(r.fee).replace(/[^0-9.]/g, '')) || 0;
-  const hasDiscount = totalClasses >= 6;
-  const discountAmt = hasDiscount ? Math.round(feeRaw * 0.05) : 0;
-  const finalFee    = hasDiscount ? Math.round(feeRaw * 0.95) : feeRaw;
-  const feeDisplay     = `NT$ ${feeRaw.toLocaleString()}`;
-  const discountDisplay = `- NT$ ${discountAmt.toLocaleString()}`;
-  const finalDisplay   = `NT$ ${finalFee.toLocaleString()}`;
-
-  // 團體賽資格
-  const tournamentVal = (r.tournament || '').toLowerCase();
-  const wantsTournament = tournamentVal === 'yes' || tournamentVal === 'maybe';
-
-  // 時段：解碼後轉成卡片式 HTML（含班別/教練）
-  function decodeToItems(str) {
-    if (!str || str === '—') return [];
-    const seen = new Set();
-    return str.split(/\n|,/).map(s => {
-      const raw = s.trim();
-      const k = SLOT_ALIAS[raw] || raw;
-      const info = SLOT_INFO[k];
-      if (!info) return {label: k, date: k, time: '', cls: '', coach: ''};
-      if (seen.has(info.label)) return null;
-      seen.add(info.label);
-      return info;
-    }).filter(Boolean);
-  }
-
-  const slotItems    = decodeToItems(r.slots    || '');
-  const waitItems    = decodeToItems(r.waitlist || '');
-
-  const toCards = items => items.length
-    ? items.map(s => `
-      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f1f5f9;">
-        <div style="min-width:90px;font-size:12px;font-weight:700;color:#111;">${s.date}</div>
-        <div style="min-width:90px;font-size:12px;color:#555;">${s.time}</div>
-        <div style="font-size:11px;color:#7c3aed;font-weight:600;">${s.cls}</div>
-        <div style="font-size:11px;color:#6b7280;margin-left:auto;">${s.coach}</div>
-      </div>`).join('')
-    : '<div class="inv-row"><span class="inv-val">—</span></div>';
-
-  const slotsHtml = toCards(slotItems);
-  const waitHtml  = waitItems.length ? toCards(waitItems) : null;
-
-  // 純文字（複製用）
-  const slotsTxt = slotItems.length
-    ? slotItems.map(s => `  ・${s.date} ${s.time} ${s.cls}・${s.coach}`).join('\n')
-    : '  —';
-  const tournamentTxt = hasDiscount && wantsTournament
-    ? '\n🎾 符合免費參加 12/23-24 團體賽資格！'
-    : hasDiscount && !wantsTournament
-    ? '\n（已達6堂，可免費參加 12/23-24 團體賽，如有意願請告知教練）'
-    : '';
-
-  invoiceTextCache =
-`🎾 網球課程繳費單
-━━━━━━━━━━━━━━━
-學員姓名：${r.name}
-訂單編號：${r.orderId || '—'}
-━━━━━━━━━━━━━━━
-【課程資訊】
-班別：${levelLabel}
-堂數：${classCount}（共 ${totalClasses} 堂）
-報名時段：
-${slotsTxt}
-━━━━━━━━━━━━━━━
-【費用明細】
-課程原價：${feeDisplay}${hasDiscount ? `\n95折優惠：${discountDisplay}` : ''}
-應繳總額：${finalDisplay}${tournamentTxt}
-━━━━━━━━━━━━━━━
-【轉帳資訊】
-銀行：(013) 國泰世華銀行
-帳號：068506241972
-━━━━━━━━━━━━━━━
-⚠️ 轉帳完成後請截圖傳給教練確認，謝謝！`;
-
-  document.getElementById('invoice-content').innerHTML = `
-  <div class="inv">
-    <div class="inv-hero">
-      <div class="inv-icon">🎾</div>
-      <div>
-        <div class="inv-title">網球課程繳費單</div>
-        <div class="inv-subtitle">訂單編號：${r.orderId || '—'}</div>
-      </div>
-    </div>
-    <div class="inv-block">
-      <div class="inv-block-title">學員資訊</div>
-      <div class="inv-row"><span class="inv-label">姓名</span><span class="inv-val">${r.name}</span></div>
-      <div class="inv-row"><span class="inv-label">LINE ID</span><span class="inv-val">${r.line || '—'}</span></div>
-      <div class="inv-row"><span class="inv-label">電話</span><span class="inv-val">${r.phone || '—'}</span></div>
-    </div>
-    <div class="inv-block">
-      <div class="inv-block-title">課程資訊</div>
-      <div class="inv-row"><span class="inv-label">班別</span><span class="inv-val accent">${levelLabel}</span></div>
-      <div class="inv-row"><span class="inv-label">堂數</span><span class="inv-val">${classCount}（共 ${totalClasses} 堂）</span></div>
-    </div>
-    <div class="inv-block">
-      <div class="inv-block-title">正選時段</div>
-      <div style="display:flex;gap:10px;padding:4px 0 6px;border-bottom:1.5px solid #e2e8f0;margin-bottom:2px;">
-        <div style="min-width:90px;font-size:10px;font-weight:700;color:#9ca3af;">日期</div>
-        <div style="min-width:90px;font-size:10px;font-weight:700;color:#9ca3af;">時段</div>
-        <div style="font-size:10px;font-weight:700;color:#9ca3af;">班別</div>
-        <div style="font-size:10px;font-weight:700;color:#9ca3af;margin-left:auto;">教練</div>
-      </div>
-      ${slotsHtml}
-    </div>
-    ${waitHtml ? `<div class="inv-block" style="background:#faf5ff;border:1px solid #e9d5ff;">
-      <div class="inv-block-title" style="color:#7c3aed;">候補時段</div>
-      <div style="display:flex;gap:10px;padding:4px 0 6px;border-bottom:1.5px solid #e9d5ff;margin-bottom:2px;">
-        <div style="min-width:90px;font-size:10px;font-weight:700;color:#9ca3af;">日期</div>
-        <div style="min-width:90px;font-size:10px;font-weight:700;color:#9ca3af;">時段</div>
-        <div style="font-size:10px;font-weight:700;color:#9ca3af;">班別</div>
-        <div style="font-size:10px;font-weight:700;color:#9ca3af;margin-left:auto;">教練</div>
-      </div>
-      ${waitHtml}
-    </div>` : ''}
-    <div class="inv-block">
-      <div class="inv-block-title">費用明細</div>
-      <div class="inv-row"><span class="inv-label">課程原價</span><span class="inv-val">${feeDisplay}</span></div>
-      ${hasDiscount ? `<div class="inv-row"><span class="inv-label">95折優惠</span><span class="inv-val" style="color:#16a34a;">${discountDisplay}</span></div>` : ''}
-    </div>
-    <div class="inv-total">
-      <div class="inv-total-label">應繳總額</div>
-      <div class="inv-total-amount">${finalDisplay}</div>
-    </div>
-    ${hasDiscount && wantsTournament ? `
-    <div style="background:#dcfce7;border:1.5px solid #86efac;border-radius:10px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
-      <span style="font-size:20px;">🎾</span>
-      <div>
-        <div style="font-size:12px;font-weight:700;color:#166534;">符合免費團體賽資格！</div>
-        <div style="font-size:11px;color:#15803d;margin-top:2px;">12/23–24 團體賽報名名額已為您保留</div>
-      </div>
-    </div>` : hasDiscount && !wantsTournament ? `
-    <div style="background:#fef9c3;border:1.5px solid #fde68a;border-radius:10px;padding:11px 14px;margin-bottom:10px;">
-      <div style="font-size:12px;font-weight:700;color:#92400e;">🎾 已達6堂，具備免費參加資格</div>
-      <div style="font-size:11px;color:#78350f;margin-top:3px;">12/23–24 團體賽可免費參加，如有意願請告知教練</div>
-    </div>` : ''}
-    <div class="inv-bank">
-      <div class="inv-bank-title">💳 轉帳資訊</div>
-      <div class="inv-bank-row"><span class="inv-bank-label">銀行代碼</span><span class="inv-bank-val">(013) 國泰世華</span></div>
-      <div class="inv-bank-row"><span class="inv-bank-label">帳號</span><span class="inv-bank-val">068506241972</span></div>
-    </div>
-    <div class="inv-note">
-      <b>⚠️ 注意事項</b><br>
-      轉帳完成後，請截圖並傳給教練確認，待確認後報名即完成。謝謝！
-    </div>
-  </div>`;
-
-  document.getElementById('invoice-modal').classList.add('open');
-}
-
-function closeInvoice() {
-  document.getElementById('invoice-modal').classList.remove('open');
-}
-
-function copyInvoiceText() {
-  navigator.clipboard.writeText(invoiceTextCache).then(() => {
-    const btn = document.querySelector('.btn-copy-inv');
-    const orig = btn.textContent;
-    btn.textContent = '✅ 已複製！';
-    setTimeout(() => btn.textContent = orig, 1800);
-  }).catch(() => {
-    const ta = document.createElement('textarea');
-    ta.value = invoiceTextCache;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
+  grid.querySelectorAll('.slot-card').forEach(card => {
+    card.addEventListener('click', function(){
+      const cd = this.dataset.click;
+      if(!cd || cd==='none') return;
+      const [action, key] = cd.split(':');
+      if(action==='sel'){
+        if(selSlots.has(key)) selSlots.delete(key); else selSlots.add(key);
+      } else if(action==='wait'){
+        if(waitSlots.has(key)) waitSlots.delete(key); else waitSlots.add(key);
+        renderWaitlist();
+      }
+      calcFee(); updateSelInfo(); renderSlots(); checkBtn();
+    });
   });
 }
+
+function renderWaitlist(){
+  const box = document.getElementById('waitlist-box');
+  const items = document.getElementById('waitlist-items');
+  if(waitSlots.size===0){ box.style.display='none'; return; }
+  box.style.display='block';
+  items.innerHTML = [...waitSlots].map(wkey => {
+    const parts=wkey.split('-');
+    const m=parseInt(parts[1]), i=parseInt(parts[2]);
+    const s=DEFS[m]&&DEFS[m][i];
+    if(!s) return '';
+    const wdLabel=s.type==='wed'?'週三':s.type==='thu'?'週四':'週二';
+    return `<div class="wl-item">
+      <span>${s.d} ${s.t}（${wdLabel}）</span>
+      <button class="wl-remove" data-key="${wkey}">移除</button>
+    </div>`;
+  }).join('');
+  items.querySelectorAll('.wl-remove').forEach(btn => {
+    btn.addEventListener('click', function(){
+      waitSlots.delete(this.dataset.key);
+      renderWaitlist(); updateSelInfo(); renderSlots(); checkBtn();
+    });
+  });
+}
+
+function calcFee(){
+  let small=0, big=0, rally=0;
+  for(const k of selSlots){
+    const parts=k.split('-'); const m=parseInt(parts[1]), i=parseInt(parts[2]);
+    if(DEFS[m]&&DEFS[m][i]){
+      const cls=DEFS[m][i].cls;
+      if(cls==='big') big++; else if(cls==='rally') rally++; else small++;
+    }
+  }
+  const total=small+big+rally, raw=small*550+big*490+rally*800;
+  const is10=total>=6, disc=is10?Math.round((small*550+big*490+rally*800)*0.05):0, final=raw-disc;
+  document.getElementById('fs').textContent=`${small} 堂 × $550 = $${(small*550).toLocaleString()}`;
+  document.getElementById('fb').textContent=`${big} 堂 × $490 = $${(big*490).toLocaleString()}`;
+  document.getElementById('fr').textContent=`${rally} 堂 × $800 = $${(rally*800).toLocaleString()}`;
+  document.getElementById('fc').textContent=total;
+  const fd=document.getElementById('fd');
+  if(is10){ fd.style.display='flex'; document.getElementById('fd-amt').textContent=`- $${disc.toLocaleString()}`; }
+  else fd.style.display='none';
+  document.getElementById('ft').textContent=`$${final.toLocaleString()}`;
+  document.getElementById('fg').style.display=is10?'block':'none';
+  // ★ 有選時段才顯示清除按鈕（鎖定狀態下不顯示）
+  const clearBtn=document.getElementById('btn-clear-slots');
+  if(clearBtn) clearBtn.style.display=(!isOrderLocked && (selSlots.size>0||waitSlots.size>0))?'block':'none';
+}
+
+// ★ 清除全部時段
+function clearAllSlots(){
+  if(!confirm('確定要清除所有已選時段？')) return;
+  selSlots.clear();
+  waitSlots.clear();
+  renderWaitlist(); calcFee(); updateSelInfo(); renderSlots(); checkBtn();
+}
+
+function updateSelInfo(){
+  document.getElementById('sel-info').textContent=`已選 ${selSlots.size} 個正選時段・${waitSlots.size} 個候補時段`;
+}
+
+function checkBtn(){
+  const name=document.getElementById('f-name').value.trim();
+  const line=document.getElementById('f-line').value.trim();
+  const agree=document.getElementById('agree').checked;
+  document.getElementById('submit-btn').disabled=!(name&&line&&level&&(selSlots.size>=1||waitSlots.size>=1)&&agree);
+}
+
+// =============================================
+// 事件綁定
+// =============================================
+document.getElementById('level-grid').addEventListener('click', function(e){
+  const lc=e.target.closest('.lc'); if(!lc) return;
+  document.querySelectorAll('.lc').forEach(c=>c.classList.remove('sel'));
+  lc.classList.add('sel');
+  level=lc.dataset.level;
+  // 顯示對應程度介紹
+  document.querySelectorAll('.level-desc-box').forEach(b=>b.classList.remove('show'));
+  const descEl=document.getElementById('desc-'+level);
+  if(descEl) descEl.classList.add('show');
+  checkBtn();
+});
+
+document.getElementById('month-tabs').addEventListener('click', function(e){
+  const tab=e.target.closest('.mtab'); if(!tab) return;
+  document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  curM=parseInt(tab.dataset.m);
+  renderSlots();
+  document.getElementById('deadline-hint').style.display = curM === 7 ? 'block' : 'none';
+});
+
+document.getElementById('f-name').addEventListener('input', checkBtn);
+document.getElementById('f-line').addEventListener('input', function(){
+  checkBtn();
+  clearTimeout(autoCheckTimer);
+  bookedSlots.clear();
+  const val=this.value.trim();
+  if(val.length < 3){
+    renderSlots();
+    const hintEl=document.getElementById('line-booked-hint');
+    if(hintEl) hintEl.style.display='none';
+    return;
+  }
+  autoCheckTimer=setTimeout(()=>checkExistingOrders(val), 800);
+});
+document.getElementById('agree').addEventListener('change', checkBtn);
+
+// ★ 自動查詢已有訂單
+async function checkExistingOrders(lineId){
+  try{
+    const res=await fetch(`${GAS_URL}?action=getRegistration&line=${encodeURIComponent(lineId)}`,{
+      method:'GET',redirect:'follow',headers:{'Accept':'application/json'}
+    });
+    const result=await res.json();
+    bookedPaid.clear();
+    bookedPending.clear();
+    bookedSlots.clear();
+
+    if(result.status==='ok' && result.orders){
+      result.orders.forEach(o=>{
+        if(o.isPaid){
+          (o.slots||[]).forEach(k=>{ bookedPaid.add(k); bookedSlots.add(k); });
+        } else {
+          (o.slots||[]).forEach(k=>{ bookedPending.add(k); bookedSlots.add(k); });
+        }
+      });
+
+      const el=document.getElementById('line-booked-hint');
+      if(el && bookedSlots.size>0){
+        el.style.display='block';
+        const paidCount=bookedPaid.size, pendCount=bookedPending.size;
+        let msg='找到既有訂單：';
+        if(paidCount>0) msg+=` 已確認 ${paidCount} 堂（黃色）`;
+        if(pendCount>0) msg+=` 待確認 ${pendCount} 堂（藍色可調整）`;
+        el.textContent=msg+'。';
+      } else if(el){
+        el.style.display='none';
+      }
+    } else {
+      const el=document.getElementById('line-booked-hint');
+      if(el) el.style.display='none';
+    }
+    renderSlots();
+  }catch(e){}
+}
+  
+document.getElementById('level-filter').addEventListener('change', renderSlots);
+// =============================================
+// 送出報名 → 寫入 Google Sheets（最終絕對不噴錯版）
+// =============================================
+document.getElementById('submit-btn').addEventListener('click', async function(){
+  // ★ 雙重保護：已繳費不允許送出
+  if (isOrderLocked) {
+    alert('此訂單已確認繳費，無法修改，請聯繫 Adam 教練');
+    return;
+  }
+  this.disabled = true;
+  this.textContent = '送出中...';
+  
+  const name = document.getElementById('f-name').value.trim();
+  const line = document.getElementById('f-line').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const levelMap = {beginner: '初階班', mid: '中階班', '1v1': '對打班'};
+  
+  let small = 0, big = 0, rally = 0;
+  
+  // 1. 計算堂數
+  [...selSlots].forEach(k => {
+    const parts = k.split('-'); 
+    const m = parseInt(parts[1]), i = parseInt(parts[2]);
+    const s = DEFS[m] && DEFS[m][i];
+    if (s) {
+      if (s.cls === 'big') big++; else if (s.cls === 'rally') rally++; else small++;
+    }
+  });
+
+  // 2. 核心關鍵：打包原始的「代碼字串」（用逗號隔開），傳給後端統計人數
+  const rawSlotsStr = [...selSlots].join(',');         // 例如: "s-7-0,s-7-1"
+  const rawWaitlistStr = [...waitSlots].join(',');     // 例如: "w-7-2"
+
+  const total = small + big + rally, raw = small * 550 + big * 490 + rally * 800;
+  const disc = total >= 6 ? Math.round((small * 550 + big * 490 + rally * 800) * 0.05) : 0;
+  const final = raw - disc;
+
+  // 3. 打包傳給後端的資料（Payload）
+  const payload = {
+    action: 'register',
+    name, line, phone, level,
+    slots: rawSlotsStr,        // 確保傳過去的是 s-7-0 這種代碼！
+    waitlist: rawWaitlistStr,  
+    smallCount: small, 
+    bigCount: big,
+    rallyCount: rally,
+    totalFee: final, 
+    discount: disc,
+    time: new Date().toLocaleString('zh-TW'),
+    tournamentIntent: tournamentIntent,
+    orderId: currentOrderId  // ★ 有值=修改舊單，空值=新單
+  };
+
+  try {
+    // 4. 處理網頁畫面上顯示用的中文（僅限前端顯示，不影響後端）
+    const formattedSlots = [...selSlots].map(k => {
+  const parts = k.split('-'); const m = parseInt(parts[1]), i = parseInt(parts[2]);
+  const s = DEFS[m] && DEFS[m][i];
+  if (!s) return '';
+  const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
+  let classLabel;
+  if (s.cls === 'big') classLabel = '大班初階';
+  else if (s.cls === 'rally') classLabel = '對打課';
+  else if (s.type === 'thu' && s.t === '19-20') classLabel = '小班中階';
+  else classLabel = '小班初階';
+  return `${s.d} ${timeLabel}（${classLabel}）`;
+}).filter(str => str !== '').join('<br>');
+    await fetch(GAS_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+      mode: 'no-cors'
+    });
+
+    // 顯示成功畫面
+    const formattedWaitlist = [...waitSlots].map(k => {
+      const parts = k.split('-'); const m = parseInt(parts[1]), i = parseInt(parts[2]);
+      const s = DEFS[m] && DEFS[m][i];
+      if (!s) return '';
+      const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
+      return `${s.d} ${timeLabel}`;
+    }).filter(str => str !== '').join('<br>');
+
+    document.getElementById('form-main').style.display='none';
+    document.getElementById('success-box').style.display='block';
+    document.getElementById('success-msg').innerHTML=
+      `<b>${name}</b> 你好！<br><br>`+
+      `程度：${levelMap[level]}<br>`+
+      (selSlots.size?`正選時段：<br>${formattedSlots}<br>共 ${total} 堂｜課程費 $${final.toLocaleString()}${total>=6?' (95折 -$'+disc+')':''}<br>`:'')+
+      (waitSlots.size?`<br>候補時段：<br>${formattedWaitlist}<br>`:'')+
+      `場地費 $80/堂，上課當天收取<br>`+
+      (total>=6?`🏆 已取得 12/23–24 網球團體賽免費資格！<br>`:'')+
+      `<br>教練將於 6 月底確認訂單後，透過 LINE 與您確認課程訂單＆繳費資訊 🎾`;
+  } catch(e) {
+    this.disabled=false; this.textContent='送出報名';
+    alert('送出失敗，請稍後再試或直接聯繫教練');
+  }
+});
+// =============================================
+// 老學員查詢訂單（共用邏輯，顯示訂單列表）
+// =============================================
+document.getElementById('btn-load-old').addEventListener('click', async function() {
+  const searchLine = document.getElementById('f-search-line').value.trim();
+  const msgEl = document.getElementById('search-msg');
+  if (!searchLine) { alert('請先輸入 LINE ID 或聯絡電話再點擊帶入'); return; }
+
+  this.disabled = true;
+  this.textContent = '搜尋中...';
+  msgEl.textContent = '正在比對訂單紀錄...';
+  document.getElementById('f-line').value = searchLine;
+
+  try {
+    const res = await fetch(`${GAS_URL}?action=getRegistration&line=${encodeURIComponent(searchLine)}`,{
+      method:'GET', redirect:'follow', headers:{'Accept':'application/json'}
+    });
+    if (!res.ok) throw new Error('網路回應不成功');
+    const result = await res.json();
+    bookedPaid.clear(); bookedPending.clear(); bookedSlots.clear();
+
+    if (result.status === 'ok' && result.orders && result.orders.length > 0) {
+      const orders = result.orders;
+      orders.forEach(o => {
+        if(o.isPaid) (o.slots||[]).forEach(k=>{ bookedPaid.add(k); bookedSlots.add(k); });
+        else         (o.slots||[]).forEach(k=>{ bookedPending.add(k); bookedSlots.add(k); });
+      });
+      const hintEl = document.getElementById('line-booked-hint');
+      if(hintEl && bookedSlots.size > 0){
+        hintEl.style.display = 'block';
+        const paidCount=bookedPaid.size, pendCount=bookedPending.size;
+        let msg='找到既有訂單：';
+        if(paidCount>0) msg+=` 已確認 ${paidCount} 堂（黃色）`;
+        if(pendCount>0) msg+=` 待確認 ${pendCount} 堂（藍色可調整）`;
+        hintEl.textContent = msg+'。';
+      }
+      renderSlots();
+      showOrderList(orders, msgEl);
+    } else {
+      isOrderLocked = false; currentOrderId = '';
+      const hintEl = document.getElementById('line-booked-hint');
+      if(hintEl) hintEl.style.display = 'none';
+      renderSlots();
+      msgEl.style.color = '#dc2626';
+      msgEl.textContent = '❌ 找不到此 LINE ID 的報名紀錄，請確認輸入是否正確（大小寫需一致）。';
+    }
+  } catch(e) {
+    msgEl.style.color = '#dc2626';
+    msgEl.textContent = '連線失敗或權限不足，請確認後台部署設定。';
+  } finally {
+    this.disabled = false;
+    this.textContent = '帶入舊資料';
+  }
+});
+
+// 解析 slot key → 時段詳細資料
+function slotKeyToDetail(key) {
+  const parts = key.split('-');
+  const m = parseInt(parts[1]), i = parseInt(parts[2]);
+  const s = DEFS[m] && DEFS[m][i];
+  if (!s) return null;
+  const timeLabel = s.t === '19-20' ? '19:00–20:00' : s.t === '20-21' ? '20:00–21:00' : s.t;
+  let classLabel, levelLabel, coachLabel;
+  if (s.cls === 'big')         { classLabel = '大班'; levelLabel = '初階'; }
+  else if (s.cls === 'rally')  { classLabel = '對打課'; levelLabel = '—'; }
+  else if (s.type === 'thu' && s.t === '19-20') { classLabel = '小班'; levelLabel = '中階'; }
+  else                         { classLabel = '小班'; levelLabel = '初階'; }
+  if (s.type === 'tue')        coachLabel = 'Adam + Miguel';
+  else if (s.cls === 'rally')  coachLabel = 'Miguel';
+  else                         coachLabel = 'Adam';
+  return { date: s.d, time: timeLabel, cls: classLabel, level: levelLabel, coach: coachLabel };
+}
+
+// 產生時段總表 HTML（卡片格狀）
+function buildSlotTable(slots) {
+  if (!slots || slots.length === 0) return '<div style="font-size:11px;color:#aaa;padding:8px 0;">（無時段資料）</div>';
+  const cards = slots.map(key => {
+    const d = slotKeyToDetail(key);
+    if (!d) return '';
+    return `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;">
+      <div style="font-size:12px;font-weight:700;color:#1a1a1a;">${d.date}</div>
+      <div style="font-size:11px;color:#6b7280;margin-top:1px;">${d.time}</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;">
+        <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:#eff6ff;color:#1d4ed8;">${d.cls}</span>
+        <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:#f0fdf4;color:#166534;">${d.level}</span>
+        <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:#faf5ff;color:#6b21a8;">${d.coach}</span>
+      </div>
+    </div>`;
+  }).filter(Boolean).join('');
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;">${cards}</div>`;
+}
+
+// 顯示訂單列表（展開式時段卡片）
+function showOrderList(orders, msgEl) {
+  window._pendingOrders = orders;
+  const listHtml = orders.map((o, idx) => {
+    const isPaid = o.isPaid;
+    const badge = isPaid
+      ? `<span style="background:#dcfce7;color:#166534;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;">已繳費✅</span>`
+      : `<span style="background:#fef9c3;color:#92400e;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;">待確認</span>`;
+    const action = isPaid
+      ? `<span style="font-size:11px;color:#888;">已鎖定</span>`
+      : `<button onclick="cancelOrder(${idx})" style="background:#fff;color:#dc2626;border:1.5px solid #dc2626;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;">取消訂單</button>`;
+    const panelId = `slot-panel-${idx}`;
+    const iconId = `slot-icon-${idx}`;
+    const slotCount = (o.slots||[]).length;
+    const cardsHtml = buildSlotTable(o.slots||[]);
+    return `<div style="border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:8px;background:#fff;overflow:hidden;">
+      <div onclick="toggleSlotTable('${panelId}','${iconId}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;user-select:none;">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#1a1a1a;">${o.orderId||'—'}</div>
+          <div style="font-size:11px;color:#888;margin-top:2px;">${o.fee||''}｜${slotCount} 堂
+            <span id="${iconId}" style="font-size:10px;color:#93c5fd;margin-left:4px;">▼ 點擊查看時段</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">${badge}${action}</div>
+      </div>
+      <div id="${panelId}" style="display:none;border-top:1px solid #f1f5f9;padding:10px 12px 12px;background:#f8fafc;">
+        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:7px;">已選時段（共 ${slotCount} 堂）</div>
+        ${cardsHtml}
+      </div>
+    </div>`;
+  }).join('');
+
+  msgEl.innerHTML = `<div style="margin-top:8px;">
+    <div style="font-size:12px;font-weight:700;color:#1a1a1a;margin-bottom:8px;">找到 ${orders.length} 筆訂單：</div>
+    ${listHtml}
+    <div style="font-size:11px;color:#888;margin-top:6px;">待確認訂單的時段已顯示為藍色，可直接調整後送出新訂單。</div>
+  </div>`;
+}
+
+// 展開／收合時段卡片
+function toggleSlotTable(panelId, iconId) {
+  const panel = document.getElementById(panelId);
+  const icon  = document.getElementById(iconId);
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (icon) icon.textContent = isOpen ? '▼ 點擊查看時段' : '▲ 收合';
+}
+
+// 帶入待確認訂單時段（還原進 selSlots 顯示藍色）
+function loadOrderById(idx) {
+  const o = window._pendingOrders && window._pendingOrders[idx];
+  if (!o || o.isPaid) return;
+  isOrderLocked = false;
+  currentOrderId = o.orderId || '';
+  (o.slots||[]).forEach(k => selSlots.add(k));
+  renderWaitlist(); calcFee(); updateSelInfo(); renderSlots(); checkBtn();
+}
+
+// ★ 取消訂單
+async function cancelOrder(idx) {
+  const o = window._pendingOrders && window._pendingOrders[idx];
+  if (!o) return;
+  if (!confirm(`確定要取消訂單 ${o.orderId||''}？取消後需重新下訂。`)) return;
+
+  try {
+    const res = await fetch(`${GAS_URL}?action=cancel&rowIndex=${o.rowIndex}&pass=adam2026`);
+    const data = await res.json();
+    if (data.status === 'ok') {
+      // 從列表移除並更新 bookedSlots
+      window._pendingOrders.splice(idx, 1);
+      bookedPending.clear(); bookedPaid.clear(); bookedSlots.clear();
+      window._pendingOrders.forEach(ord => {
+        if(ord.isPaid) (ord.slots||[]).forEach(k=>{ bookedPaid.add(k); bookedSlots.add(k); });
+        else           (ord.slots||[]).forEach(k=>{ bookedPending.add(k); bookedSlots.add(k); });
+      });
+      // 清除已取消訂單的 selSlots
+      (o.slots||[]).forEach(k => selSlots.delete(k));
+      renderWaitlist(); calcFee(); updateSelInfo(); renderSlots(); checkBtn();
+      const msgEl = document.getElementById('search-msg');
+      if(window._pendingOrders.length > 0){
+        showOrderList(window._pendingOrders, msgEl);
+      } else {
+        msgEl.innerHTML = `<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:12px;color:#166534;">✅ 訂單已取消，可重新選擇時段下訂。</div>`;
+      }
+    } else {
+      alert('取消失敗，請稍後再試');
+    }
+  } catch(e) { alert('取消失敗，請稍後再試'); }
+}
+
+// 團體賽報名意願
+document.getElementById('tournament-opts').addEventListener('click', function(e){
+  const opt = e.target.closest('.tournament-opt');
+  if(!opt) return;
+  tournamentIntent = opt.dataset.val;
+  document.querySelectorAll('.tournament-opt').forEach(o => {
+    o.style.borderColor='#e2e8f0';
+    o.style.background='#fff';
+    o.style.color='#1a1a1a';
+  });
+  opt.style.borderColor='#1d4ed8';
+  opt.style.background='#dbeafe';
+  opt.style.color='#1d4ed8';
+});
+
+// 初始化
+loadCounts();
 </script>
+<div style="text-align:center;padding:2rem 1rem 3rem;color:#888;font-size:12px;line-height:2;">
+  <div style="font-size:16px;font-weight:700;color:#1d4ed8;margin-bottom:6px;">🎾 Adam 網球教學</div>
+  <div>📍 中正河濱公園網球場</div>
+  <div>📱 LINE ID：<a href="https://line.me/ti/p/~0958357747" style="color:#06b6d4;text-decoration:none;font-weight:600;">0958357747</a></div>
+  <div style="margin-top:8px;font-size:11px;color:#bbb;">© 2026 Adam Tennis</div>
+</div>
 </body>
 </html>
