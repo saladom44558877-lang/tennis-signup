@@ -1,4 +1,90 @@
-<!DOCTYPE html>
+// ── 時段完整資訊（與 index.html DEFS 完全對應）──
+const SLOT_INFO = {
+  's-7-0': {label:'07/01(三) 20:00-21:00', date:'07/01(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
+  's-7-1': {label:'07/02(四) 19:00-20:00', date:'07/02(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-7-2': {label:'07/02(四) 20:00-21:00', date:'07/02(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-7-3': {label:'07/08(三) 19:00-20:00', date:'07/08(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-7-4': {label:'07/08(三) 20:00-21:00', date:'07/08(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
+  's-7-5': {label:'07/15(三) 19:00-20:00', date:'07/15(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-7-6': {label:'07/15(三) 20:00-21:00', date:'07/15(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
+  's-7-7': {label:'07/22(三) 19:00-20:00', date:'07/22(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-7-8': {label:'07/23(四) 19:00-20:00', date:'07/23(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-7-9': {label:'07/29(三) 19:00-20:00', date:'07/29(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-7-10':{label:'07/29(三) 20:00-21:00', date:'07/29(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
+  's-7-11':{label:'07/30(四) 19:00-20:00', date:'07/30(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-7-12':{label:'07/30(四) 20:00-21:00', date:'07/30(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-8-0': {label:'08/04(二) 20:00-21:00', date:'08/04(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Miguel'},
+  's-8-1': {label:'08/05(三) 19:00-20:00', date:'08/05(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-8-2': {label:'08/05(三) 20:00-21:00', date:'08/05(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
+  's-8-3': {label:'08/06(四) 20:00-21:00', date:'08/06(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-8-4': {label:'08/11(二) 20:00-21:00', date:'08/11(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Miguel'},
+  's-8-5': {label:'08/12(三) 20:00-21:00', date:'08/12(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
+  's-8-6': {label:'08/13(四) 19:00-20:00', date:'08/13(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-8-7': {label:'08/18(二) 19:00-20:00', date:'08/18(二)', time:'19:00-20:00', cls:'小班・初階', coach:'Miguel'},
+  's-8-8': {label:'08/18(二) 20:00-21:00', date:'08/18(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Miguel'},
+  's-8-9': {label:'08/25(二) 19:00-20:00', date:'08/25(二)', time:'19:00-20:00', cls:'小班・初階', coach:'Miguel'},
+  's-8-10':{label:'08/25(二) 20:00-21:00', date:'08/25(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Miguel'},
+  's-8-11':{label:'08/26(三) 20:00-21:00', date:'08/26(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
+  's-8-12':{label:'08/27(四) 20:00-21:00', date:'08/27(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-9-0': {label:'09/01(二) 19:00-20:00', date:'09/01(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
+  's-9-1': {label:'09/01(二) 19:00-20:00', date:'09/01(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
+  's-9-2': {label:'09/02(三) 19:00-20:00', date:'09/02(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-9-3': {label:'09/03(四) 19:00-20:00', date:'09/03(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-9-4': {label:'09/03(四) 20:00-21:00', date:'09/03(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-9-5': {label:'09/08(二) 20:00-21:00', date:'09/08(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
+  's-9-6': {label:'09/10(四) 19:00-20:00', date:'09/10(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-9-7': {label:'09/10(四) 20:00-21:00', date:'09/10(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-9-8': {label:'09/15(二) 19:00-20:00', date:'09/15(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
+  's-9-9': {label:'09/15(二) 20:00-21:00', date:'09/15(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
+  's-9-10':{label:'09/16(三) 19:00-20:00', date:'09/16(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-9-11':{label:'09/16(三) 20:00-21:00', date:'09/16(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
+  's-9-12':{label:'09/17(四) 19:00-20:00', date:'09/17(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-9-13':{label:'09/17(四) 20:00-21:00', date:'09/17(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-9-14':{label:'09/23(三) 20:00-21:00', date:'09/23(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
+  's-9-15':{label:'09/24(四) 19:00-20:00', date:'09/24(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-9-16':{label:'09/24(四) 20:00-21:00', date:'09/24(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-9-17':{label:'09/30(三) 19:00-20:00', date:'09/30(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-9-18':{label:'09/30(三) 20:00-21:00', date:'09/30(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
+  's-10-0':{label:'10/01(四) 19:00-20:00', date:'10/01(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-10-1':{label:'10/06(二) 19:00-20:00', date:'10/06(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
+  's-10-2':{label:'10/07(三) 19:00-20:00', date:'10/07(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-10-3':{label:'10/08(四) 19:00-20:00', date:'10/08(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-10-4':{label:'10/08(四) 20:00-21:00', date:'10/08(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-10-5':{label:'10/14(三) 19:00-20:00', date:'10/14(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-10-6':{label:'10/15(四) 19:00-20:00', date:'10/15(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-10-7':{label:'10/20(二) 20:00-21:00', date:'10/20(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
+  's-10-8':{label:'10/22(四) 19:00-20:00', date:'10/22(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-10-9':{label:'10/27(二) 20:00-21:00', date:'10/27(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
+  's-10-10':{label:'10/29(四) 19:00-20:00',date:'10/29(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-11-0':{label:'11/03(二) 19:00-20:00', date:'11/03(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
+  's-11-1':{label:'11/04(三) 20:00-21:00', date:'11/04(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
+  's-11-2':{label:'11/12(四) 20:00-21:00', date:'11/12(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-11-3':{label:'11/17(二) 19:00-20:00', date:'11/17(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
+  's-11-4':{label:'11/17(二) 20:00-21:00', date:'11/17(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
+  's-11-5':{label:'11/19(四) 20:00-21:00', date:'11/19(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-11-6':{label:'11/24(二) 20:00-21:00', date:'11/24(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
+  's-12-0':{label:'12/02(三) 19:00-20:00', date:'12/02(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-12-1':{label:'12/02(三) 20:00-21:00', date:'12/02(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
+  's-12-2':{label:'12/03(四) 20:00-21:00', date:'12/03(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-12-3':{label:'12/09(三) 19:00-20:00', date:'12/09(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-12-4':{label:'12/10(四) 20:00-21:00', date:'12/10(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-12-5':{label:'12/16(三) 19:00-20:00', date:'12/16(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-12-6':{label:'12/17(四) 19:00-20:00', date:'12/17(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-12-7':{label:'12/17(四) 20:00-21:00', date:'12/17(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-12-8':{label:'12/23(三) 19:00-20:00', date:'12/23(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-12-9':{label:'12/23(三) 19:00-20:00', date:'12/23(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-12-10':{label:'12/23(三) 19:00-20:00',date:'12/23(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-12-11':{label:'12/24(四) 19:00-20:00',date:'12/24(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-12-12':{label:'12/24(四) 19:00-20:00',date:'12/24(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-12-13':{label:'12/24(四) 20:00-21:00',date:'12/24(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-12-14':{label:'12/24(四) 20:00-21:00',date:'12/24(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
+  's-12-15':{label:'12/30(三) 19:00-20:00',date:'12/30(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-12-16':{label:'12/31(四) 19:00-20:00',date:'12/31(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+};
+// 向下相容：後台卡片顯示用
+const SLOT_LABELS = Object.fromEntries(Object.entries(SLOT_INFO).map(([k,v])=>[k,v.label]));
+
+// 雙教練課<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -66,19 +152,24 @@
     .btn-invoice { flex: 1; padding: 9px; background: #fff; color: #7c3aed; border: 1.5px solid #7c3aed; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
     .btn-invoice:hover { background: #f5f3ff; }
 
-    /* Modal */
+    /* Modal 遮罩 */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 999; align-items: center; justify-content: center; padding: 1rem; }
     .modal-overlay.open { display: flex; }
     .modal-box { background: #fff; border-radius: 16px; width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,.25); }
+
+    /* Modal header */
     .modal-hd { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; background: #fff; z-index: 1; border-radius: 16px 16px 0 0; }
-    .modal-hd-title { font-size: 14px; font-weight: 700; }
-    .modal-close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: #aaa; }
+    .modal-hd-title { font-size: 14px; font-weight: 700; color: #1a1a1a; }
+    .modal-close { background: none; border: none; font-size: 22px; line-height: 1; cursor: pointer; color: #aaa; padding: 0 2px; }
     .modal-close:hover { color: #555; }
+
+    /* 繳費單本體 */
     .inv { padding: 18px; }
     .inv-hero { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
     .inv-icon { width: 44px; height: 44px; background: linear-gradient(135deg,#4f46e5,#7c3aed); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
     .inv-title { font-size: 16px; font-weight: 800; color: #111; }
     .inv-subtitle { font-size: 11px; color: #888; margin-top: 2px; }
+
     .inv-block { background: #f8fafc; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
     .inv-block-title { font-size: 10px; font-weight: 700; color: #6b7280; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 9px; }
     .inv-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; margin-bottom: 6px; }
@@ -86,21 +177,29 @@
     .inv-label { color: #6b7280; flex-shrink: 0; margin-right: 8px; }
     .inv-val { font-weight: 600; color: #111; text-align: right; }
     .inv-val.accent { color: #7c3aed; }
+
     .inv-total { background: linear-gradient(135deg,#4f46e5,#7c3aed); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     .inv-total-label { font-size: 13px; color: rgba(255,255,255,.85); font-weight: 600; }
     .inv-total-amount { font-size: 24px; font-weight: 800; color: #fff; }
+
     .inv-bank { background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
     .inv-bank-title { font-size: 10px; font-weight: 700; color: #1d4ed8; letter-spacing: .08em; margin-bottom: 9px; }
     .inv-bank-row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 6px; }
     .inv-bank-row:last-child { margin-bottom: 0; }
     .inv-bank-label { color: #3b82f6; }
     .inv-bank-val { font-weight: 700; color: #1e3a8a; font-family: 'Courier New', monospace; letter-spacing: .04em; }
+
     .inv-note { background: #fef9c3; border-radius: 8px; padding: 10px 13px; font-size: 12px; color: #78350f; line-height: 1.7; }
+    .inv-note b { color: #92400e; }
+
+    /* Modal footer */
     .modal-ft { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid #f1f5f9; position: sticky; bottom: 0; background: #fff; border-radius: 0 0 16px 16px; }
     .modal-ft button { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; }
     .btn-copy-inv { background: #f1f5f9; color: #374151; }
     .btn-copy-inv:hover { background: #e2e8f0; }
     .btn-print-inv { background: linear-gradient(135deg,#4f46e5,#7c3aed); color: #fff; }
+    .btn-print-inv:hover { opacity: .9; }
+
     @media print {
       body > *:not(#invoice-modal) { display: none !important; }
       #invoice-modal { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
@@ -110,21 +209,6 @@
   </style>
 </head>
 <body>
-
-<!-- 繳費單 Modal -->
-<div class="modal-overlay" id="invoice-modal" onclick="if(event.target===this)closeInvoice()">
-  <div class="modal-box">
-    <div class="modal-hd">
-      <div class="modal-hd-title">📋 繳費單</div>
-      <button class="modal-close" onclick="closeInvoice()">×</button>
-    </div>
-    <div id="invoice-content"></div>
-    <div class="modal-ft">
-      <button class="btn-copy-inv" onclick="copyInvoiceText()">📋 複製文字</button>
-      <button class="btn-print-inv" onclick="window.print()">🖨️ 列印</button>
-    </div>
-  </div>
-</div>
 <div class="container">
 
   <!-- 登入 -->
@@ -165,112 +249,24 @@
 
 </div>
 
+<!-- 繳費單 Modal -->
+<div class="modal-overlay" id="invoice-modal" onclick="if(event.target===this)closeInvoice()">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <div class="modal-hd-title">📋 繳費單</div>
+      <button class="modal-close" onclick="closeInvoice()">×</button>
+    </div>
+    <div id="invoice-content"></div>
+    <div class="modal-ft">
+      <button class="btn-copy-inv" onclick="copyInvoiceText()">📋 複製文字</button>
+      <button class="btn-print-inv" onclick="window.print()">🖨️ 列印</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ⚙️ 改成你的 Apps Script 網址
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxddtd_CFTtvDCBd1aLe9ve7MJ_tVLG-5Uy3XLyzL_DQjHgpElpcTPrFzZ6mDY90SzeoQ/exec";
-
-// ── 時段 key → 可讀標籤（與 index.html DEFS 完全對應）──
-const SLOT_LABELS = {
-  's-7-0':'07/01(三) 20:00-21:00',
-  's-7-1':'07/02(四) 19:00-20:00',
-  's-7-2':'07/02(四) 20:00-21:00',
-  's-7-3':'07/08(三) 19:00-20:00',
-  's-7-4':'07/08(三) 20:00-21:00',
-  's-7-5':'07/15(三) 19:00-20:00',
-  's-7-6':'07/15(三) 20:00-21:00',
-  's-7-7':'07/22(三) 19:00-20:00',
-  's-7-8':'07/23(四) 19:00-20:00',
-  's-7-9':'07/29(三) 19:00-20:00',
-  's-7-10':'07/29(三) 20:00-21:00',
-  's-7-11':'07/30(四) 19:00-20:00',
-  's-7-12':'07/30(四) 20:00-21:00',
-  's-8-0':'08/04(二) 20:00-21:00',
-  's-8-1':'08/05(三) 19:00-20:00',
-  's-8-2':'08/05(三) 20:00-21:00',
-  's-8-3':'08/06(四) 20:00-21:00',
-  's-8-4':'08/11(二) 20:00-21:00',
-  's-8-5':'08/12(三) 20:00-21:00',
-  's-8-6':'08/13(四) 19:00-20:00',
-  's-8-7':'08/18(二) 19:00-20:00',
-  's-8-8':'08/18(二) 20:00-21:00',  // ← 補回來
-  's-8-9':'08/25(二) 19:00-20:00',  // ← 原本是 s-8-10
-  's-8-10':'08/25(二) 20:00-21:00', // ← 原本是 s-8-11
-  's-8-11':'08/26(三) 20:00-21:00', // ← 原本是 s-8-12
-  's-8-12':'08/27(四) 20:00-21:00', // ← 原本是 s-8-13
-  's-9-0':'09/01(二) 19:00-20:00',
-  's-9-1':'09/01(二) 19:00-20:00',
-  's-9-2':'09/02(三) 19:00-20:00',
-  's-9-3':'09/03(四) 19:00-20:00',
-  's-9-4':'09/03(四) 20:00-21:00',
-  's-9-5':'09/08(二) 20:00-21:00',
-  's-9-6':'09/10(四) 19:00-20:00',
-  's-9-7':'09/10(四) 20:00-21:00',
-  's-9-8':'09/15(二) 19:00-20:00',
-  's-9-9':'09/15(二) 20:00-21:00',
-  's-9-10':'09/16(三) 19:00-20:00',
-  's-9-11':'09/16(三) 20:00-21:00',
-  's-9-12':'09/17(四) 19:00-20:00',
-  's-9-13':'09/17(四) 20:00-21:00',
-  's-9-14':'09/23(三) 20:00-21:00',
-  's-9-15':'09/24(四) 19:00-20:00',
-  's-9-16':'09/24(四) 20:00-21:00',
-  's-9-17':'09/30(三) 19:00-20:00',
-  's-9-18':'09/30(三) 20:00-21:00',
-  's-10-0':'10/01(四) 19:00-20:00',
-  's-10-1':'10/06(二) 19:00-20:00',
-  's-10-2':'10/07(三) 19:00-20:00',
-  's-10-3':'10/08(四) 19:00-20:00',
-  's-10-4':'10/08(四) 20:00-21:00',
-  's-10-5':'10/14(三) 19:00-20:00',
-  's-10-6':'10/15(四) 19:00-20:00',
-  's-10-7':'10/20(二) 20:00-21:00',
-  's-10-8':'10/22(四) 19:00-20:00',
-  's-10-9':'10/27(二) 20:00-21:00',
-  's-10-10':'10/29(四) 19:00-20:00',
-  's-11-0':'11/03(二) 19:00-20:00',
-  's-11-1':'11/04(三) 20:00-21:00',
-  's-11-2':'11/12(四) 20:00-21:00',
-  's-11-3':'11/17(二) 19:00-20:00',
-  's-11-4':'11/17(二) 20:00-21:00',
-  's-11-5':'11/19(四) 20:00-21:00',
-  's-11-6':'11/24(二) 20:00-21:00',
-  's-12-0':'12/02(三) 19:00-20:00',
-  's-12-1':'12/02(三) 20:00-21:00',
-  's-12-2':'12/03(四) 20:00-21:00',
-  's-12-3':'12/09(三) 19:00-20:00',
-  's-12-4':'12/10(四) 20:00-21:00',
-  's-12-5':'12/16(三) 19:00-20:00',
-  's-12-6':'12/17(四) 19:00-20:00',
-  's-12-7':'12/17(四) 20:00-21:00',
-  's-12-8':'12/23(三) 19:00-20:00',
-  's-12-9':'12/23(三) 19:00-20:00',
-  's-12-10':'12/23(三) 19:00-20:00',
-  's-12-11':'12/24(四) 19:00-20:00',
-  's-12-12':'12/24(四) 19:00-20:00',
-  's-12-13':'12/24(四) 20:00-21:00',
-  's-12-14':'12/24(四) 20:00-21:00',
-  's-12-15':'12/30(三) 19:00-20:00',
-  's-12-16':'12/31(四) 19:00-20:00'
-};
-
-// 雙教練課：第二個 court 的 key alias 到第一個 court（顯示時合併為同一堂）
-const SLOT_ALIAS = {
-  's-9-1': 's-9-0',  // 09/01(二) 19:00-20:00 court5 → 同堂為 court6
-};
-
-// 將時段字串中的 key 解碼為可讀標籤，雙教練重複時段自動去重
-function decodeSlotStr(str) {
-  if (!str || str === '—') return str;
-  const seen = new Set();
-  return str.split(/\n|,/).map(s => {
-    const raw = s.trim();
-    const k = SLOT_ALIAS[raw] || raw;   // alias 替換
-    const label = SLOT_LABELS[k] || k;
-    if (seen.has(label)) return null;   // 去重：同標籤只顯示一次
-    seen.add(label);
-    return label;
-  }).filter(Boolean).join('\n');
-}
 
 let adminPass = '';
 let allRows = [];
@@ -349,9 +345,6 @@ function renderList() {
     const sb = statusBadge[r.status] || 'status-pending';
     const isPending = r.status === '待確認';
     const isCancelled = r.status === '已取消❌';
-    // 解碼時段 key → 可讀格式
-    const slotsDisplay   = decodeSlotStr(r.slots   || '');
-    const waitlistDisplay = decodeSlotStr(r.waitlist || '');
     return `<div class="reg-card ${sc}">
       <div class="reg-top">
         <div>
@@ -366,8 +359,8 @@ function renderList() {
         <b>堂數：</b>小班 ${r.small} 堂・大班 ${r.big} 堂・對打 ${r.rally} 堂<br>
         <b>團體賽：</b>${r.tournament || '—'} ｜ <b>報名時間：</b>${r.time}
       </div>
-      ${slotsDisplay ? `<div class="reg-slots"><b>正選時段：</b><br>${slotsDisplay.replace(/\n/g,'<br>')}</div>` : ''}
-      ${waitlistDisplay ? `<div class="reg-slots" style="background:#faf5ff;border-color:#e9d5ff;"><b>候補時段：</b><br>${waitlistDisplay.replace(/\n/g,'<br>')}</div>` : ''}
+      ${r.slots && r.slots !== '—' ? `<div class="reg-slots"><b>正選時段：</b><br>${r.slots}</div>` : ''}
+      ${r.waitlist && r.waitlist !== '—' ? `<div class="reg-slots" style="background:#faf5ff;border-color:#e9d5ff;"><b>候補時段：</b><br>${r.waitlist}</div>` : ''}
       ${!isCancelled ? `<div class="reg-actions">
         ${isPending ? `<button class="btn-confirm" onclick="confirmPayment(${r.rowIndex})">✅ 確認已繳費</button>` : '<div style="flex:1;"></div>'}
         <button class="btn-invoice" onclick='showInvoice(${JSON.stringify(r).replace(/'/g,"&#39;")})'>📋 繳費單</button>
@@ -397,7 +390,7 @@ async function cancelReg(rowIndex) {
   } catch(e) { alert('操作失敗，請重試'); }
 }
 
-// ── 繳費單 ─────────────────────────────────────────────
+// ── 繳費單相關 ──────────────────────────────────────
 
 let invoiceTextCache = '';
 
@@ -420,28 +413,61 @@ function showInvoice(r) {
   const hasDiscount = totalClasses >= 6;
   const discountAmt = hasDiscount ? Math.round(feeRaw * 0.05) : 0;
   const finalFee    = hasDiscount ? Math.round(feeRaw * 0.95) : feeRaw;
-  const feeDisplay     = `NT$ ${feeRaw.toLocaleString()}`;
+  const feeDisplay      = `NT$ ${feeRaw.toLocaleString()}`;
   const discountDisplay = `- NT$ ${discountAmt.toLocaleString()}`;
-  const finalDisplay   = `NT$ ${finalFee.toLocaleString()}`;
+  const finalDisplay    = `NT$ ${finalFee.toLocaleString()}`;
 
   // 團體賽資格
-  const tournamentVal = (r.tournament || '').toLowerCase();
+  const tournamentVal   = (r.tournament || '').toLowerCase();
   const wantsTournament = tournamentVal === 'yes' || tournamentVal === 'maybe';
 
-  // 時段：解碼後轉成 HTML 清單
-  const rawSlots    = decodeSlotStr(r.slots    || '');
-  const rawWaitlist = decodeSlotStr(r.waitlist || '');
-  const toRows = str => str
-    ? str.split('\n').filter(Boolean)
-        .map(s => `<div class="inv-row"><span class="inv-label">・</span><span class="inv-val">${s}</span></div>`).join('')
+  // 時段：解碼成物件陣列，含班別/教練
+  // 反查表：中文標籤 → SLOT_INFO 物件（因為 Sheets 存的是中文字串）
+  const SLOT_BY_LABEL = {};
+  Object.values(SLOT_INFO).forEach(v => { if (!SLOT_BY_LABEL[v.label]) SLOT_BY_LABEL[v.label] = v; });
+
+  function decodeToItems(str) {
+    if (!str || str === '—') return [];
+    const seen = new Set();
+    return str.split(/\n|,/).map(s => {
+      const raw  = s.trim();
+      // 先試 key 查法（s-9-0），再試中文標籤反查（09/01(二) 19:00-20:00）
+      const k    = SLOT_ALIAS[raw] || raw;
+      const info = SLOT_INFO[k] || SLOT_BY_LABEL[raw];
+      if (!info) return { label: raw, date: raw, time: '', cls: '', coach: '' };
+      if (seen.has(info.label)) return null;
+      seen.add(info.label);
+      return info;
+    }).filter(Boolean);
+  }
+
+  const slotItems = decodeToItems(r.slots    || '');
+  const waitItems = decodeToItems(r.waitlist || '');
+
+  const toCards = items => items.length
+    ? `<div style="display:flex;gap:8px;padding:3px 0 6px;border-bottom:1.5px solid #e2e8f0;margin-bottom:2px;">
+        <div style="min-width:76px;font-size:10px;font-weight:700;color:#9ca3af;">日期</div>
+        <div style="min-width:88px;font-size:10px;font-weight:700;color:#9ca3af;">時段</div>
+        <div style="font-size:10px;font-weight:700;color:#9ca3af;flex:1;">班別</div>
+        <div style="font-size:10px;font-weight:700;color:#9ca3af;">教練</div>
+      </div>` +
+      items.map(s => `
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:12px;">
+        <div style="min-width:76px;font-weight:700;color:#111;">${s.date}</div>
+        <div style="min-width:88px;color:#555;">${s.time}</div>
+        <div style="color:#7c3aed;font-weight:600;flex:1;">${s.cls}</div>
+        <div style="color:#6b7280;white-space:nowrap;">${s.coach}</div>
+      </div>`).join('')
     : '<div class="inv-row"><span class="inv-val">—</span></div>';
-  const slotsHtml   = toRows(rawSlots);
-  const waitHtml    = rawWaitlist ? toRows(rawWaitlist) : null;
+
+  const slotsHtml = toCards(slotItems);
+  const waitHtml  = waitItems.length ? toCards(waitItems) : null;
 
   // 純文字（複製用）
-  const slotsTxt = rawSlots
-    ? rawSlots.split('\n').map(s => '  ・' + s).join('\n')
+  const slotsTxt = slotItems.length
+    ? slotItems.map(s => `  ・${s.date} ${s.time} ${s.cls}・${s.coach}`).join('\n')
     : '  —';
+
   const tournamentTxt = hasDiscount && wantsTournament
     ? '\n🎾 符合免費參加 12/23-24 團體賽資格！'
     : hasDiscount && !wantsTournament
@@ -532,7 +558,6 @@ ${slotsTxt}
 
   document.getElementById('invoice-modal').classList.add('open');
 }
-
 function closeInvoice() {
   document.getElementById('invoice-modal').classList.remove('open');
 }
@@ -544,6 +569,7 @@ function copyInvoiceText() {
     btn.textContent = '✅ 已複製！';
     setTimeout(() => btn.textContent = orig, 1800);
   }).catch(() => {
+    // fallback
     const ta = document.createElement('textarea');
     ta.value = invoiceTextCache;
     document.body.appendChild(ta);
