@@ -607,7 +607,7 @@ function renderSlots(){
       if(s.special === 'tournament') return false;
       if(filterVal === 'rally')    return s.type === 'thu' && s.t === '20-21';
       if(filterVal === 'mid')      return s.type === 'thu' && s.t === '19-20';
-      if(filterVal === 'beginner') return s.type === 'tue' || s.type === 'wed' || (s.type === 'thu' && s.cls === 'small' && s.t === '19-20');
+      if(filterVal === 'beginner') return s.type === 'tue' || s.type === 'wed';
       return true;
     });
   const grid = document.getElementById('slot-grid');
@@ -850,10 +850,14 @@ document.getElementById('level-grid').addEventListener('click', function(e){
   document.querySelectorAll('.lc').forEach(c=>c.classList.remove('sel'));
   lc.classList.add('sel');
   level=lc.dataset.level;
+  // 同步更新下拉選單，讓 renderSlots() 正確過濾時段
+  const filterMap = { 'beginner':'beginner', 'mid':'mid', '1v1':'rally' };
+  document.getElementById('level-filter').value = filterMap[level] || '';
   // 顯示對應程度介紹
   document.querySelectorAll('.level-desc-box').forEach(b=>b.classList.remove('show'));
   const descEl=document.getElementById('desc-'+level);
   if(descEl) descEl.classList.add('show');
+  renderSlots();
   checkBtn();
 });
 
