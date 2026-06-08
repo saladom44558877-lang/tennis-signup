@@ -242,19 +242,23 @@
     .os-gift { background: #dcfce7; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #166534; margin-top: 8px; font-weight: 600; }
 
     /* ── 程度自評表 ── */
-    .skill-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
-    .skill-table td { padding: 8px 4px; vertical-align: middle; }
-    .skill-table td:first-child { font-size: 13px; color: #374151; font-weight: 500; width: 56px; }
-    .star-row { display: flex; gap: 6px; }
-    .star {
-      font-size: 24px; cursor: pointer; line-height: 1;
-      transition: transform .15s;
-      color: #d1d5db;
-      user-select: none;
-    }
-    .star:hover { transform: scale(1.2); }
-    .star.lit { color: #f59e0b; }
-    .skill-hint { font-size: 10px; color: #9ca3af; min-width: 60px; padding-left: 6px; }
+    .sk-deco-tl{position:absolute;top:-18px;left:-18px;font-size:64px;opacity:.06;transform:rotate(-20deg);pointer-events:none;}
+    .sk-deco-br{position:absolute;bottom:-22px;right:-14px;font-size:80px;opacity:.05;transform:rotate(15deg);pointer-events:none;}
+    .sk-header{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+    .sk-header-icon{font-size:18px;}
+    .sk-header-title{font-size:13px;font-weight:500;color:#1d4ed8;letter-spacing:.04em;}
+    .sk-sub{font-size:11px;color:#94a3b8;margin-bottom:16px;line-height:1.7;padding-left:26px;}
+    .sk-body{display:flex;flex-direction:column;gap:0;}
+    .sk-row{display:flex;align-items:center;gap:10px;padding:9px 0;}
+    .sk-name{font-size:13px;font-weight:500;width:32px;flex-shrink:0;color:#94a3b8;transition:color .25s;}
+    .sk-segs{display:flex;gap:3px;flex:1;user-select:none;touch-action:pan-y;}
+    .sk-seg{flex:1;padding:8px 0;border-radius:5px;border:none;font-size:11px;font-weight:500;cursor:pointer;pointer-events:none;background:#f1f5f9;color:#94a3b8;transition:background .1s,color .1s,transform .1s;}
+    .sk-badge{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#fff;flex-shrink:0;opacity:0;transform:scale(.4);transition:opacity .3s,transform .3s cubic-bezier(.34,1.56,.64,1);}
+    .sk-badge.show{opacity:1;transform:scale(1);}
+    .sk-hint{font-size:11px;padding-left:42px;min-height:14px;color:#94a3b8;opacity:0;transition:opacity .25s,color .25s;padding-bottom:8px;border-bottom:1px solid #f1f5f9;}
+    .sk-hint.show{opacity:1;}
+    .sk-item:last-child .sk-hint{border-bottom:none;}
+    .sk-radar-wrap{display:flex;justify-content:center;margin-top:16px;padding-top:14px;border-top:1px solid #f1f5f9;}
 
     /* ── 導航按鈕 ── */
     .nav-row {
@@ -445,66 +449,18 @@
   ══════════════════════════════════ -->
   <div class="step-page" id="step-2">
     <!-- 程度自評表 -->
-    <div class="card">
-      <div class="sec-label">上課前程度自評（選填）</div>
-      <p style="font-size:12px;color:#888;margin-bottom:14px;line-height:1.7;">幫助教練在第一堂課前了解你的程度，給自己一個客觀的評分吧！</p>
-      <table class="skill-table" id="skill-table">
-        <tr data-skill="forehand">
-          <td>正拍</td>
-          <td><div class="star-row">
-            <span class="star" data-v="1">★</span>
-            <span class="star" data-v="2">★</span>
-            <span class="star" data-v="3">★</span>
-            <span class="star" data-v="4">★</span>
-            <span class="star" data-v="5">★</span>
-          </div></td>
-          <td class="skill-hint" id="hint-forehand">未評分</td>
-        </tr>
-        <tr data-skill="backhand">
-          <td>反拍</td>
-          <td><div class="star-row">
-            <span class="star" data-v="1">★</span>
-            <span class="star" data-v="2">★</span>
-            <span class="star" data-v="3">★</span>
-            <span class="star" data-v="4">★</span>
-            <span class="star" data-v="5">★</span>
-          </div></td>
-          <td class="skill-hint" id="hint-backhand">未評分</td>
-        </tr>
-        <tr data-skill="volley">
-          <td>截擊</td>
-          <td><div class="star-row">
-            <span class="star" data-v="1">★</span>
-            <span class="star" data-v="2">★</span>
-            <span class="star" data-v="3">★</span>
-            <span class="star" data-v="4">★</span>
-            <span class="star" data-v="5">★</span>
-          </div></td>
-          <td class="skill-hint" id="hint-volley">未評分</td>
-        </tr>
-        <tr data-skill="serve">
-          <td>發球</td>
-          <td><div class="star-row">
-            <span class="star" data-v="1">★</span>
-            <span class="star" data-v="2">★</span>
-            <span class="star" data-v="3">★</span>
-            <span class="star" data-v="4">★</span>
-            <span class="star" data-v="5">★</span>
-          </div></td>
-          <td class="skill-hint" id="hint-serve">未評分</td>
-        </tr>
-        <tr data-skill="smash">
-          <td>扣殺</td>
-          <td><div class="star-row">
-            <span class="star" data-v="1">★</span>
-            <span class="star" data-v="2">★</span>
-            <span class="star" data-v="3">★</span>
-            <span class="star" data-v="4">★</span>
-            <span class="star" data-v="5">★</span>
-          </div></td>
-          <td class="skill-hint" id="hint-smash">未評分</td>
-        </tr>
-      </table>
+    <div class="card" style="position:relative;overflow:hidden;">
+      <div class="sk-deco-tl">🎾</div>
+      <div class="sk-deco-br">🎾</div>
+      <div class="sk-header">
+        <span class="sk-header-icon">🎾</span>
+        <span class="sk-header-title">上課前程度自評（選填）</span>
+      </div>
+      <p class="sk-sub">按住並左右拖曳，或點擊格子選分</p>
+      <div class="sk-body" id="skill-table"></div>
+      <div class="sk-radar-wrap">
+        <canvas id="radar" width="240" height="224"></canvas>
+      </div>
     </div>
 
     <div class="card">
@@ -1235,43 +1191,124 @@ document.getElementById('f-line').addEventListener('input', function(){
 document.getElementById('agree').addEventListener('change', checkBtn);
 
 // =============================================
-// 程度自評 — 星星互動
+// 程度自評 — 色塊拖曳 + 雷達圖
 // =============================================
-const skillHints = ['', '完全不會', '略懂皮毛', '可以對打', '相當穩定', '非常熟練'];
+const RADAR_ORDER = ['serve','forehand','volley','smash','backhand'];
+const skSkills = [
+  {key:'forehand',name:'正拍',hints:['完全沒有接觸過','知道基本握拍，動作不穩定','能維持底線來回對打','擊球穩定，有落點控制','技術成熟，可實戰運用']},
+  {key:'backhand',name:'反拍',hints:['完全沒有接觸過','知道基本握拍，動作不穩定','能維持底線來回對打','擊球穩定，有落點控制','技術成熟，可實戰運用']},
+  {key:'volley',  name:'截擊',hints:['未學過截擊','知道截擊動作，但難以掌握擊球時機','能完成簡單網前截擊','可穩定處理網前來球並控制方向','能主動截擊、施壓並完成得分']},
+  {key:'serve',   name:'發球',hints:['不會拋球與發球動作','能將球發進場，但成功率不高','能穩定開始一分並完成基本發球','一發、二發成功率高，能控制落點','具備旋轉、速度與戰術發球能力']},
+  {key:'smash',   name:'扣殺',hints:['未學過高壓扣殺','知道動作，但常打框或失誤','能完成簡單高球扣殺','可穩定處理大部分高球','能主動移位並有效完成扣殺得分']},
+];
+const skLabels = ['不會','略懂','對打','穩定','熟練'];
+const skBlue   = ['#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#1d4ed8'];
+const skText   = ['#1e3a5f','#1e3a5f','#fff','#fff','#fff'];
+const skMap    = {};
+skSkills.forEach(s => skMap[s.key] = s);
 
-document.getElementById('skill-table').addEventListener('click', function(e) {
-  const star = e.target.closest('.star'); if (!star) return;
-  const row = star.closest('tr'); if (!row) return;
-  const skill = row.dataset.skill;
-  const val = parseInt(star.dataset.v);
-  skillRatings[skill] = val;
+// 雷達圖
+const skCanvas = document.getElementById('radar');
+const skCtx    = skCanvas.getContext('2d');
+const SK_CX=120, SK_CY=112, SK_R=80, SK_N=5;
+const BALL_SIZE=18;
+const ballCv = document.createElement('canvas');
+ballCv.width = BALL_SIZE; ballCv.height = BALL_SIZE;
+const bCtx = ballCv.getContext('2d');
+bCtx.font = `${BALL_SIZE}px serif`;
+bCtx.textAlign = 'center'; bCtx.textBaseline = 'middle';
+bCtx.fillText('🎾', BALL_SIZE/2, BALL_SIZE/2+1);
 
-  // 更新星星顏色
-  row.querySelectorAll('.star').forEach(s => {
-    s.classList.toggle('lit', parseInt(s.dataset.v) <= val);
-  });
-  // 更新提示文字
-  const hint = document.getElementById('hint-' + skill);
-  if (hint) hint.textContent = skillHints[val] || '';
-});
+function skAngle(i){ return (Math.PI*2/SK_N)*i - Math.PI/2; }
+function skPt(i,r){ return [SK_CX+r*Math.cos(skAngle(i)), SK_CY+r*Math.sin(skAngle(i))]; }
 
-// hover 預覽
-document.getElementById('skill-table').addEventListener('mouseover', function(e) {
-  const star = e.target.closest('.star'); if (!star) return;
-  const row = star.closest('tr'); if (!row) return;
-  const hoverVal = parseInt(star.dataset.v);
-  row.querySelectorAll('.star').forEach(s => {
-    s.style.color = parseInt(s.dataset.v) <= hoverVal ? '#f59e0b' : '';
+function drawRadar(){
+  skCtx.clearRect(0,0,240,224);
+  for(let lvl=1;lvl<=5;lvl++){
+    const r=SK_R*(lvl/5);
+    skCtx.beginPath();
+    for(let i=0;i<SK_N;i++){
+      const [x,y]=skPt(i,r); i===0?skCtx.moveTo(x,y):skCtx.lineTo(x,y);
+    }
+    skCtx.closePath(); skCtx.strokeStyle='#e2e8f0'; skCtx.lineWidth=1; skCtx.stroke();
+  }
+  for(let i=0;i<SK_N;i++){
+    const [x,y]=skPt(i,SK_R);
+    skCtx.beginPath(); skCtx.moveTo(SK_CX,SK_CY); skCtx.lineTo(x,y);
+    skCtx.strokeStyle='#e2e8f0'; skCtx.lineWidth=1; skCtx.stroke();
+  }
+  skCtx.beginPath();
+  for(let i=0;i<SK_N;i++){
+    const r=SK_R*((skillRatings[RADAR_ORDER[i]]||0)/5);
+    const [x,y]=skPt(i,r); i===0?skCtx.moveTo(x,y):skCtx.lineTo(x,y);
+  }
+  skCtx.closePath();
+  skCtx.fillStyle='rgba(59,130,246,0.15)'; skCtx.fill();
+  skCtx.strokeStyle='#3b82f6'; skCtx.lineWidth=2; skCtx.stroke();
+  skCtx.font='500 11px -apple-system,sans-serif'; skCtx.textBaseline='middle';
+  for(let i=0;i<SK_N;i++){
+    const key=RADAR_ORDER[i], v=skillRatings[key]||0;
+    const r=SK_R*(v/5); const [x,y]=skPt(i,r);
+    const [lx,ly]=skPt(i,SK_R+18);
+    const a=skAngle(i);
+    const ox=Math.cos(a)>0.1?6:Math.cos(a)<-0.1?-6:0;
+    const oy=Math.sin(a)>0.1?6:Math.sin(a)<-0.1?-6:0;
+    if(v>0){ skCtx.drawImage(ballCv,x-BALL_SIZE/2,y-BALL_SIZE/2,BALL_SIZE,BALL_SIZE); }
+    else { skCtx.beginPath(); skCtx.arc(x,y,4,0,Math.PI*2); skCtx.fillStyle='#e2e8f0'; skCtx.fill(); }
+    skCtx.textAlign=Math.cos(a)>0.1?'left':Math.cos(a)<-0.1?'right':'center';
+    skCtx.fillStyle=v>0?skBlue[Math.min(v-1,4)]:'#94a3b8';
+    skCtx.fillText(skMap[key].name,lx+ox,ly+oy);
+  }
+}
+drawRadar();
+
+// 評分列
+const skWrap = document.getElementById('skill-table');
+skSkills.forEach(skill => {
+  const item = document.createElement('div'); item.className='sk-item';
+  const row  = document.createElement('div'); row.className='sk-row';
+  const nameEl = document.createElement('div'); nameEl.className='sk-name'; nameEl.textContent=skill.name;
+  const segs   = document.createElement('div'); segs.className='sk-segs';
+  const badge  = document.createElement('div'); badge.className='sk-badge';
+  const hint   = document.createElement('div'); hint.className='sk-hint';
+
+  skLabels.forEach((lbl,i)=>{
+    const seg=document.createElement('div'); seg.className='sk-seg';
+    seg.textContent=lbl; seg.dataset.val=i+1; segs.appendChild(seg);
   });
-});
-document.getElementById('skill-table').addEventListener('mouseout', function(e) {
-  const row = e.target.closest('tr'); if (!row || !row.dataset.skill) return;
-  const skill = row.dataset.skill;
-  const saved = skillRatings[skill];
-  row.querySelectorAll('.star').forEach(s => {
-    s.style.color = '';
-    s.classList.toggle('lit', parseInt(s.dataset.v) <= saved);
-  });
+  row.appendChild(nameEl); row.appendChild(segs); row.appendChild(badge);
+  item.appendChild(row); item.appendChild(hint); skWrap.appendChild(item);
+
+  function applyVal(val){
+    if(skillRatings[skill.key]===val) return;
+    skillRatings[skill.key]=val;
+    const idx=val-1;
+    segs.querySelectorAll('.sk-seg').forEach((s,i)=>{
+      if(i<val){ s.style.background=skBlue[i]; s.style.color=skText[i]; s.style.transform=i===idx?'scaleY(1.1)':'scaleY(1)'; }
+      else { s.style.background='#f1f5f9'; s.style.color='#94a3b8'; s.style.transform='scaleY(1)'; }
+    });
+    badge.style.background=skBlue[idx]; badge.style.color=skText[idx];
+    badge.textContent=val; badge.classList.add('show');
+    hint.textContent=skill.hints[idx]; hint.style.color=skBlue[idx]; hint.classList.add('show');
+    nameEl.style.color=skBlue[idx];
+    segs.querySelectorAll('.sk-seg').forEach(s=>{ s.style.padding='5px 0'; s.style.fontSize='10px'; });
+    drawRadar();
+  }
+
+  let dragging=false;
+  function segFromX(x){
+    for(const s of segs.querySelectorAll('.sk-seg')){
+      const r=s.getBoundingClientRect();
+      if(x>=r.left&&x<=r.right) return parseInt(s.dataset.val);
+    }
+    return null;
+  }
+  segs.addEventListener('mousedown',e=>{dragging=true;const v=segFromX(e.clientX);if(v)applyVal(v);});
+  window.addEventListener('mousemove',e=>{if(!dragging)return;const v=segFromX(e.clientX);if(v)applyVal(v);});
+  window.addEventListener('mouseup',()=>{dragging=false;});
+  segs.addEventListener('touchstart',e=>{dragging=true;const v=segFromX(e.touches[0].clientX);if(v)applyVal(v);},{passive:true});
+  segs.addEventListener('touchmove',e=>{if(!dragging)return;const v=segFromX(e.touches[0].clientX);if(v)applyVal(v);},{passive:true});
+  segs.addEventListener('touchend',()=>{dragging=false;});
 });
 
 document.getElementById('tournament-opts').addEventListener('click', function(e){
