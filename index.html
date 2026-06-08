@@ -1464,8 +1464,6 @@ document.getElementById('btn-load-old').addEventListener('click', async function
       }
       renderSlots();
       showOrderList(orders, msgEl);
-      // 查詢成功 → 自動跳到 Step 3 讓學員直接看時段
-      setTimeout(() => goStep(3), 400);
     } else {
       isOrderLocked = false; currentOrderId = '';
       const hintEl = document.getElementById('line-booked-hint');
