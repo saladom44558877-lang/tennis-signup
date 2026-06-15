@@ -166,6 +166,43 @@
     .s-ok   { color: #166534; } .s-warn { color: #b45309; }
     .s-full { color: #dc2626; } .s-wait { color: #6b21a8; }
 
+    /* ── 行事曆式選課 ── */
+    .habit-card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; margin-bottom:12px; }
+    .habit-row { display:flex; align-items:flex-start; gap:8px; }
+    .habit-icon { font-size:16px; line-height:1.4; }
+    .habit-text { font-size:12px; color:#1a1a1a; line-height:1.6; margin-bottom:6px; }
+    .habit-empty { font-size:12px; color:#666; line-height:1.6; }
+    .habit-bar-bg { height:5px; background:#e5e7eb; border-radius:20px; overflow:hidden; }
+    .habit-bar-fill { height:100%; border-radius:20px; transition:width .3s; }
+    .habit-sub { font-size:10px; color:#94a3b8; margin-top:3px; }
+
+    .cal-grid { display:grid; gap:4px; margin-bottom:4px; }
+    .cal-head { font-size:11px; color:#94a3b8; text-align:center; padding:4px 0; font-weight:600; }
+    .cal-head.is-hl { color:#1d4ed8; }
+    .cal-week-label { font-size:10px; color:#94a3b8; display:flex; align-items:center; justify-content:center; text-align:center; padding:2px; }
+    .cal-cell { display:flex; flex-direction:column; gap:4px; border-radius:8px; padding:2px; transition:background .15s; }
+    .cal-cell.is-hl { background:#f0f7ff; }
+
+    .cal-chip { border:1.5px solid #e2e8f0; border-radius:8px; overflow:hidden; cursor:pointer; background:#fff; transition:all .15s; }
+    .cal-chip:hover:not(.is-full):not(.is-waitfull):not(.is-locked):not(.is-booked):not(.is-tournament) { border-color:#378ADD; }
+    .cal-chip.is-sel { border-color:#1d4ed8; box-shadow: inset 0 0 0 1px #1d4ed8; }
+    .cal-chip.is-wait { border-color:#7c3aed; box-shadow: inset 0 0 0 1px #7c3aed; }
+    .cal-chip.is-locked { border-color:#16a34a; cursor:default; pointer-events:none; }
+    .cal-chip.is-booked { border-color:#f59e0b; cursor:default; pointer-events:none; }
+    .cal-chip.is-full { cursor:default; opacity:.85; }
+    .cal-chip.is-waitfull { cursor:default; opacity:.5; }
+    .cal-chip.is-tournament { cursor:default; opacity:.9; }
+    .cal-chip-head { padding:4px 6px; }
+    .cal-chip-datetime { font-size:9px; font-weight:700; margin-bottom:2px; }
+    .cal-chip-toprow { display:flex; align-items:baseline; justify-content:space-between; gap:4px; }
+    .cal-chip-label { font-size:10px; font-weight:700; }
+    .cal-chip-count { font-size:9px; font-weight:600; white-space:nowrap; }
+    .cal-chip-body { padding:3px 6px; font-size:9px; color:#666; background:#fff; line-height:1.5; }
+    .cal-chip-bar-bg { height:3px; background:#e5e7eb; }
+    .cal-chip-bar-fill { height:100%; transition:width .3s; }
+    .cal-chip-status { font-size:9px; font-weight:600; padding:3px 6px; background:#fff; }
+    .cal-tour-row { display:flex; justify-content:space-between; gap:4px; font-size:9px; color:#92400e; padding:1px 0; }
+
     .sel-info { font-size: 12px; color: #666; margin-top: 8px; padding: 8px 12px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
 
     .waitlist-box { background: #faf5ff; border: 1.5px solid #c4b5fd; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; display: none; }
@@ -562,7 +599,9 @@
         <option value="rally">🩷 對打課（週四 20-21）</option>
       </select>
 
-      <div class="slot-grid" id="slot-grid"></div>
+      <div id="habit-card" class="habit-card"></div>
+
+      <div class="cal-grid" id="slot-grid"></div>
       <div class="sel-info" id="sel-info">已選 0 個正選時段・0 個候補時段</div>
     </div>
 
@@ -866,7 +905,7 @@ function updateOrderSummary() {
     const s=DEFS[m]&&DEFS[m][i]; if(!s) return '';
     const timeLabel = s.t==='19-20'?'19:00–20:00':'20:00–21:00';
     let clsLabel, clsColor, price;
-    if(s.cls==='big')                              { clsLabel='大班初階'; clsColor='background:#dbeafe;color:#1e40af;'; price='$490'; }
+    if(s.cls==='big')                              { clsLabel='大班初階'; clsColor='background:#dcfce7;color:#166534;'; price='$490'; }
     else if(s.cls==='rally')                       { clsLabel='對打課';   clsColor='background:#fce7f3;color:#9d174d;'; price='$800'; }
     else if(s.type==='thu' && s.t==='19-20')       { clsLabel='小班中階'; clsColor='background:#dbeafe;color:#1e40af;'; price='$550'; }
     else                                           { clsLabel='小班初階'; clsColor='background:#dcfce7;color:#166534;'; price='$550'; }
@@ -948,11 +987,35 @@ async function loadCounts() {
 }
 
 // =============================================
-// 渲染時段（邏輯完全不變）
+// 渲染時段（容量／候補／鎖定等邏輯完全不變，僅改變呈現版面）
 // =============================================
 function maxOf(cls){ return cls==='big'? MAX_B : cls==='rally'? 3 : MAX_S; }
 function sk(m,i){ return 's-'+m+'-'+i; }
 function wk(m,i){ return 'w-'+m+'-'+i; }
+
+const WD_LABEL = ['週一','週二','週三','週四','週五','週六','週日'];
+const WD_CHAR_IDX = {'一':0,'二':1,'三':2,'四':3,'五':4,'六':5,'日':6};
+const BAR_COLOR = {'bar-green':'#22c55e','bar-yellow':'#f59e0b','bar-red':'#ef4444','bar-purple':'#8b5cf6'};
+const STATUS_COLOR = {'s-ok':'#166534','s-warn':'#b45309','s-full':'#dc2626','s-wait':'#6b21a8'};
+let highlightedWd = null;
+
+function parseDateInfo(d){
+  const m = d.match(/^(\d{2})\/(\d{2})\((.)\)/);
+  const day = parseInt(m[2]);
+  const wd = WD_CHAR_IDX[m[3]];
+  return { day, wd, weekKey: day - wd };
+}
+
+function slotMeta(s){
+  if(s.cls==='rally') return {label:'對打課', bg:'#fce7f3', text:'#9d174d', sub:'#be185d'};
+  if(s.cls==='big')   return {label:'大班初階', bg:'#dcfce7', text:'#166534', sub:'#15803d'};
+  if(s.type==='thu' && s.t==='19-20') return {label:'小班中階', bg:'#dbeafe', text:'#1e40af', sub:'#1d4ed8'};
+  return {label:'小班初階', bg:'#dcfce7', text:'#166534', sub:'#15803d'};
+}
+
+function coachOf(m, s){
+  return (m===8 && s.type==='tue') ? 'Miguel教練' : (s.cls==='big' ? '雙教練' : 'Adam教練');
+}
 
 function renderSlots(){
   const filterVal = document.getElementById('level-filter').value;
@@ -971,27 +1034,7 @@ function renderSlots(){
     });
   const grid = document.getElementById('slot-grid');
 
-  function renderTournamentGroup(slots){
-    const dateLabel = slots[0].d.slice(0,5);
-    const wd = slots[0].d.match(/\((.)\)/)?.[1] || '';
-    const rows = slots.map(s => {
-      const tl = s.t==='19-20'?'19:00–20:00':'20:00–21:00';
-      const courtBadge = s.court ? `<span class="badge" style="background:#e0f2fe;color:#075985;">第${s.court}面</span>` : '';
-      const coachBadge = s.type==='tue' ? '<span class="badge b-coach">雙教練</span>' : '<span class="badge b-coach">Adam教練</span>';
-      return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:0.5px solid #fde68a;flex-wrap:wrap;">
-        <span style="font-size:12px;font-weight:600;color:#78350f;min-width:90px;">${tl}</span>
-        ${courtBadge}${coachBadge}
-      </div>`;
-    }).join('');
-    return `<div style="grid-column:1/-1;cursor:default;background:#fffbeb;border:2px solid #fcd34d;border-radius:10px;padding:12px;opacity:0.9;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <span style="font-size:13px;font-weight:700;color:#92400e;">${dateLabel}（${wd}）</span>
-        <span class="badge" style="background:#fef3c7;color:#92400e;">🏆 年末比賽</span>
-      </div>${rows}
-      <div style="margin-top:8px;font-size:10px;font-weight:600;color:#b45309;">年末團體賽時段・不開放報名</div>
-    </div>`;
-  }
-
+  // 將時段依「年末比賽」分組（邏輯不變）
   const groups = [];
   let i = 0;
   while(i < defs.length){
@@ -1008,10 +1051,23 @@ function renderSlots(){
     }
   }
 
-  grid.innerHTML = groups.map((g) => {
-    if(g.type === 'tournament') return renderTournamentGroup(g.slots);
-    const s = g.slot;
-    const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
+  // 加上星期、週次資訊（用於行事曆排版）
+  const items = groups.map(g => {
+    const ref = g.type === 'tournament' ? g.slots[0] : g.slot;
+    const {wd, weekKey} = parseDateInfo(ref.d);
+    return {...g, wd, weekKey};
+  });
+
+  if(items.length === 0){ grid.innerHTML=''; grid.style.gridTemplateColumns=''; renderHabitCard(); return; }
+
+  // 自動偵測有課的星期（週一→週日排序）與週次，跳過沒有課的星期/週
+  const activeWds = [...new Set(items.map(it => it.wd))].sort((a,b)=>a-b);
+  const weekKeys = [...new Set(items.map(it => it.weekKey))].sort((a,b)=>a-b);
+
+  grid.style.gridTemplateColumns = `40px repeat(${activeWds.length}, 1fr)`;
+
+  function renderChip(s, wd){
+    const timeLabel = s.t === '19-20' ? '19:00' : s.t === '20-21' ? '20:00' : s.t;
     const key=sk(curM,s.origIdx), wkey=wk(curM,s.origIdx);
     const max=maxOf(s.cls);
     const cnt=counts[key]||0, wcnt=wcounts[wkey]||0;
@@ -1021,7 +1077,7 @@ function renderSlots(){
     const price=s.cls==='big'?'$490':s.cls==='rally'?'$800':'$550';
     const pct=Math.min(cnt/max*100,100);
     let barCls=pct>=100?'bar-red':pct>=60?'bar-yellow':'bar-green';
-    let cardCls='slot-card', statusTxt, statusCls, clickAction;
+    let cardCls='cal-chip', statusTxt, statusCls, clickAction;
 
     if(!full){
       if(isOrderLocked){
@@ -1051,32 +1107,70 @@ function renderSlots(){
       cardCls+=' is-full is-waitfull'; barCls='bar-red'; statusTxt=`額滿｜候補已滿`; statusCls='s-full'; clickAction='none';
     }
 
-    let levelBadge;
-    if(s.type==='thu' && s.t==='20-21')      levelBadge='<span class="badge" style="background:#fce7f3;color:#9d174d;">對打課</span>';
-    else if(s.type==='thu')                   levelBadge='<span class="badge" style="background:#dbeafe;color:#1e40af;">中階班</span>';
-    else                                      levelBadge='<span class="badge" style="background:#dcfce7;color:#166534;">初階班</span>';
-
-    let coachBadge='';
-    if(curM===8 && s.type==='tue')            coachBadge='<span class="badge b-coach">Miguel教練</span>';
-    else if(s.cls==='big')                    coachBadge='<span class="badge b-coach">雙教練</span>';
-    else                                      coachBadge='<span class="badge b-coach">Adam教練</span>';
-
+    const meta = slotMeta(s);
+    const coachLabel = coachOf(curM, s);
     const isDualCourt = sk(curM, s.origIdx) === 's-9-0';
-    const courtBadge = isDualCourt
-      ? '<span class="badge" style="background:#e0f2fe;color:#075985;">第5面</span><span class="badge" style="background:#e0f2fe;color:#075985;">第6面</span>'
-      : s.court ? `<span class="badge" style="background:#e0f2fe;color:#075985;">第${s.court}面</span>` : '';
-    const bookedBadge=isPaidBooked?'<span class="badge" style="background:#fef3c7;color:#92400e;">已確認</span>':'';
+    const courtLabel = isDualCourt ? '第5+6面' : (s.court ? `第${s.court}面` : '');
 
-    return `<div class="${cardCls}" data-click="${clickAction}">
-      <div class="slot-date">${s.d}</div>
-      <div class="slot-time">${timeLabel}</div>
-      <div class="badges">${courtBadge}${bookedBadge}${isPaidBooked?'':coachBadge}${levelBadge}<span class="badge b-price">${price}</span></div>
-      <div class="slot-bar-bg"><div class="slot-bar-fill ${barCls}" style="width:${pct}%"></div></div>
-      <div class="slot-status ${statusCls}">${statusTxt}</div>
+    return `<div class="${cardCls}" data-click="${clickAction}" data-wd="${wd}">
+      <div class="cal-chip-head" style="background:${meta.bg}">
+        <div class="cal-chip-datetime" style="color:${meta.sub}">${s.d.slice(0,5)} ${timeLabel}</div>
+        <div class="cal-chip-toprow">
+          <span class="cal-chip-label" style="color:${meta.text}">${meta.label}</span>
+          <span class="cal-chip-count" style="color:${meta.sub}">${cnt}/${max}</span>
+        </div>
+      </div>
+      <div class="cal-chip-body">${coachLabel}・${courtLabel}・${price}</div>
+      <div class="cal-chip-bar-bg"><div class="cal-chip-bar-fill" style="width:${pct}%;background:${BAR_COLOR[barCls]}"></div></div>
+      <div class="cal-chip-status" style="color:${STATUS_COLOR[statusCls]}">${statusTxt}</div>
     </div>`;
-  }).join('');
+  }
 
-  grid.querySelectorAll('.slot-card').forEach(card => {
+  function renderTournamentChip(slots){
+    const dateLabel = slots[0].d.slice(0,5);
+    const rows = slots.map(s=>{
+      const tl = s.t==='19-20'?'19:00–20:00':'20:00–21:00';
+      const courtTxt = s.court ? `第${s.court}面` : '';
+      const coachTxt = s.type==='tue' ? '雙教練' : 'Adam教練';
+      return `<div class="cal-tour-row"><span>${tl}</span><span>${courtTxt}</span><span>${coachTxt}</span></div>`;
+    }).join('');
+    return `<div class="cal-chip is-tournament" data-click="none">
+      <div class="cal-chip-head" style="background:#fef3c7">
+        <div class="cal-chip-datetime" style="color:#b45309">${dateLabel}</div>
+        <div class="cal-chip-toprow"><span class="cal-chip-label" style="color:#92400e">🏆 年末團體賽</span></div>
+      </div>
+      <div class="cal-chip-body">${rows}</div>
+      <div class="cal-chip-status" style="color:#b45309">不開放報名</div>
+    </div>`;
+  }
+
+  // 標頭列（星期）
+  let html = `<div class="cal-week-label"></div>`;
+  activeWds.forEach(wd => {
+    html += `<div class="cal-head${wd===highlightedWd?' is-hl':''}">${WD_LABEL[wd]}</div>`;
+  });
+
+  // 每週一列
+  weekKeys.forEach((weekKey, idx) => {
+    html += `<div class="cal-week-label">第${idx+1}週</div>`;
+    activeWds.forEach(wd => {
+      const cellItems = items
+        .filter(it => it.weekKey===weekKey && it.wd===wd)
+        .sort((a,b)=>{
+          const ta = a.type==='tournament' ? a.slots[0].t : a.slot.t;
+          const tb = b.type==='tournament' ? b.slots[0].t : b.slot.t;
+          return ta < tb ? -1 : ta > tb ? 1 : 0;
+        });
+      const chipsHtml = cellItems.map(it =>
+        it.type==='tournament' ? renderTournamentChip(it.slots) : renderChip(it.slot, wd)
+      ).join('');
+      html += `<div class="cal-cell${wd===highlightedWd?' is-hl':''}">${chipsHtml}</div>`;
+    });
+  });
+
+  grid.innerHTML = html;
+
+  grid.querySelectorAll('.cal-chip[data-click]').forEach(card => {
     card.addEventListener('click', function(){
       const cd = this.dataset.click;
       if(!cd || cd==='none') return;
@@ -1087,9 +1181,78 @@ function renderSlots(){
         if(waitSlots.has(key)) waitSlots.delete(key); else waitSlots.add(key);
         renderWaitlist();
       }
+      highlightedWd = parseInt(this.dataset.wd);
       calcFee(); updateSelInfo(); renderSlots(); checkBtn3();
     });
   });
+
+  renderHabitCard();
+}
+
+// =============================================
+// 養成習慣推薦卡：依目前已選時段提示固定星期與優惠進度
+// =============================================
+function renderHabitCard(){
+  const card = document.getElementById('habit-card');
+  if(!card) return;
+  const THRESHOLD = 6;
+  const total = selSlots.size;
+
+  if(total === 0){
+    card.innerHTML = `<div class="habit-row"><span class="habit-icon">📅</span><div class="habit-empty">點選你想固定上課的時段，例如每週三 19:00，我們會幫你追蹤同時段還有幾堂可以加選，方便規劃整季的課表。</div></div>`;
+    return;
+  }
+
+  // 統計目前已選時段中，各星期出現的次數
+  const dayCounts = [0,0,0,0,0,0,0];
+  selSlots.forEach(key=>{
+    const parts=key.split('-'); const m=parseInt(parts[1]), idx=parseInt(parts[2]);
+    const s=DEFS[m]&&DEFS[m][idx]; if(!s) return;
+    const {wd}=parseDateInfo(s.d);
+    dayCounts[wd]++;
+  });
+  let domWd=-1, domCount=0;
+  dayCounts.forEach((c,idx)=>{ if(c>domCount){ domCount=c; domWd=idx; } });
+
+  let extra='';
+  if(domCount>=2){
+    let avail=0;
+    Object.keys(DEFS).forEach(mStr=>{
+      const m=parseInt(mStr);
+      DEFS[m].forEach((s,idx)=>{
+        if(s.special==='tournament') return;
+        if(sk(m,idx)==='s-9-1') return;
+        const key=sk(m,idx);
+        if(selSlots.has(key)) return;
+        const {wd}=parseDateInfo(s.d);
+        if(wd!==domWd) return;
+        const max=maxOf(s.cls), cnt=counts[key]||0;
+        if(cnt<max) avail++;
+      });
+    });
+    if(avail>0) extra = `本季「${WD_LABEL[domWd]}」時段還有 ${avail} 堂可選，`;
+  }
+
+  const remaining = Math.max(0, THRESHOLD-total);
+  const pct = Math.min(100, Math.round(total/THRESHOLD*100));
+  let mainText, icon, barColor;
+  if(remaining>0){
+    mainText = `${extra}再選 ${remaining} 堂即可享 6 堂優惠價（95折）＋免費年終賽資格`;
+    icon='📅'; barColor='#378ADD';
+  } else {
+    mainText = `已達 6 堂！可享優惠價（95折）＋免費年終賽資格 🎉`;
+    icon='✅'; barColor='#22c55e';
+  }
+
+  card.innerHTML = `
+    <div class="habit-row">
+      <span class="habit-icon">${icon}</span>
+      <div style="flex:1;">
+        <div class="habit-text">${mainText}</div>
+        <div class="habit-bar-bg"><div class="habit-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
+        <div class="habit-sub">已選 ${total} / ${THRESHOLD} 堂</div>
+      </div>
+    </div>`;
 }
 
 function renderWaitlist(){
@@ -1129,11 +1292,29 @@ function calcFee(){
   document.getElementById('ft').textContent=`$${final.toLocaleString()}`;
   document.getElementById('fg').style.display=is10?'block':'none';
   const clearBtn=document.getElementById('btn-clear-slots');
-  if(clearBtn) clearBtn.style.display=(!isOrderLocked&&(selSlots.size>0||waitSlots.size>0))?'block':'none';
+  if(clearBtn){
+    clearBtn.style.display=(!isOrderLocked&&(selSlots.size>0||waitSlots.size>0))?'block':'none';
+    if(clearConfirmTimer){ clearTimeout(clearConfirmTimer); clearConfirmTimer=null; }
+    clearBtn.dataset.confirming='';
+    clearBtn.textContent='清除全部';
+  }
 }
 
+let clearConfirmTimer=null;
 function clearAllSlots(){
-  if(!confirm('確定要清除所有已選時段？')) return;
+  const btn=document.getElementById('btn-clear-slots');
+  if(btn.dataset.confirming !== '1'){
+    btn.dataset.confirming='1';
+    btn.textContent='再按一次確認清除';
+    clearConfirmTimer=setTimeout(()=>{
+      btn.dataset.confirming='';
+      btn.textContent='清除全部';
+    }, 3000);
+    return;
+  }
+  clearTimeout(clearConfirmTimer);
+  btn.dataset.confirming='';
+  btn.textContent='清除全部';
   selSlots.clear(); waitSlots.clear();
   renderWaitlist(); calcFee(); updateSelInfo(); renderSlots(); checkBtn3();
 }
