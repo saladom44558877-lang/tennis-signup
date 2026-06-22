@@ -64,8 +64,58 @@
     /* ── 分頁容器 ── */
     .page-wrap { max-width: 560px; margin: 0 auto; padding: 1rem 1rem 4rem; }
 
-    .step-page { display: none; animation: fadeIn .25s ease; }
-    .step-page.active { display: block; }
+    .pkg-lv {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 8px;
+      text-align: center;
+      cursor: pointer;
+      background: #fff;
+      transition: border-color .15s, background .15s, transform .1s, box-shadow .15s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pkg-lv:hover { border-color: #93c5fd; background: #f0f7ff; box-shadow: 0 2px 8px rgba(24,95,165,.1); }
+    .pkg-lv:active { transform: scale(.97); background: #dbeafe; }
+    .pkg-lv-sel { border: 2px solid #185FA5 !important; background: #E6F1FB !important; box-shadow: 0 0 0 3px rgba(24,95,165,.12) !important; }
+
+    .pkg-plan {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 12px;
+      cursor: pointer;
+      background: #fff;
+      position: relative;
+      transition: border-color .15s, background .15s, transform .1s, box-shadow .15s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pkg-plan:hover { border-color: #93c5fd; background: #f0f7ff; box-shadow: 0 2px 8px rgba(24,95,165,.1); }
+    .pkg-plan:active { transform: scale(.98); }
+    .pkg-plan-sel { border: 2px solid #185FA5 !important; background: #E6F1FB !important; box-shadow: 0 0 0 3px rgba(24,95,165,.12) !important; }
+
+    .pkg-m-opt {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: border-color .15s, background .15s, transform .1s, box-shadow .15s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pkg-m-opt:hover { border-color: #93c5fd; background: #f0f7ff; box-shadow: 0 2px 8px rgba(24,95,165,.1); }
+    .pkg-m-opt:active { transform: scale(.99); }
+    .pkg-m-opt-sel { border: 2px solid #185FA5 !important; background: #E6F1FB !important; box-shadow: 0 0 0 3px rgba(24,95,165,.12) !important; }
+
+    .pkg-chip { font-size:11px; font-weight:500; padding:3px 9px; border-radius:20px; background:#B5D4F4; color:#042C53; }
+    .pkg-slot-row { display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:10px; border:1.5px solid #e2e8f0; background:#fff; }
+    .pkg-slot-row-sel { border-color:#185FA5 !important; background:#E6F1FB !important; }
+    .pkg-slot-num { font-size:11px; font-weight:500; color:#0C447C; background:#85B7EB; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .pkg-slot-extra { opacity:.55; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
     /* ── 卡片 ── */
@@ -256,15 +306,17 @@
     .os-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; color: #444; }
     .os-slot-list { display: flex; flex-direction: column; gap: 5px; }
     .os-slot-item {
-      display: flex; align-items: center; gap: 8px;
+      display: flex; align-items: center; gap: 6px;
       background: #f8fafc; border-radius: 8px; padding: 7px 10px;
       border: 1px solid #e2e8f0;
     }
-    .os-slot-date { font-size: 12px; font-weight: 700; color: #1a1a1a; min-width: 80px; }
-    .os-slot-time { font-size: 11px; color: #666; flex: 1; }
-    .os-slot-badge { font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 10px; white-space: nowrap; }
+    .os-slot-date { font-size: 12px; font-weight: 700; color: #1a1a1a; min-width: 76px; flex-shrink: 0; }
+    .os-slot-time { font-size: 11px; color: #666; flex: 1; min-width: 0; }
+    .os-slot-badge { font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
+    .os-remove-btn { background: none; border: none; color: #dc2626; font-size: 15px; cursor: pointer; padding: 0 2px; line-height: 1; flex-shrink: 0; opacity: .7; transition: opacity .15s; }
+    .os-remove-btn:hover { opacity: 1; }
     .os-wait-item {
-      display: flex; align-items: center; gap: 8px;
+      display: flex; align-items: center; gap: 6px;
       background: #faf5ff; border-radius: 8px; padding: 7px 10px;
       border: 1px solid #e9d5ff;
     }
@@ -308,14 +360,59 @@
       cursor: pointer; transition: all .15s;
     }
     .btn-prev:hover { border-color: #cbd5e1; background: #f8fafc; }
+    .btn-prev:active { transform: scale(.97); background: #f1f5f9; }
     .btn-next {
       flex: 1; padding: 14px;
       border-radius: 10px; border: none;
       background: #1d4ed8; color: #fff; font-size: 16px; font-weight: 700;
-      cursor: pointer; transition: background .15s;
+      cursor: pointer; transition: background .15s, transform .1s;
     }
     .btn-next:hover:not(:disabled) { background: #1e40af; }
+    .btn-next:active:not(:disabled) { transform: scale(.98); background: #1e3a8a; }
     .btn-next:disabled { opacity: .4; cursor: not-allowed; background: #9ca3af; }
+
+    .flow-card {
+      background: #fff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 18px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, transform .1s, box-shadow .15s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .flow-card:hover { border-color: #93c5fd; background: #f0f7ff; box-shadow: 0 2px 8px rgba(24,95,165,.1); }
+    .flow-card:active { transform: scale(.97); background: #dbeafe; }
+    .flow-card.active { border: 2px solid #185FA5; background: #E6F1FB; box-shadow: 0 0 0 3px rgba(24,95,165,.12); }
+    .flow-icon { font-size: 28px; margin-bottom: 8px; }
+    .flow-title { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+    .flow-sub { font-size: 11px; color: #64748b; line-height: 1.7; }
+
+    .pkg-confirm-btn {
+      width: 100%; padding: 14px;
+      background: #185FA5; color: #fff;
+      border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer;
+      transition: background .15s, transform .1s, box-shadow .15s;
+      margin-bottom: 10px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pkg-confirm-btn:hover { background: #1d4ed8; box-shadow: 0 4px 12px rgba(24,95,165,.3); }
+    .pkg-confirm-btn:active { transform: scale(.98); background: #0c447c; }
+
+    .pkg-free-btn {
+      width: 100%; padding: 11px;
+      background: #fff; color: #64748b;
+      border: 1.5px solid #e2e8f0; border-radius: 12px;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, color .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pkg-free-btn:hover { border-color: #94a3b8; background: #f8fafc; color: #475569; }
+    .pkg-free-btn:active { background: #f1f5f9; transform: scale(.99); }
 
     .loading-bar { display: none; text-align: center; padding: 1rem; color: #888; font-size: 13px; }
 
@@ -340,19 +437,16 @@
     <div class="wh-title">🎾 Adam & Miguel 網球課程報名</div>
     <div class="wh-deadline">⏰ 7月報名 6/25 截止</div>
   </div>
-  <div class="progress-steps" id="progress-steps">
+  <div class="progress-steps" id="progress-steps" style="grid-template-columns:repeat(2,1fr);">
     <div class="ps-item active" data-step="1" onclick="jumpToStep(1)">
-      <div class="ps-dot">1</div><div class="ps-label">認識課程</div>
+      <div class="ps-dot">1</div><div class="ps-label">選擇時段</div>
     </div>
     <div class="ps-item" data-step="2" onclick="jumpToStep(2)">
-      <div class="ps-dot">2</div><div class="ps-label">選擇程度</div>
+      <div class="ps-dot">2</div><div class="ps-label">確認送出</div>
     </div>
-    <div class="ps-item" data-step="3" onclick="jumpToStep(3)">
-      <div class="ps-dot">3</div><div class="ps-label">選擇時段</div>
-    </div>
-    <div class="ps-item" data-step="4" onclick="jumpToStep(4)">
-      <div class="ps-dot">4</div><div class="ps-label">確認送出</div>
-    </div>
+  </div>
+  <div style="max-width:560px;margin:0 auto;padding:4px 0 8px;text-align:right;">
+    <a href="#course-info" style="font-size:11px;color:#1d4ed8;text-decoration:none;">📖 了解更多課程資訊 ↓</a>
   </div>
 </div>
 
@@ -360,30 +454,340 @@
   <div class="loading-bar" id="loading-bar">⏳ 讀取最新名額中...</div>
 
   <!-- ══════════════════════════════════
-       STEP 1：認識課程
+       STEP 1：選擇時段（原 step-3）
   ══════════════════════════════════ -->
-  <div class="step-page active" id="step-1">
-    <div class="hero">
+<div class="step-page active" id="step-1">
+
+    <!-- Hero -->
+    <div style="background:#185FA5;border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1rem;">
+      <div style="font-size:18px;font-weight:700;color:#E6F1FB;margin-bottom:4px;">🎾 Adam & Miguel 網球課程</div>
+      <div style="font-size:12px;color:#B5D4F4;line-height:1.8;">中正河濱公園網球場｜小班制教學｜12月年末團體賽</div>
+    </div>
+
+    <!-- 分流選單 -->
+    <div id="flow-menu" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem;">
+      <div class="flow-card" onclick="showFlow('pkg')">
+        <div class="flow-icon">🎯</div>
+        <div class="flow-title">套班報名</div>
+        <div class="flow-sub">選好班別自動排 6 堂<br>享 95 折優惠</div>
+      </div>
+      <div class="flow-card" onclick="showFlow('free')">
+        <div class="flow-icon">📅</div>
+        <div class="flow-title">自由選課</div>
+        <div class="flow-sub">自己挑選想上的<br>每一堂時段</div>
+      </div>
+      <div class="flow-card" onclick="showFlow('search')">
+        <div class="flow-icon">🔍</div>
+        <div class="flow-title">查詢訂單</div>
+        <div class="flow-sub">查詢或修改<br>已送出的報名</div>
+      </div>
+      <div class="flow-card" onclick="showFlow('info')">
+        <div class="flow-icon">📖</div>
+        <div class="flow-title">了解更多</div>
+        <div class="flow-sub">課程介紹、教練<br>與優惠說明</div>
+      </div>
+    </div>
+
+    <!-- 套班內容 -->
+    <div id="flow-pkg" style="display:none;">
+      <!-- 場地說明 -->
+      <div style="background:#FAEEDA;border:.5px solid #EF9F27;border-radius:10px;padding:9px 12px;margin-bottom:.75rem;font-size:12px;color:#633806;line-height:1.8;">
+        ⚠️ 場地採<b>抽籤制</b>，課表為目前已確認的開課日期，實際時段以系統顯示為準。
+      </div>
+      <!-- Step A: 程度 -->
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <div style="width:20px;height:20px;border-radius:50%;background:#185FA5;color:#E6F1FB;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+          <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">選擇程度</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="pkg-level-grid">
+          <div class="pkg-lv pkg-lv-sel" onclick="pkgSelectLevel('beginner',this)">
+            <div style="font-size:18px;margin-bottom:4px;">🌱</div>
+            <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">初階班</div>
+            <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;">從零開始</div>
+          </div>
+          <div class="pkg-lv" onclick="pkgSelectLevel('mid',this)">
+            <div style="font-size:18px;margin-bottom:4px;">🔥</div>
+            <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">中階班</div>
+            <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;">提升穩定度</div>
+          </div>
+          <div class="pkg-lv" onclick="pkgSelectLevel('rally',this)">
+            <div style="font-size:18px;margin-bottom:4px;">⚡</div>
+            <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">對打班</div>
+            <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;">純對打訓練</div>
+          </div>
+        </div>
+      </div>
+      <!-- Step B: 班別 -->
+      <div class="card" id="pkg-plan-card">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <div style="width:20px;height:20px;border-radius:50%;background:#185FA5;color:#E6F1FB;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+          <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">選擇班別</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;" id="pkg-plan-grid"></div>
+      </div>
+      <!-- Step C: 起始月份 -->
+      <div class="card" id="pkg-month-card" style="display:none;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <div style="width:20px;height:20px;border-radius:50%;background:#185FA5;color:#E6F1FB;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+          <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">選擇起始月份</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;" id="pkg-month-opts"></div>
+      </div>
+      <!-- Step D: 時段預覽 -->
+      <div class="card" id="pkg-slot-card" style="display:none;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+          <div style="width:20px;height:20px;border-radius:50%;background:#185FA5;color:#E6F1FB;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+          <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);" id="pkg-slot-label">時段預覽</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;" id="pkg-slot-list"></div>
+      </div>
+      <!-- 費用 -->
+      <div class="card" id="pkg-fee-card" style="display:none;">
+        <div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;">費用明細</div>
+        <div id="pkg-fee-rows"></div>
+      </div>
+      <!-- 確認按鈕 -->
+      <div id="pkg-action" style="display:none;">
+        <button onclick="confirmPackageAndNext()" class="pkg-confirm-btn">確認套班，繼續填寫資料 →</button>
+      </div>
+
+
+      <button onclick="showFlow(null)" style="width:100%;padding:9px;margin-top:8px;background:none;border:none;font-size:12px;color:#94a3b8;cursor:pointer;">← 返回主選單</button>
+    </div><!-- /flow-pkg -->
+<!-- 自由選課內容 -->
+    <div id="flow-free" style="display:none;">
+      <div class="card">
+        <div class="sec-label">選擇時段（可多選，想上幾堂選幾堂）</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+          <div class="month-tabs" id="month-tabs" style="margin:0;">
+            <div class="mtab active" data-m="7">7月</div>
+            <div class="mtab" data-m="8">8月</div>
+            <div class="mtab" data-m="9">9月</div>
+            <div class="mtab" data-m="10">10月</div>
+            <div class="mtab" data-m="11">11月</div>
+            <div class="mtab" data-m="12">12月</div>
+          </div>
+          <button id="btn-clear-slots" onclick="clearAllSlots()" style="display:none;padding:4px 12px;font-size:11px;font-weight:600;color:#dc2626;background:#fff;border:1.5px solid #dc2626;border-radius:20px;cursor:pointer;white-space:nowrap;">清除全部</button>
+        </div>
+        <div id="deadline-hint" style="display:block;background:#fffbeb;border:0.5px solid #fcd34d;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#92400e;">⏰ 7月課程報名將於 <b>6/25</b> 截止！</div>
+        <select id="level-filter" style="width:100%;padding:8px 12px;border-radius:9px;border:1.5px solid #e2e8f0;font-size:13px;color:#1a1a1a;background:#fff;outline:none;margin-bottom:12px;">
+          <option value="">全部時段</option>
+          <option value="beginner">🟢 初階班（週二、週三）</option>
+          <option value="mid">🔵 中階班（週四 19-20）</option>
+          <option value="rally">🩷 對打課（週四 20-21）</option>
+        </select>
+        <div id="habit-card" class="habit-card"></div>
+        <div class="cal-grid" id="slot-grid"></div>
+        <div class="sel-info" id="sel-info">已選 0 個正選時段・0 個候補時段</div>
+      </div>
+      <div id="waitlist-box" class="waitlist-box">
+        <div class="waitlist-title">🟣 候補名單</div>
+        <div class="waitlist-sub">以下時段額滿，你已加入候補。有名額釋出時教練會優先聯繫你。</div>
+        <div id="waitlist-items"></div>
+      </div>
+      <div class="card">
+        <div class="sec-label">費用試算</div>
+        <div class="fee-box">
+          <div class="fee-title">📊 你的報名費用</div>
+          <div class="fee-row"><span>小班</span><span id="fs">0 堂 × $550 = $0</span></div>
+          <div class="fee-row"><span>大班</span><span id="fb">0 堂 × $490 = $0</span></div>
+          <div class="fee-row"><span>對打課</span><span id="fr">0 堂 × $800 = $0</span></div>
+          <div class="fee-row" id="fd" style="display:none"><span class="fee-disc">🎉 6堂95折優惠</span><span class="fee-disc" id="fd-amt"></span></div>
+          <div class="fee-row"><span>場地費（上課當天收）</span><span>$80 × <span id="fc">0</span> 堂</span></div>
+          <div class="fee-row"><span>課程費合計</span><span id="ft" style="color:#1d4ed8">$0</span></div>
+          <div id="fg" class="fee-gift" style="display:none">🏆 選滿6堂！免費參加 12/23–24 網球團體賽（免報名費 $600）</div>
+          <div class="fee-note">
+            ・6堂套票95折（小班、大班、對打課皆可混搭）<br>
+            ・場地費 $80/堂，上課當天收取<br>
+            ・候補確認入班後再計費
+          </div>
+        </div>
+      </div>
+      <div id="free-summary-wrap" style="display:none;margin-bottom:.75rem;">
+        <div onclick="toggleFreeSummary()" style="background:#fff;border:1.5px solid #bfdbfe;border-radius:12px 12px 0 0;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+          <div style="font-size:13px;font-weight:500;color:#1d4ed8;">📋 確認選課內容</div>
+          <span id="free-summary-toggle-icon" style="font-size:12px;color:#1d4ed8;">▼</span>
+        </div>
+        <div id="free-summary-body" style="display:none;background:#f8fafc;border:1.5px solid #bfdbfe;border-top:none;border-radius:0 0 12px 12px;padding:12px 14px;">
+          <div id="free-summary-content"></div>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn-next" id="btn-next-3" disabled onclick="showSharedForm('free')">填資料送出 →</button>
+      </div>
+      <button onclick="showFlow(null)" style="width:100%;padding:9px;margin-top:6px;background:none;border:none;font-size:12px;color:#94a3b8;cursor:pointer;">← 返回主選單</button>
+    </div><!-- /flow-free -->
+
+
+
+
+        <!-- 查詢訂單內容 -->
+    <div id="flow-search" style="display:none;">
+      <div class="card">
+        <div class="sec-label">查詢／修改已送出的報名</div>
+        <div style="font-size:12px;color:#888;margin-bottom:10px;line-height:1.7;">已送出報名後想查詢或更改時段？輸入當初填寫的 LINE ID 或聯絡電話。</div>
+        <div style="display:flex;gap:6px;">
+          <input id="f-search-line" placeholder="輸入 LINE ID 或聯絡電話" style="flex:1;padding:8px 12px;font-size:13px;border-radius:8px;border:1.5px solid #e2e8f0;outline:none;background:#fff;">
+          <button id="btn-load-old" type="button" style="background:#64748b;color:#fff;border:none;padding:8px 14px;font-size:13px;border-radius:8px;cursor:pointer;font-weight:700;white-space:nowrap;">查詢訂單</button>
+        </div>
+        <span id="search-msg" style="font-size:11px;color:#888;display:block;margin-top:6px;"></span>
+      </div>
+      <button onclick="showFlow(null)" style="width:100%;padding:9px;background:none;border:none;font-size:12px;color:#94a3b8;cursor:pointer;">← 返回主選單</button>
+    </div>
+
+    <!-- 了解更多內容 -->
+    <div id="flow-info" style="display:none;">
+      <div style="text-align:center;padding:1rem 0 .5rem;">
+        <div style="font-size:14px;color:#555;margin-bottom:12px;">課程介紹、教練資訊與優惠說明在頁面下方</div>
+        <a href="#course-info" style="display:inline-block;padding:10px 24px;background:#185FA5;color:#fff;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">↓ 前往查看課程介紹</a>
+      </div>
+      <button onclick="showFlow(null)" style="width:100%;padding:9px;margin-top:6px;background:none;border:none;font-size:12px;color:#94a3b8;cursor:pointer;">← 返回主選單</button>
+    </div>
+
+  </div><!-- /step-1 -->
+
+
+
+
+
+
+
+
+  <!-- ══════════════════════════════════
+       STEP 2：填資料 + 確認送出（原 step-4）
+  ══════════════════════════════════ -->
+  <div class="step-page" id="step-2">
+  </div>
+  <!-- 成功畫面 -->
+  <div class="success-box" id="success-box">
+    <div class="success-icon">🎾</div>
+    <div class="success-title">🎉 報名成功！</div>
+    <div class="success-sub" id="success-msg"></div>
+  </div>
+
+  <!-- 共用填資料表單 -->
+  <div id="shared-form" style="display:none;">
+
+    <!-- 訂單摘要 -->
+    <div class="order-summary" id="order-summary">
+      <div class="os-header">
+        <div class="os-title">📋 報名確認摘要</div>
+        <button class="os-edit-btn" onclick="showFlow('pkg')">← 修改時段</button>
+      </div>
+      <div class="os-body" id="os-body"></div>
+    </div>
+
+    <!-- 團體賽意願 -->
+    <div class="card" id="tournament-card">
+      <div class="sec-label">年底團體賽報名意願</div>
+      <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:12px;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;">🏆 12/23–24 網球團體賽</div>
+        <div style="font-size:12px;color:#78350f;line-height:1.9;">報名費：<b>$600 元</b><br>🎁 <b>報名滿6堂課即可免費參賽！</b>（省 $600）</div>
+      </div>
+      <div style="font-size:13px;color:#555;margin-bottom:10px;">請問您是否有意願報名年底的團體賽？</div>
+      <div style="display:flex;gap:8px;" id="tournament-opts">
+        <div class="tournament-opt" data-val="yes" style="flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;user-select:none;"><div style="font-size:18px;margin-bottom:4px;">✅</div>有意願</div>
+        <div class="tournament-opt" data-val="maybe" style="flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;user-select:none;"><div style="font-size:18px;margin-bottom:4px;">🤔</div>考慮中</div>
+        <div class="tournament-opt" data-val="no" style="flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;user-select:none;"><div style="font-size:18px;margin-bottom:4px;">❌</div>暫不考慮</div>
+      </div>
+    </div>
+
+    <!-- 基本資料 -->
+    <div class="card">
+      <div class="sec-label">基本資料</div>
+      <div class="field"><label>姓名 *</label><input id="f-name" placeholder="請輸入真實姓名"></div>
+      <div class="field"><label>LINE ID *</label><input id="f-line" placeholder="確認入班後加入群組"></div>
+      <div id="line-booked-hint"></div>
+      <div class="field"><label>聯絡電話</label><input id="f-phone" placeholder="停課通知用"></div>
+    </div>
+
+    <!-- 注意事項 -->
+    <div class="card">
+      <div class="sec-label">注意事項</div>
+      <div style="background:#eff6ff;border-radius:10px;padding:12px 14px;margin-bottom:12px;border:1.5px solid #bfdbfe;">
+        <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:8px;">📋 報名流程</div>
+        <div style="display:flex;gap:0;flex-direction:column;">
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;padding:4px 0;">
+            <span style="background:#1d4ed8;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">1</span>
+            <span style="color:#1e40af;">填寫報名表並送出，選擇偏好的上課時段</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;padding:4px 0;">
+            <span style="background:#1d4ed8;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</span>
+            <span style="color:#1e40af;">教練確認班級與時段後，透過 LINE 傳送正式繳費單</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;padding:4px 0;">
+            <span style="background:#1d4ed8;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</span>
+            <span style="color:#1e40af;">完成繳費後，訂單正式成立，名額確認！</span>
+          </div>
+        </div>
+      </div>
+      <div class="rules">
+        <div class="rule-row"><span class="r-icon">🎾</span><span>課表於報名完成後，由教練確認並統一公告給學員</span></div>
+        <div class="rule-row"><span class="r-icon">🌧️</span><span>下雨天停課，退費不補課</span></div>
+        <div class="rule-row"><span class="r-icon">🙋</span><span>請假仍需負擔當堂場地費 $80，請於上課前 1 小時告知</span></div>
+        <div class="rule-row"><span class="r-icon">👥</span><span>小班 1–5 人｜大班 4–10 人｜對打課 1–3 人，未達最低人數不開課</span></div>
+        <div class="rule-row"><span class="r-icon">🟣</span><span>額滿可填候補，每時段上限 3 位，有名額時優先通知</span></div>
+      </div>
+      <label class="chk">
+        <input type="checkbox" id="agree">
+        我已閱讀並同意以上所有規則與費用說明
+      </label>
+      <button class="btn-next" id="submit-btn" disabled style="margin-top:0;">送出報名 🎾</button>
+    </div>
+
+    <!-- 程度自評（選填） -->
+    <div class="card" style="position:relative;overflow:hidden;">
+      <div class="sk-deco-tl">🎾</div>
+      <div class="sk-deco-br">🎾</div>
+      <div class="sk-header">
+        <span class="sk-header-icon">🎾</span>
+        <span class="sk-header-title">上課前程度自評（選填）</span>
+      </div>
+      <p class="sk-sub">按住並左右拖曳，或點擊格子選分</p>
+      <div class="sk-body" id="skill-table"></div>
+      <div class="sk-radar-wrap">
+        <canvas id="radar" width="240" height="224"></canvas>
+      </div>
+    </div>
+
+    <div class="nav-row" style="margin-top:0;">
+      <button class="btn-prev" id="shared-back-btn" onclick="showFlow(currentFlow)" style="width:100%;flex:1;">← 返回</button>
+    </div>
+  </div>
+
+
+</div><!-- /page-wrap -->
+
+<!-- footer -->
+<div style="text-align:center;padding:2rem 1rem 2rem;color:#888;font-size:12px;line-height:2;">
+  <div style="font-size:16px;font-weight:700;color:#1d4ed8;margin-bottom:6px;">🎾 Adam 網球教學</div>
+  <div>📍 中正河濱公園網球場</div>
+  <div>📱 LINE ID：<a href="https://line.me/ti/p/~0958357747" style="color:#06b6d4;text-decoration:none;font-weight:600;">0958357747</a></div>
+  <div style="margin-top:8px;font-size:11px;color:#bbb;">© 2026 Adam Tennis</div>
+</div>
+
+<!-- ══ 了解更多：課程介紹 ══ -->
+<div id="course-info" style="background:#fff;border-top:2px solid #e2e8f0;padding:2rem 1rem 3rem;">
+  <div style="max-width:560px;margin:0 auto;">
+    <div style="font-size:18px;font-weight:900;color:#1d4ed8;margin-bottom:1rem;text-align:center;">📖 了解更多課程資訊</div>
+
+    <!-- Hero 簡介 -->
+    <div class="hero" style="margin-bottom:1rem;">
       <div class="hero-title">🎾 Adam & Miguel 網球課程</div>
       <div class="hero-sub">中正河濱公園網球場｜教練逐一調整動作｜名額有限</div>
       <div class="class-types">
         <div class="ct ct-small">
           <div class="ct-title">📌 小班</div>
-          <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">
-            週三／四<br>👤 1–5人<br>🧑‍🏫 Adam教練<br>💰 $550／堂
-          </div>
+          <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">週三／四<br>👤 1–5人<br>🧑‍🏫 Adam教練<br>💰 $550／堂</div>
         </div>
         <div class="ct ct-big">
           <div class="ct-title">📌 大班</div>
-          <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">
-            週二（9月起）<br>👤 4–10人<br>🧑‍🏫 Adam＋Miguel<br>💰 $490／堂
-          </div>
+          <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">週二（9月起）<br>👤 4–10人<br>🧑‍🏫 Adam＋Miguel<br>💰 $490／堂</div>
         </div>
         <div class="ct" style="background:rgba(255,255,255,.12);">
           <div class="ct-title">🎾 對打課</div>
-          <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">
-            週四 20-21<br>👤 1–3人<br>🧑‍🏫 Adam教練<br>💰 $800／堂
-          </div>
+          <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">週四 20-21<br>👤 1–3人<br>🧑‍🏫 Adam教練<br>💰 $800／堂</div>
         </div>
       </div>
     </div>
@@ -396,7 +800,7 @@
           <div class="feature-icon">🌱</div>
           <div class="feature-text">
             <div class="feature-title">建立信心，從零開始</div>
-            <div class="feature-desc">不管有沒有基礎，教練會在每一堂課中逐一觀察並調整你的動作。課程內容涵蓋以下四大核心：</div>
+            <div class="feature-desc">不管有沒有基礎，教練會在每一堂課中逐一觀察並調整你的動作。</div>
             <div class="course-content">
               <div class="cc-item"><span class="cc-tag">正＆反拍</span><span class="cc-desc">從握拍姿勢、站位到重心轉移，建立順暢的發力動作。</span></div>
               <div class="cc-item"><span class="cc-tag">發球</span><span class="cc-desc">從下手的穩定發球到上手發球循序漸進，練出漂亮的發球姿勢。</span></div>
@@ -466,7 +870,7 @@
       </div>
     </div>
 
-    <!-- 6堂優惠提示 -->
+    <!-- 優惠 -->
     <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:2px solid #fcd34d;border-radius:14px;padding:14px 16px;margin-bottom:1rem;">
       <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;">🎁 報名優惠</div>
       <div style="font-size:12px;color:#78350f;line-height:1.9;">
@@ -476,264 +880,10 @@
       </div>
     </div>
 
-    <div class="nav-row">
-      <button class="btn-next" onclick="goStep(2)">開始報名 →</button>
-    </div>
-
-    <!-- 查詢已送出的報名 -->
-    <div class="modify-card">
-      <div class="sec-label">查詢／修改已送出的報名</div>
-      <div style="font-size:12px;color:#888;margin-bottom:10px;line-height:1.7;">已送出報名後想查詢或更改時段？輸入當初填寫的 LINE ID 或聯絡電話。</div>
-      <div style="display:flex;gap:6px;">
-        <input id="f-search-line" placeholder="輸入 LINE ID 或聯絡電話" style="flex:1;padding:8px 12px;font-size:13px;border-radius:8px;border:1.5px solid #e2e8f0;outline:none;background:#fff;">
-        <button id="btn-load-old" type="button" style="background:#64748b;color:#fff;border:none;padding:8px 14px;font-size:13px;border-radius:8px;cursor:pointer;font-weight:700;white-space:nowrap;">查詢訂單</button>
-      </div>
-      <span id="search-msg" style="font-size:11px;color:#888;display:block;margin-top:6px;"></span>
+    <div style="text-align:center;">
+      <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" style="display:inline-block;padding:10px 24px;background:#1d4ed8;color:#fff;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;">↑ 回到報名表</a>
     </div>
   </div>
-
-  <!-- ══════════════════════════════════
-       STEP 2：選擇程度
-  ══════════════════════════════════ -->
-  <div class="step-page" id="step-2">
-    <!-- 程度自評表 -->
-    <div class="card" style="position:relative;overflow:hidden;">
-      <div class="sk-deco-tl">🎾</div>
-      <div class="sk-deco-br">🎾</div>
-      <div class="sk-header">
-        <span class="sk-header-icon">🎾</span>
-        <span class="sk-header-title">上課前程度自評（選填）</span>
-      </div>
-      <p class="sk-sub">按住並左右拖曳，或點擊格子選分</p>
-      <div class="sk-body" id="skill-table"></div>
-      <div class="sk-radar-wrap">
-        <canvas id="radar" width="240" height="224"></canvas>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="sec-label">你的程度</div>
-      <p style="font-size:13px;color:#555;margin-bottom:16px;line-height:1.7;">請選擇最符合你目前程度的班別。選擇後系統會自動篩選對應的上課時段。</p>
-      <div class="level-grid" id="level-grid">
-        <div class="lc" data-level="beginner">
-          <div class="lc-icon">🌱</div>
-          <div class="lc-name">初階班</div>
-          <div class="lc-desc">從零開始</div>
-        </div>
-        <div class="lc" data-level="mid">
-          <div class="lc-icon">🔥</div>
-          <div class="lc-name">中階班</div>
-          <div class="lc-desc">提升穩定度</div>
-        </div>
-        <div class="lc" data-level="1v1">
-          <div class="lc-icon">⚡</div>
-          <div class="lc-name">對打班</div>
-          <div class="lc-desc">純對打訓練</div>
-        </div>
-      </div>
-
-      <div class="level-desc-box" id="desc-beginner">
-        <div class="level-desc-title">🌱 初階班 — 從零開始打好基礎</div>
-        <div class="level-desc-content">
-          適合完全沒有基礎或剛接觸網球的學員，會有大量的動作練習。<br><br>
-          <span class="level-tag">正＆反拍</span> 學習握拍姿勢與基本動作，建立穩定的揮拍動作<br>
-          <span class="level-tag">下手發球</span> 掌握發球節奏，建立穩定的發球基礎<br>
-          <span class="level-tag">上手發球</span> 循序漸進學習上手發球，掌握正確發力方式<br>
-          <span class="level-tag">比賽規則</span> 熟悉基本計分與規則，為實際對打做準備
-        </div>
-      </div>
-      <div class="level-desc-box" id="desc-mid">
-        <div class="level-desc-title">🔥 中階班 — 提升穩定度與球種多樣性</div>
-        <div class="level-desc-content">
-          適合已有基礎、正反拍可對打的學員，著重技術提升。<br><br>
-          <span class="level-tag">站位與重心</span> 更穩定的站位與重心轉移，提升擊球品質<br>
-          <span class="level-tag">長短球</span> 學習底線對打的長球與短球不同處理方式<br>
-          <span class="level-tag">截擊</span> 網前截擊技術訓練<br>
-          <span class="level-tag">上旋＆側旋發球</span> 發球旋轉控制，讓發球更具威脅性<br>
-          <span class="level-tag">小格對打</span> 小場地密集對打，提升手感與反應速度
-        </div>
-      </div>
-      <div class="level-desc-box" id="desc-1v1">
-        <div class="level-desc-title">⚡ 對打班 — 純對打，磨練手感</div>
-        <div class="level-desc-content">
-          適合已有一定程度、想透過大量對打提升穩定度的學員。<br><br>
-          <span class="level-tag">底線對打</span> 著重底線來回抽球的穩定度<br>
-          <span class="level-tag">擊球品質</span> 提升每一球的落點控制與擊球質量<br>
-          <span class="level-tag">實戰訓練</span> 在對打中累積比賽節奏與臨場感
-        </div>
-      </div>
-    </div>
-
-    <div class="nav-row">
-      <button class="btn-prev" onclick="goStep(1)">← 返回</button>
-      <button class="btn-next" id="btn-next-2" disabled onclick="goStep(3)">選好了，看時段 →</button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════
-       STEP 3：選擇時段
-  ══════════════════════════════════ -->
-  <div class="step-page" id="step-3">
-    <div class="card">
-      <div class="sec-label">選擇時段（可多選，想上幾堂選幾堂）</div>
-
-      <!-- 月份切換 -->
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
-        <div class="month-tabs" id="month-tabs" style="margin:0;">
-          <div class="mtab active" data-m="7">7月</div>
-          <div class="mtab" data-m="8">8月</div>
-          <div class="mtab" data-m="9">9月</div>
-          <div class="mtab" data-m="10">10月</div>
-          <div class="mtab" data-m="11">11月</div>
-          <div class="mtab" data-m="12">12月</div>
-        </div>
-        <button id="btn-clear-slots" onclick="clearAllSlots()" style="display:none;padding:4px 12px;font-size:11px;font-weight:600;color:#dc2626;background:#fff;border:1.5px solid #dc2626;border-radius:20px;cursor:pointer;white-space:nowrap;">清除全部</button>
-      </div>
-
-      <div id="deadline-hint" style="display:block;background:#fffbeb;border:0.5px solid #fcd34d;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#92400e;">⏰ 7月課程報名將於 <b>6/25</b> 截止！</div>
-
-      <select id="level-filter" style="width:100%;padding:8px 12px;border-radius:9px;border:1.5px solid #e2e8f0;font-size:13px;color:#1a1a1a;background:#fff;outline:none;margin-bottom:12px;">
-        <option value="">全部時段</option>
-        <option value="beginner">🟢 初階班（週二、週三）</option>
-        <option value="mid">🔵 中階班（週四 19-20）</option>
-        <option value="rally">🩷 對打課（週四 20-21）</option>
-      </select>
-
-      <div id="habit-card" class="habit-card"></div>
-
-      <div class="cal-grid" id="slot-grid"></div>
-      <div class="sel-info" id="sel-info">已選 0 個正選時段・0 個候補時段</div>
-    </div>
-
-    <!-- 候補名單 -->
-    <div id="waitlist-box" class="waitlist-box">
-      <div class="waitlist-title">🟣 候補名單</div>
-      <div class="waitlist-sub">以下時段額滿，你已加入候補。有名額釋出時教練會優先聯繫你。</div>
-      <div id="waitlist-items"></div>
-    </div>
-
-    <!-- 費用試算 -->
-    <div class="card">
-      <div class="sec-label">費用試算</div>
-      <div class="fee-box">
-        <div class="fee-title">📊 你的報名費用</div>
-        <div class="fee-row"><span>小班</span><span id="fs">0 堂 × $550 = $0</span></div>
-        <div class="fee-row"><span>大班</span><span id="fb">0 堂 × $490 = $0</span></div>
-        <div class="fee-row"><span>對打課</span><span id="fr">0 堂 × $800 = $0</span></div>
-        <div class="fee-row" id="fd" style="display:none"><span class="fee-disc">🎉 6堂95折優惠</span><span class="fee-disc" id="fd-amt"></span></div>
-        <div class="fee-row"><span>場地費（上課當天收）</span><span>$80 × <span id="fc">0</span> 堂</span></div>
-        <div class="fee-row"><span>課程費合計</span><span id="ft" style="color:#1d4ed8">$0</span></div>
-        <div id="fg" class="fee-gift" style="display:none">🏆 選滿6堂！免費參加 12/23–24 網球團體賽（免報名費 $600）</div>
-        <div class="fee-note">
-          ・6堂套票95折（小班、大班、對打課皆可混搭）<br>
-          ・場地費 $80/堂，上課當天收取<br>
-          ・候補確認入班後再計費
-        </div>
-      </div>
-    </div>
-
-    <div class="nav-row">
-      <button class="btn-prev" onclick="goStep(2)">← 返回</button>
-      <button class="btn-next" id="btn-next-3" disabled onclick="goStep(4)">填資料送出 →</button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════
-       STEP 4：填資料 + 確認送出
-  ══════════════════════════════════ -->
-  <div class="step-page" id="step-4">
-
-    <!-- 訂單摘要 -->
-    <div class="order-summary" id="order-summary">
-      <div class="os-header">
-        <div class="os-title">📋 報名確認摘要</div>
-        <button class="os-edit-btn" onclick="goStep(3)">← 修改時段</button>
-      </div>
-      <div class="os-body" id="os-body">
-        <!-- 由 updateOrderSummary() 動態產生 -->
-      </div>
-    </div>
-
-    <!-- 團體賽意願 -->
-    <div class="card" id="tournament-card">
-      <div class="sec-label">年底團體賽報名意願</div>
-      <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:12px;margin-bottom:12px;">
-        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;">🏆 12/23–24 網球團體賽</div>
-        <div style="font-size:12px;color:#78350f;line-height:1.9;">報名費：<b>$600 元</b><br>🎁 <b>報名滿6堂課即可免費參賽！</b>（省 $600）</div>
-      </div>
-      <div style="font-size:13px;color:#555;margin-bottom:10px;">請問您是否有意願報名年底的團體賽？</div>
-      <div style="display:flex;gap:8px;" id="tournament-opts">
-        <div class="tournament-opt" data-val="yes" style="flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;user-select:none;"><div style="font-size:18px;margin-bottom:4px;">✅</div>有意願</div>
-        <div class="tournament-opt" data-val="maybe" style="flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;user-select:none;"><div style="font-size:18px;margin-bottom:4px;">🤔</div>考慮中</div>
-        <div class="tournament-opt" data-val="no" style="flex:1;border:2px solid #e2e8f0;border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;user-select:none;"><div style="font-size:18px;margin-bottom:4px;">❌</div>暫不考慮</div>
-      </div>
-    </div>
-
-    <!-- 基本資料 -->
-    <div class="card">
-      <div class="sec-label">基本資料</div>
-      <div class="field"><label>姓名 *</label><input id="f-name" placeholder="請輸入真實姓名"></div>
-      <div class="field"><label>LINE ID *</label><input id="f-line" placeholder="確認入班後加入群組"></div>
-      <div id="line-booked-hint"></div>
-      <div class="field"><label>聯絡電話</label><input id="f-phone" placeholder="停課通知用"></div>
-    </div>
-
-    <!-- 注意事項 -->
-    <div class="card">
-      <div class="sec-label">注意事項</div>
-      <div style="background:#eff6ff;border-radius:10px;padding:12px 14px;margin-bottom:12px;border:1.5px solid #bfdbfe;">
-        <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:8px;">📋 報名流程</div>
-        <div style="display:flex;gap:0;flex-direction:column;">
-          <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;padding:4px 0;">
-            <span style="background:#1d4ed8;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">1</span>
-            <span style="color:#1e40af;">填寫報名表並送出，選擇偏好的上課時段</span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;padding:4px 0;">
-            <span style="background:#1d4ed8;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</span>
-            <span style="color:#1e40af;">教練確認班級與時段後，透過 LINE 傳送正式繳費單</span>
-          </div>
-          <div style="display:flex;gap:10px;align-items:flex-start;font-size:12px;padding:4px 0;">
-            <span style="background:#1d4ed8;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</span>
-            <span style="color:#1e40af;">完成繳費後，訂單正式成立，名額確認！</span>
-          </div>
-        </div>
-      </div>
-      <div class="rules">
-        <div class="rule-row"><span class="r-icon">🎾</span><span>課表於報名完成後，由教練確認並統一公告給學員</span></div>
-        <div class="rule-row"><span class="r-icon">🌧️</span><span>下雨天停課，退費不補課</span></div>
-        <div class="rule-row"><span class="r-icon">🙋</span><span>請假仍需負擔當堂場地費 $80，請於上課前 1 小時告知</span></div>
-        <div class="rule-row"><span class="r-icon">👥</span><span>小班 1–5 人｜大班 4–10 人｜對打課 1–3 人，未達最低人數不開課</span></div>
-        <div class="rule-row"><span class="r-icon">🟣</span><span>額滿可填候補，每時段上限 3 位，有名額時優先通知</span></div>
-      </div>
-      <label class="chk">
-        <input type="checkbox" id="agree">
-        我已閱讀並同意以上所有規則與費用說明
-      </label>
-      <button class="btn-next" id="submit-btn" disabled style="margin-top:0;">送出報名 🎾</button>
-    </div>
-
-    <div class="nav-row" style="margin-top:0;">
-      <button class="btn-prev" onclick="goStep(3)" style="width:100%;flex:1;">← 返回修改時段</button>
-    </div>
-
-
-  </div>
-
-  <!-- 成功畫面 -->
-  <div class="success-box" id="success-box">
-    <div class="success-icon">🎾</div>
-    <div class="success-title">🎉 報名成功！</div>
-    <div class="success-sub" id="success-msg"></div>
-  </div>
-
-</div><!-- /page-wrap -->
-
-<!-- footer -->
-<div style="text-align:center;padding:2rem 1rem 3rem;color:#888;font-size:12px;line-height:2;">
-  <div style="font-size:16px;font-weight:700;color:#1d4ed8;margin-bottom:6px;">🎾 Adam 網球教學</div>
-  <div>📍 中正河濱公園網球場</div>
-  <div>📱 LINE ID：<a href="https://line.me/ti/p/~0958357747" style="color:#06b6d4;text-decoration:none;font-weight:600;">0958357747</a></div>
-  <div style="margin-top:8px;font-size:11px;color:#bbb;">© 2026 Adam Tennis</div>
 </div>
 
 <script>
@@ -841,7 +991,7 @@ const DEFS = {
 };
 
 const MAX_S=5, MAX_B=10, MAX_W=3;
-let curM=7, level='', selSlots=new Set(), waitSlots=new Set();
+let curM=7, level='beginner', selSlots=new Set(), waitSlots=new Set();
 let tournamentIntent='';
 let skillRatings = { forehand:0, backhand:0, volley:0, serve:0, smash:0 };
 let counts={}, wcounts={};
@@ -857,22 +1007,14 @@ let currentStep=1;
 // 分頁導航
 // =============================================
 function goStep(n) {
-  // 向前只能到已完成步驟
-  if (n > 2 && !level) { alert('請先選擇課程程度'); return; }
-  if (n > 3 && selSlots.size === 0 && waitSlots.size === 0) { alert('請先選擇至少一個時段'); return; }
-
-  document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active'));
-  document.getElementById('step-' + n).classList.add('active');
-  currentStep = n;
+  if (n > 1 && selSlots.size === 0 && waitSlots.size === 0) { alert('請先選擇至少一個時段'); return; }
+  if (n === 2) { showSharedForm(currentFlow || 'free'); return; }
+  if (n === 1) { showFlow(currentFlow || 'free'); return; }
   updateProgress();
   window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  // 進入 step 4 時更新摘要
-  if (n === 4) updateOrderSummary();
 }
 
 function jumpToStep(n) {
-  // 只允許跳到已完成或當前步驟
   if (n >= currentStep) return;
   goStep(n);
 }
@@ -914,7 +1056,7 @@ function updateOrderSummary() {
       <div class="os-slot-date">${s.d}</div>
       <div class="os-slot-time">${timeLabel}｜${coachLabel}</div>
       <span class="os-slot-badge" style="${clsColor}">${clsLabel}</span>
-      <span style="font-size:11px;font-weight:700;color:#854d0e;">${price}</span>
+      <button class="os-remove-btn" onclick="osSumRemoveSlot('${k}')" title="移除此時段">✕</button>
     </div>`;
   }).filter(Boolean).join('');
 
@@ -924,9 +1066,10 @@ function updateOrderSummary() {
     const s=DEFS[m]&&DEFS[m][i]; if(!s) return '';
     const timeLabel = s.t==='19-20'?'19:00–20:00':'20:00–21:00';
     return `<div class="os-wait-item">
-      <span style="font-size:11px;color:#7c3aed;font-weight:700;">🟣 候補</span>
+      <span style="font-size:11px;color:#7c3aed;font-weight:700;flex-shrink:0;">🟣 候補</span>
       <div class="os-slot-date">${s.d}</div>
-      <div class="os-slot-time">${timeLabel}</div>
+      <div class="os-slot-time" style="flex:1;">${timeLabel}</div>
+      <button class="os-remove-btn" onclick="osSumRemoveWait('${k}')" title="移除候補">✕</button>
     </div>`;
   }).filter(Boolean).join('');
 
@@ -943,13 +1086,28 @@ function updateOrderSummary() {
     ? `<div class="os-gift">🏆 選滿6堂！免費參加 12/23–24 網球團體賽（省 $600）</div>`
     : '';
 
-  document.getElementById('os-body').innerHTML = `
+  // 套班資訊
+  const pkgInfo = (() => {
+    if(!pkgPlan || !pkgMonth) return '';
+    const p = PKG_PLANS.find(x=>x.key===pkgPlan);
+    if(!p) return '';
+    const lvLabel = {beginner:'初階班', mid:'中階班', rally:'對打班'}[pkgLevel] || '';
+    return `
     <div class="os-section">
-      <div class="os-section-title">班別</div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="os-slot-badge" style="font-size:12px;padding:3px 12px;${levelColors[level]||''}">${levelMap[level]||'—'}</span>
+      <div class="os-section-title">套班方案</div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span class="os-slot-badge" style="font-size:11px;padding:3px 10px;background:#E6F1FB;color:#0C447C;">${lvLabel}</span>
+          <span style="font-size:13px;font-weight:500;color:#1a1a1a;">${p.label}</span>
+          <span style="font-size:11px;color:#666;">從 ${pkgMonth} 月起</span>
+        </div>
+        <div style="font-size:11px;color:#666;">👤 ${p.coach}・${p.size}・$${p.price}／堂</div>
       </div>
-    </div>
+    </div>`;
+  })();
+
+  document.getElementById('os-body').innerHTML = `
+    ${pkgInfo}
     ${selSlots.size>0 ? `
     <div class="os-section">
       <div class="os-section-title">正選時段（${selSlots.size} 堂）</div>
@@ -1326,19 +1484,20 @@ function updateSelInfo(){
 function checkBtn3(){
   const hasSlot = selSlots.size >= 1 || waitSlots.size >= 1;
   document.getElementById('btn-next-3').disabled = !hasSlot;
+  updateFreeSummary();
 }
 
 function checkBtn(){
   const name=document.getElementById('f-name').value.trim();
   const line=document.getElementById('f-line').value.trim();
   const agree=document.getElementById('agree').checked;
-  document.getElementById('submit-btn').disabled=!(name&&line&&level&&(selSlots.size>=1||waitSlots.size>=1)&&agree);
+  document.getElementById('submit-btn').disabled=!(name&&line&&(selSlots.size>=1||waitSlots.size>=1)&&agree);
 }
 
 // =============================================
 // 事件綁定
 // =============================================
-document.getElementById('level-grid').addEventListener('click', function(e){
+document.getElementById('level-grid') && document.getElementById('level-grid').addEventListener('click', function(e){
   const lc=e.target.closest('.lc'); if(!lc) return;
   document.querySelectorAll('.lc').forEach(c=>c.classList.remove('sel'));
   lc.classList.add('sel');
@@ -1348,7 +1507,6 @@ document.getElementById('level-grid').addEventListener('click', function(e){
   document.querySelectorAll('.level-desc-box').forEach(b=>b.classList.remove('show'));
   const descEl=document.getElementById('desc-'+level);
   if(descEl) descEl.classList.add('show');
-  document.getElementById('btn-next-2').disabled = false;
   renderSlots();
 });
 
@@ -1558,8 +1716,14 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   const disc = total >= 6 ? Math.round(raw * 0.05) : 0;
   const final = raw - disc;
 
+  // 程度：套班流程用 pkgLevel，自由選課用 level 變數
+  // pkgLevel 對應: beginner/mid/rally → GAS 的 1v1 需轉換
+  const effectiveLevel = (currentFlow === 'pkg' && pkgLevel)
+    ? (pkgLevel === 'rally' ? '1v1' : pkgLevel)
+    : level;
+
   const payload = {
-    action: 'register', name, line, phone, level,
+    action: 'register', name, line, phone, level: effectiveLevel,
     slots: rawSlotsStr, waitlist: rawWaitlistStr,
     smallCount: small, bigCount: big, rallyCount: rally,
     totalFee: final, discount: disc,
@@ -1591,7 +1755,8 @@ document.getElementById('submit-btn').addEventListener('click', async function()
       return `${s.d} ${timeLabel}`;
     }).filter(str => str !== '').join('<br>');
 
-    document.getElementById('step-4').style.display='none';
+    document.getElementById('step-1').style.display='none';
+    document.getElementById('shared-form').style.display='none';
     document.getElementById('success-box').style.display='block';
     document.getElementById('success-msg').innerHTML=
       `<b>${name}</b> 你好！<br><br>`+
@@ -1770,9 +1935,341 @@ async function cancelOrder(idx) {
   } catch(e) { alert('取消失敗，請稍後再試'); }
 }
 
+function toggleFreeSummary(){
+  const body = document.getElementById('free-summary-body');
+  const icon = document.getElementById('free-summary-toggle-icon');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  icon.textContent = open ? '▲' : '▼';
+}
+
+function updateFreeSummary(){
+  const wrap = document.getElementById('free-summary-wrap');
+  const content = document.getElementById('free-summary-content');
+  if(!wrap || !content) return;
+
+  const total = selSlots.size + waitSlots.size;
+  if(total === 0){ wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+
+  const timeStr = t => t==='19-20'?'19:00–20:00':'20:00–21:00';
+  const clsColor = {small:'background:#dcfce7;color:#166534;', big:'background:#dbeafe;color:#1e40af;', rally:'background:#fce7f3;color:#9d174d;'};
+  const clsLabel = {small:'小班', big:'大班', rally:'對打'};
+
+  let html = '';
+
+  if(selSlots.size > 0){
+    html += `<div style="font-size:10px;font-weight:700;color:#9ca3af;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">正選時段（${selSlots.size} 堂）</div>`;
+    html += [...selSlots].map(k=>{
+      const parts=k.split('-'); const m=parseInt(parts[1]), i=parseInt(parts[2]);
+      const s=DEFS[m]&&DEFS[m][i]; if(!s) return '';
+      return `<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;margin-bottom:4px;">
+        <div style="font-size:12px;font-weight:700;min-width:76px;flex-shrink:0;">${s.d}</div>
+        <div style="font-size:11px;color:#666;flex:1;">${timeStr(s.t)}</div>
+        <span style="font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px;white-space:nowrap;${clsColor[s.cls]}">${clsLabel[s.cls]}</span>
+        <button onclick="osSumRemoveSlot('${k}')" class="os-remove-btn" title="移除">✕</button>
+      </div>`;
+    }).filter(Boolean).join('');
+  }
+
+  if(waitSlots.size > 0){
+    html += `<div style="font-size:10px;font-weight:700;color:#9ca3af;letter-spacing:.06em;text-transform:uppercase;margin:8px 0 6px;">候補時段（${waitSlots.size} 堂）</div>`;
+    html += [...waitSlots].map(k=>{
+      const parts=k.split('-'); const m=parseInt(parts[1]), i=parseInt(parts[2]);
+      const s=DEFS[m]&&DEFS[m][i]; if(!s) return '';
+      return `<div style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;border:1px solid #e9d5ff;background:#faf5ff;margin-bottom:4px;">
+        <span style="font-size:10px;color:#7c3aed;font-weight:700;flex-shrink:0;">🟣 候補</span>
+        <div style="font-size:12px;font-weight:700;min-width:76px;flex-shrink:0;">${s.d}</div>
+        <div style="font-size:11px;color:#666;flex:1;">${timeStr(s.t)}</div>
+        <button onclick="osSumRemoveWait('${k}')" class="os-remove-btn" title="移除">✕</button>
+      </div>`;
+    }).filter(Boolean).join('');
+  }
+
+  // 費用小計
+  let small=0,big=0,rally=0;
+  for(const k of selSlots){
+    const parts=k.split('-'); const m=parseInt(parts[1]), i=parseInt(parts[2]);
+    if(DEFS[m]&&DEFS[m][i]){ const cls=DEFS[m][i].cls; if(cls==='big') big++; else if(cls==='rally') rally++; else small++; }
+  }
+  const tot=small+big+rally, raw=small*550+big*490+rally*800;
+  const disc=tot>=6?Math.round(raw*0.05):0, final=raw-disc;
+  html += `<div style="border-top:1px solid #e2e8f0;margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;font-size:13px;font-weight:500;color:#1d4ed8;">
+    <span>課程費合計${tot>=6?' (95折)':''}</span><span>$${final.toLocaleString()}</span>
+  </div>`;
+  if(tot>=6) html+=`<div style="background:#dcfce7;border-radius:8px;padding:6px 10px;font-size:11px;color:#166534;margin-top:6px;font-weight:600;">🏆 選滿6堂！免費參加 12/23–24 年末團體賽</div>`;
+
+  content.innerHTML = html;
+}
+
+function osSumRemoveSlot(k){
+  selSlots.delete(k);
+  calcFee(); updateSelInfo(); checkBtn3();
+  updateOrderSummary();
+  updateFreeSummary();
+}
+
+function osSumRemoveWait(k){
+  waitSlots.delete(k);
+  renderWaitlist(); calcFee(); updateSelInfo(); checkBtn3();
+  updateOrderSummary();
+  updateFreeSummary();
+}
+
+// =============================================
+// 分流選單
+// =============================================
+let currentFlow = null; // 記錄從哪個 flow 進來的
+
+function showFlow(flow){
+  const progressSteps = document.getElementById('progress-steps');
+  const progressLink = progressSteps ? progressSteps.nextElementSibling : null;
+
+  ['pkg','free','search','info'].forEach(f=>{
+    document.getElementById('flow-'+f).style.display='none';
+  });
+  const sharedForm = document.getElementById('shared-form');
+  if(sharedForm) sharedForm.style.display='none';
+  document.querySelectorAll('.flow-card').forEach(c=>c.classList.remove('active'));
+
+  if(!flow){
+    document.getElementById('flow-menu').style.display='grid';
+    if(progressSteps) progressSteps.style.display='grid';
+    if(progressLink) progressLink.style.display='block';
+    window.scrollTo({top:0,behavior:'smooth'});
+    currentFlow = null;
+    return;
+  }
+
+  document.getElementById('flow-menu').style.display='none';
+  document.getElementById('flow-'+flow).style.display='block';
+  if(progressSteps) progressSteps.style.display='none';
+  if(progressLink) progressLink.style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+  currentFlow = flow;
+
+  if(flow==='free') renderSlots();
+  if(flow==='pkg') pkgRenderPlans();
+}
+
+function showSharedForm(fromFlow){
+  currentFlow = fromFlow;
+  ['pkg','free','search','info'].forEach(f=>{
+    document.getElementById('flow-'+f).style.display='none';
+  });
+  const sharedForm = document.getElementById('shared-form');
+  if(sharedForm){
+    sharedForm.style.display='block';
+    // 更新返回按鈕標籤
+    const backBtn = document.getElementById('shared-back-btn');
+    if(backBtn) backBtn.textContent = fromFlow==='pkg' ? '← 返回套班選課' : '← 返回自由選課';
+    updateOrderSummary();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+
+// =============================================
+// 套班功能（程度 → 班別 → 起始月 → 時段）
+// =============================================
+const PKG_PLANS=[
+  {key:'tue-19',label:'週二 19:00–20:00',type:'tue',time:'19-20',cls:['small','big'],level:'beginner',price:490,coach:'Adam + Miguel',size:'大班 4–10人',note9:'9月才開始大班'},
+  {key:'tue-20',label:'週二 20:00–21:00',type:'tue',time:'20-21',cls:['small','big'],level:'beginner',price:490,coach:'Adam + Miguel',size:'大班 4–10人',note9:'9月才開始大班'},
+  {key:'wed-19',label:'週三 19:00–20:00',type:'wed',time:'19-20',cls:['small'],level:'beginner',price:550,coach:'Adam',size:'小班 1–5人',rec:true},
+  {key:'wed-20',label:'週三 20:00–21:00',type:'wed',time:'20-21',cls:['small'],level:'beginner',price:550,coach:'Adam',size:'小班 1–5人'},
+  {key:'thu-19',label:'週四 19:00–20:00',type:'thu',time:'19-20',cls:['small'],level:'mid',price:550,coach:'Adam',size:'小班 1–5人'},
+  {key:'thu-20',label:'週四對打 20:00–21:00',type:'thu',time:'20-21',cls:['rally'],level:'rally',price:800,coach:'Adam',size:'1–3人'},
+];
+const PKG_MONTHS=[7,8,9,10,11,12];
+const PKG_CLS_LABEL={small:'小班',big:'大班',rally:'對打'};
+const PKG_CLS_COLOR={small:'background:#B5D4F4;color:#042C53;',big:'background:#C0DD97;color:#173404;',rally:'background:#EEEDFE;color:#26215C;'};
+const tStr2=t=>t==='19-20'?'19:00–20:00':'20:00–21:00';
+let pkgLevel='beginner', pkgPlan=null, pkgMonth=null;
+
+const PKG_TUE_DOUBLE = new Set(['s-9-1']); // 09/01 兩面球場，index 1 濾掉
+
+function pkgGetSlots(planKey,startM){
+  const p=PKG_PLANS.find(x=>x.key===planKey);
+  const res=[];
+  const si=PKG_MONTHS.indexOf(startM);
+  for(let mi=si;mi<PKG_MONTHS.length;mi++){
+    const m=PKG_MONTHS[mi];
+    (DEFS[m]||[]).forEach((s,i)=>{
+      if(PKG_TUE_DOUBLE.has(sk(m,i))) return; // 跳過重複場地
+      if(s.special==='tournament') return;
+      if(s.type!==p.type||s.t!==p.time||!p.cls.includes(s.cls)) return;
+      res.push({m,i,s});
+    });
+  }
+  return res;
+}
+
+function pkgCountInMonth(planKey,m){
+  const p=PKG_PLANS.find(x=>x.key===planKey);
+  return (DEFS[m]||[]).filter((s,i)=>
+    !PKG_TUE_DOUBLE.has(sk(m,i)) &&
+    !s.special&&s.type===p.type&&s.t===p.time&&p.cls.includes(s.cls)
+  ).length;
+}
+
+function pkgGetBreakdown(planKey,startM){
+  const pkg=pkgGetSlots(planKey,startM).slice(0,6);
+  const map={};
+  pkg.forEach(item=>{map[item.m]=(map[item.m]||0)+1;});
+  return Object.entries(map).map(([m,cnt])=>({m:parseInt(m),cnt}));
+}
+
+function pkgSelectLevel(lv,el){
+  pkgLevel=lv; pkgPlan=null; pkgMonth=null;
+  document.querySelectorAll('.pkg-lv').forEach(x=>x.classList.remove('pkg-lv-sel'));
+  el.classList.add('pkg-lv-sel');
+  pkgRenderPlans();
+  ['pkg-month-card','pkg-slot-card','pkg-fee-card','pkg-action'].forEach(id=>{
+    document.getElementById(id).style.display='none';
+  });
+}
+
+function pkgRenderPlans(){
+  const plans=PKG_PLANS.filter(p=>p.level===pkgLevel);
+  const grid=document.getElementById('pkg-plan-grid');
+  if(!grid) return;
+  grid.innerHTML=plans.map(p=>{
+    const hasSlots=pkgGetSlots(p.key,7).length>=6;
+    return `<div class="pkg-plan" onclick="pkgSelectPlan('${p.key}',this)" style="border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px 10px;cursor:pointer;background:var(--color-background-primary);position:relative;opacity:${hasSlots?1:.35};pointer-events:${hasSlots?'auto':'none'};">
+      ${p.rec&&pkgLevel==='beginner'?`<div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#185FA5;color:#E6F1FB;font-size:10px;font-weight:500;padding:2px 10px;border-radius:20px;white-space:nowrap;">推薦</div>`:''}
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px;">${p.label}</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px;">${p.size}</div>
+      <div style="font-size:20px;font-weight:500;color:var(--color-text-primary);">$${p.price}<span style="font-size:11px;color:var(--color-text-secondary);font-weight:400;"> ／堂</span></div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:8px;padding-top:8px;border-top:.5px solid var(--color-border-tertiary);line-height:1.7;">
+        👤 ${p.coach}
+        ${p.note9?`<div style="font-size:11px;color:#854F0B;background:#FAEEDA;border-radius:var(--border-radius-md);padding:4px 8px;margin-top:5px;">ℹ️ ${p.note9}，起始月自動從 9 月計算</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function pkgSelectPlan(key,el){
+  pkgPlan=key; pkgMonth=null;
+  document.querySelectorAll('.pkg-plan').forEach(x=>{
+    x.style.border='.5px solid var(--color-border-tertiary)';
+    x.style.background='var(--color-background-primary)';
+  });
+  el.style.border='2px solid #185FA5';
+  el.style.background='#E6F1FB';
+  pkgRenderMonths();
+  document.getElementById('pkg-month-card').style.display='block';
+  ['pkg-slot-card','pkg-fee-card','pkg-action'].forEach(id=>{
+    document.getElementById(id).style.display='none';
+  });
+  setTimeout(()=>document.getElementById('pkg-month-card').scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+function pkgRenderMonths(){
+  const validMs=PKG_MONTHS.filter(m=>pkgCountInMonth(pkgPlan,m)>=1&&pkgGetSlots(pkgPlan,m).length>=6);
+  const opts=document.getElementById('pkg-month-opts');
+  opts.innerHTML=validMs.map(m=>{
+    const bd=pkgGetBreakdown(pkgPlan,m);
+    const chips=bd.map(b=>`<span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:#B5D4F4;color:#042C53;">${b.m}月 ${b.cnt}堂</span>`).join('');
+    return `<div class="pkg-m-opt" onclick="pkgSelectMonth(${m},this)" style="border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;cursor:pointer;background:var(--color-background-primary);display:flex;align-items:center;gap:10px;">
+      <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);min-width:52px;">從 ${m} 月起</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;flex:1;">${chips}</div>
+    </div>`;
+  }).join('');
+}
+
+function pkgSelectMonth(m,el){
+  pkgMonth=m;
+  document.querySelectorAll('.pkg-m-opt').forEach(x=>{
+    x.style.border='.5px solid var(--color-border-tertiary)';
+    x.style.background='var(--color-background-primary)';
+  });
+  el.style.border='2px solid #185FA5';
+  el.style.background='#E6F1FB';
+  pkgRenderSlots();
+  ['pkg-slot-card','pkg-fee-card','pkg-action'].forEach(id=>{
+    document.getElementById(id).style.display='block';
+  });
+  setTimeout(()=>document.getElementById('pkg-slot-card').scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+function pkgRenderSlots(){
+  const p=PKG_PLANS.find(x=>x.key===pkgPlan);
+  const all=pkgGetSlots(pkgPlan,pkgMonth);
+  const pkg=all.slice(0,6), extra=all.slice(6,10);
+  const firstM=pkg.length>0?pkg[0].m:pkgMonth;
+  document.getElementById('pkg-slot-label').textContent=`${p.label} — 前 6 堂（從 ${firstM} 月起）`;
+
+  let html=pkg.map((item,idx)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:var(--border-radius-md);border:1.5px solid #185FA5;background:#E6F1FB;">
+      <div style="font-size:11px;font-weight:500;color:#0C447C;background:#85B7EB;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${idx+1}</div>
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);min-width:88px;">${item.s.d}</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);flex:1;">${tStr2(item.s.t)}</div>
+      <span style="font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap;${PKG_CLS_COLOR[item.s.cls]}">${PKG_CLS_LABEL[item.s.cls]}</span>
+    </div>`).join('');
+
+  if(extra.length>0){
+    html+=`<div style="font-size:12px;color:var(--color-text-secondary);text-align:center;padding:6px 0;">以下為第 7 堂起，點選即可加選</div>`;
+    html+=extra.map(item=>{
+      const key=sk(item.m,item.i);
+      const isAdded=selSlots.has(key);
+      return `
+      <div onclick="pkgToggleExtra('${key}')" id="pkg-extra-${key}" style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:var(--border-radius-md);border:${isAdded?'1.5px solid #185FA5':'1px dashed #cbd5e1'};background:${isAdded?'#E6F1FB':'var(--color-background-primary)'};cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;">
+        <div style="color:${isAdded?'#0C447C':'var(--color-text-secondary)'};background:${isAdded?'#85B7EB':'var(--color-background-secondary)'};border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;font-weight:700;">${isAdded?'✓':'+'}</div>
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);min-width:88px;">${item.s.d}</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);flex:1;">${tStr2(item.s.t)}</div>
+        <span style="font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap;${PKG_CLS_COLOR[item.s.cls]}">${PKG_CLS_LABEL[item.s.cls]}</span>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('pkg-slot-list').innerHTML=html;
+
+  let counts={small:0,big:0,rally:0};
+  pkg.forEach(item=>counts[item.s.cls]++);
+  const raw=counts.small*550+counts.big*490+counts.rally*800;
+  const disc=Math.round(raw*.05), final=raw-disc;
+  let feeHtml='';
+  if(counts.small>0) feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--color-text-secondary);border-bottom:.5px solid var(--color-border-tertiary);"><span>小班 ${counts.small} 堂 × $550</span><span>$${(counts.small*550).toLocaleString()}</span></div>`;
+  if(counts.big>0)   feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--color-text-secondary);border-bottom:.5px solid var(--color-border-tertiary);"><span>大班 ${counts.big} 堂 × $490</span><span>$${(counts.big*490).toLocaleString()}</span></div>`;
+  if(counts.rally>0) feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--color-text-secondary);border-bottom:.5px solid var(--color-border-tertiary);"><span>對打課 ${counts.rally} 堂 × $800</span><span>$${(counts.rally*800).toLocaleString()}</span></div>`;
+  feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:#854F0B;font-weight:500;border-bottom:.5px solid var(--color-border-tertiary);"><span>95 折優惠（6 堂）</span><span>- $${disc.toLocaleString()}</span></div>`;
+  feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--color-text-secondary);border-bottom:.5px solid var(--color-border-tertiary);"><span>場地費（現場收）</span><span>$80 × 6 堂 = $480</span></div>`;
+  feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:16px;font-weight:500;color:var(--color-text-primary);padding-top:10px;margin-top:6px;"><span>課程費合計</span><span style="color:#185FA5;">$${final.toLocaleString()}</span></div>`;
+  feeHtml+=`<div style="background:#EAF3DE;border-radius:var(--border-radius-md);padding:9px 12px;font-size:12px;color:#173404;margin-top:10px;">🏆 已達 6 堂！免費參加 12/23–24 年末團體賽（省 $600）</div>`;
+  document.getElementById('pkg-fee-rows').innerHTML=feeHtml;
+}
+
+function pkgToggleExtra(key){
+  if(selSlots.has(key)){
+    selSlots.delete(key);
+  } else {
+    selSlots.add(key);
+  }
+  pkgRenderSlots();
+  calcFee(); updateSelInfo(); checkBtn3();
+}
+
+function toggleFreeSelect(){
+  const panel=document.getElementById('free-select-panel');
+  const btn=document.getElementById('free-select-toggle');
+  const open=panel.style.display==='none';
+  panel.style.display=open?'block':'none';
+  btn.textContent=open?'或自由選擇個別時段 ▲':'或自由選擇個別時段 ▼';
+  if(open) renderSlots();
+}
+
+function confirmPackageAndNext(){
+  if(!pkgPlan||!pkgMonth){ alert('請完成班別與起始月份的選擇'); return; }
+  const all=pkgGetSlots(pkgPlan,pkgMonth);
+  const pkg=all.slice(0,6);
+  if(pkg.length<6){ alert('堂數不足，請調整班別或起始月份'); return; }
+  pkg.forEach(item=>{ selSlots.add(sk(item.m,item.i)); });
+  calcFee(); updateSelInfo(); checkBtn3();
+  showSharedForm('pkg');
+}
+
 // =============================================
 // 初始化
 // =============================================
+pkgRenderPlans();
 loadCounts();
 </script>
 </body>
