@@ -2224,16 +2224,23 @@ function pkgRenderSlots(){
 
   let counts={small:0,big:0,rally:0};
   pkg.forEach(item=>counts[item.s.cls]++);
+  extra.filter(item=>selSlots.has(sk(item.m,item.i)))
+       .forEach(item=>counts[item.s.cls]++);
+
+  const totalCount=counts.small+counts.big+counts.rally;
   const raw=counts.small*550+counts.big*490+counts.rally*800;
-  const disc=Math.round(raw*.05), final=raw-disc;
+  const hasDisc=totalCount>=6;
+  const disc=hasDisc?Math.round(raw*.05):0;
+  const final=raw-disc;
+
   let feeHtml='';
   if(counts.small>0) feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--color-text-secondary);border-bottom:.5px solid var(--color-border-tertiary);"><span>小班 ${counts.small} 堂 × $550</span><span>$${(counts.small*550).toLocaleString()}</span></div>`;
   if(counts.big>0)   feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--color-text-secondary);border-bottom:.5px solid var(--color-border-tertiary);"><span>大班 ${counts.big} 堂 × $490</span><span>$${(counts.big*490).toLocaleString()}</span></div>`;
   if(counts.rally>0) feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--color-text-secondary);border-bottom:.5px solid var(--color-border-tertiary);"><span>對打課 ${counts.rally} 堂 × $800</span><span>$${(counts.rally*800).toLocaleString()}</span></div>`;
-  feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:#854F0B;font-weight:500;border-bottom:.5px solid var(--color-border-tertiary);"><span>95 折優惠（6 堂）</span><span>- $${disc.toLocaleString()}</span></div>`;
-  feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--color-text-secondary);border-bottom:.5px solid var(--color-border-tertiary);"><span>場地費（現場收）</span><span>$80 × 6 堂 = $480</span></div>`;
+  if(hasDisc) feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:#854F0B;font-weight:500;border-bottom:.5px solid var(--color-border-tertiary);"><span>95 折優惠（${totalCount} 堂）</span><span>- $${disc.toLocaleString()}</span></div>`;
+  feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--color-text-secondary);border-bottom:.5px solid var(--color-border-tertiary);"><span>場地費（現場收）</span><span>$80 × ${totalCount} 堂 = $${(80*totalCount).toLocaleString()}</span></div>`;
   feeHtml+=`<div style="display:flex;justify-content:space-between;font-size:16px;font-weight:500;color:var(--color-text-primary);padding-top:10px;margin-top:6px;"><span>課程費合計</span><span style="color:#185FA5;">$${final.toLocaleString()}</span></div>`;
-  feeHtml+=`<div style="background:#EAF3DE;border-radius:var(--border-radius-md);padding:9px 12px;font-size:12px;color:#173404;margin-top:10px;">🏆 已達 6 堂！免費參加 12/23–24 年末團體賽（省 $600）</div>`;
+  if(hasDisc) feeHtml+=`<div style="background:#EAF3DE;border-radius:var(--border-radius-md);padding:9px 12px;font-size:12px;color:#173404;margin-top:10px;">🏆 已達 6 堂！免費參加 12/23–24 年末團體賽（省 $600）</div>`;
   document.getElementById('pkg-fee-rows').innerHTML=feeHtml;
 }
 
