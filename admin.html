@@ -843,17 +843,17 @@ function showInvoice(name, idx) {
     </div>
   `;
   
-  invoiceTextCache = \`
+  invoiceTextCache = `
 🎾 網球課程繳費單
 ================================
-學員：\${r.name}
-LINE：\${r.line}
-訂單：\${r.orderId || '—'}
+學員：${r.name}
+LINE：${r.line}
+訂單：${r.orderId || '—'}
 課程信息
-小班：\${r.small || 0} 堂
-大班：\${r.big || 0} 堂
-費用：\${r.fee || '—'}
-\${r.discount && r.discount !== '—' ? \`折扣：\${r.discount}\` : ''}
+小班：${r.small || 0} 堂
+大班：${r.big || 0} 堂
+費用：${r.fee || '—'}
+${r.discount && r.discount !== '—' ? \`折扣：${r.discount}\` : ''}
 ================================
 轉帳資訊
 銀行：國泰世華銀行（013）
