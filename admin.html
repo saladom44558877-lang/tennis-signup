@@ -429,7 +429,7 @@ async function loadData() {
 // 更新統計
 // =============================================
 function updateStats() {
-  const pending = adminData.filter(r => r.status === '待繳費狀態').length;
+  const pending = adminData.filter(r => r.status === '待確認').length;
   const paid = adminData.filter(r => r.status === '已繳費✅').length;
   const cancel = adminData.filter(r => r.status === '已取消❌').length;
   
@@ -445,7 +445,7 @@ function renderRegistrations() {
   const list = document.getElementById('reg-list');
   const filtered = adminData.filter(r => {
     if (currentStatus === 'all') return true;
-    if (currentStatus === 'pending') return r.status === '待繳費狀態';
+    if (currentStatus === 'pending') return r.status === '待確認';
     if (currentStatus === 'paid') return r.status === '已繳費✅';
     if (currentStatus === 'cancel') return r.status === '已取消❌';
   });
@@ -456,9 +456,9 @@ function renderRegistrations() {
   }
   
   list.innerHTML = filtered.map((r, idx) => {
-    const statusClass = r.status === '已繳費✅' ? 'paid' : r.status === '待繳費狀態' ? 'pending' : 'cancel';
-    const statusLabel = r.status === '已繳費✅' ? '已繳費' : r.status === '待繳費狀態' ? '待繳費' : '已取消';
-    const statusBgClass = r.status === '已繳費✅' ? 'status-paid' : r.status === '待繳費狀態' ? 'status-pending' : 'status-cancel';
+    const statusClass = r.status === '已繳費✅' ? 'paid' : r.status === '待確認' ? 'pending' : 'cancel';
+    const statusLabel = r.status === '已繳費✅' ? '已繳費' : r.status === '待確認' ? '待繳費' : '已取消';
+    const statusBgClass = r.status === '已繳費✅' ? 'status-paid' : r.status === '待確認' ? 'status-pending' : 'status-cancel';
     
     return `
     <div class="reg-card ${statusClass}">
@@ -472,7 +472,7 @@ function renderRegistrations() {
       </div>
       <div class="reg-slots">${r.slots || '—'}</div>
       <div class="reg-actions">
-        ${r.status === '待繳費狀態' ? `
+        ${r.status === '待確認' ? `
           <button class="btn-confirm" onclick="confirmPayment('${r.orderId}')">✓ 確認繳費</button>
         ` : ''}
         ${r.status !== '已取消❌' ? `
