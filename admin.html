@@ -784,7 +784,6 @@ function markCourseCancel(slotKey) {
 // =============================================
 // 繳費單
 // =============================================
-
 function showInvoice(name, idx) {
   currentInvoiceName = name;
   const r = adminData[idx];
@@ -794,7 +793,6 @@ function showInvoice(name, idx) {
     return;
   }
   
-  // 生成繳費單 HTML
   const invoiceHTML = `
     <div class="inv">
       <div class="inv-hero">
@@ -807,48 +805,22 @@ function showInvoice(name, idx) {
       
       <div class="inv-block">
         <div class="inv-block-title">學員信息</div>
-        <div class="inv-row">
-          <span class="inv-label">姓名</span>
-          <span class="inv-val">${r.name}</span>
-        </div>
-        <div class="inv-row">
-          <span class="inv-label">LINE ID</span>
-          <span class="inv-val">${r.line}</span>
-        </div>
-        <div class="inv-row">
-          <span class="inv-label">訂單編號</span>
-          <span class="inv-val">${r.orderId || '—'}</span>
-        </div>
+        <div class="inv-row"><span class="inv-label">姓名</span><span class="inv-val">${r.name}</span></div>
+        <div class="inv-row"><span class="inv-label">LINE ID</span><span class="inv-val">${r.line}</span></div>
+        <div class="inv-row"><span class="inv-label">訂單編號</span><span class="inv-val">${r.orderId || '—'}</span></div>
       </div>
       
       <div class="inv-block">
         <div class="inv-block-title">課程信息</div>
-        <div class="inv-row">
-          <span class="inv-label">課程類型</span>
-          <span class="inv-val">${r.level || '—'}</span>
-        </div>
-        <div class="inv-row">
-          <span class="inv-label">小班堂數</span>
-          <span class="inv-val">${r.small || 0}</span>
-        </div>
-        <div class="inv-row">
-          <span class="inv-label">大班堂數</span>
-          <span class="inv-val">${r.big || 0}</span>
-        </div>
+        <div class="inv-row"><span class="inv-label">課程類型</span><span class="inv-val">${r.level || '—'}</span></div>
+        <div class="inv-row"><span class="inv-label">小班堂數</span><span class="inv-val">${r.small || 0}</span></div>
+        <div class="inv-row"><span class="inv-label">大班堂數</span><span class="inv-val">${r.big || 0}</span></div>
       </div>
       
       <div class="inv-block">
         <div class="inv-block-title">費用</div>
-        <div class="inv-row">
-          <span class="inv-label">課程費用</span>
-          <span class="inv-val">${r.fee || '—'}</span>
-        </div>
-        ${r.discount && r.discount !== '—' ? `
-        <div class="inv-row">
-          <span class="inv-label">折扣</span>
-          <span class="inv-val accent">${r.discount}</span>
-        </div>
-        ` : ''}
+        <div class="inv-row"><span class="inv-label">課程費用</span><span class="inv-val">${r.fee || '—'}</span></div>
+        ${r.discount && r.discount !== '—' ? `<div class="inv-row"><span class="inv-label">折扣</span><span class="inv-val accent">${r.discount}</span></div>` : ''}
       </div>
       
       <div class="inv-total">
@@ -858,46 +830,37 @@ function showInvoice(name, idx) {
       
       <div class="inv-bank">
         <div class="inv-bank-title">轉帳資訊</div>
-        <div class="inv-bank-row">
-          <span class="inv-bank-label">銀行</span>
-          <span class="inv-bank-val">國泰世華銀行</span>
-        </div>
-        <div class="inv-bank-row">
-          <span class="inv-bank-label">帳戶</span>
-          <span class="inv-bank-val">0685-0624-1972</span>
-        </div>
-        <div class="inv-bank-row">
-          <span class="inv-bank-label">戶名</span>
-          <span class="inv-bank-val">王楷敦</span>
-        </div>
+        <div class="inv-bank-row"><span class="inv-bank-label">銀行</span><span class="inv-bank-val">國泰世華銀行</span></div>
+        <div class="inv-bank-row"><span class="inv-bank-label">帳戶</span><span class="inv-bank-val">0685-0624-1972</span></div>
+        <div class="inv-bank-row"><span class="inv-bank-label">戶名</span><span class="inv-bank-val">王楷敦</span></div>
       </div>
       
       <div class="inv-note">
-        ✓ 請於報名確認後 3 天內完成轉帳<br>
+        ✓ 請於報名後 3 天內完成轉帳<br>
         ✓ 轉帳後請告知末三碼以便確認<br>
         ✓ 如有問題請聯繫教練
       </div>
     </div>
   `;
   
-  invoiceTextCache = `
+  invoiceTextCache = \`
 🎾 網球課程繳費單
 ================================
-學員：${r.name}
-LINE：${r.line}
-訂單：${r.orderId || '—'}
+學員：\${r.name}
+LINE：\${r.line}
+訂單：\${r.orderId || '—'}
 課程信息
-小班：${r.small || 0} 堂
-大班：${r.big || 0} 堂
-費用：${r.fee || '—'}
-${r.discount && r.discount !== '—' ? `折扣：${r.discount}` : ''}
+小班：\${r.small || 0} 堂
+大班：\${r.big || 0} 堂
+費用：\${r.fee || '—'}
+\${r.discount && r.discount !== '—' ? \`折扣：\${r.discount}\` : ''}
 ================================
 轉帳資訊
 銀行：國泰世華銀行（013）
 帳戶：0685-0624-1972
 戶名：王楷敦
 ✓ 轉帳完成後，請截圖並傳給教練，待確認後報名即完成！感謝！
-  `;
+  \`;
   
   document.getElementById('invoice-content').innerHTML = invoiceHTML;
   document.getElementById('invoice-modal').classList.add('open');
