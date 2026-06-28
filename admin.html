@@ -412,7 +412,7 @@ async function loadData() {
       return;
     }
     
-    adminData = result.registrations || [];
+    adminData = result.rows || [];
     updateStats();
     renderRegistrations();
     
