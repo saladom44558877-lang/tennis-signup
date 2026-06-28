@@ -853,14 +853,14 @@ LINE：${r.line}
 小班：${r.small || 0} 堂
 大班：${r.big || 0} 堂
 費用：${r.fee || '—'}
-${r.discount && r.discount !== '—' ? \`折扣：${r.discount}\` : ''}
+${r.discount && r.discount !== '—' ? `折扣：${r.discount}` : ''}
 ================================
 轉帳資訊
 銀行：國泰世華銀行（013）
 帳戶：0685-0624-1972
 戶名：王楷敦
 ✓ 轉帳完成後，請截圖並傳給教練，待確認後報名即完成！感謝！
-  \`;
+  `;
   
   const contentDiv = document.getElementById('invoice-content');
 if (contentDiv) {
