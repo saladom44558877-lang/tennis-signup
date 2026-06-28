@@ -862,7 +862,13 @@ LINE：\${r.line}
 ✓ 轉帳完成後，請截圖並傳給教練，待確認後報名即完成！感謝！
   \`;
   
-  document.getElementById('invoice-content').innerHTML = invoiceHTML;
+  const contentDiv = document.getElementById('invoice-content');
+if (contentDiv) {
+  contentDiv.innerHTML = invoiceHTML;
+  contentDiv.style.display = 'block';
+} else {
+  console.error('invoice-content div not found');
+}
   document.getElementById('invoice-modal').classList.add('open');
 }
 
