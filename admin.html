@@ -482,27 +482,32 @@ function showInvoice(r) {
     ? '\n（已達6堂，可免費參加 12/23-24 團體賽，如有意願請告知教練）'
     : '';
 
-  invoiceTextCache =
+ invoiceTextCache =
 `🎾 網球課程繳費單
-━━━━━━━━━━━━━━━
-學員姓名：${r.name}
-訂單編號：${r.orderId || '—'}
-━━━━━━━━━━━━━━━
+
+學員：${r.name}
+訂單：${r.orderId || '—'}
+
 【課程資訊】
 班別：${levelLabel}
-堂數：${classCount}（共 ${totalClasses} 堂）
-報名時段：
+堂數：${classCount}
+（共 ${totalClasses} 堂）
+
+【時段】
 ${slotsTxt}
-━━━━━━━━━━━━━━━
-【費用明細】
-課程原價：${feeDisplay}${hasDiscount ? `\n95折優惠：${discountDisplay}` : ''}
-應繳總額：${finalDisplay}${tournamentTxt}
-━━━━━━━━━━━━━━━
-【轉帳資訊】
-銀行：(013) 國泰世華銀行
-帳號：068506241972
-━━━━━━━━━━━━━━━
-⚠️ 轉帳完成後請截圖傳給教練確認，謝謝！`;
+
+【費用】
+原價：${feeDisplay}
+${hasDiscount ? `優惠：${discountDisplay}\n合計：${finalDisplay} ✅` : `合計：${finalDisplay}`}
+${tournamentTxt}
+
+【轉帳】
+銀行：國泰世華
+帳號：0685-0624-1972
+
+⚠️ 轉帳後請截圖
+告知末三碼確認
+謝謝！`;
 
   document.getElementById('invoice-content').innerHTML = `
   <div class="inv">
