@@ -108,6 +108,30 @@
       .modal-box { box-shadow: none !important; max-height: none !important; }
       .modal-hd, .modal-ft { display: none !important; }
     }
+    .admin-tabs { display:flex; gap:8px; margin-bottom:1.25rem; }
+    .atab { flex:1; padding:11px; border-radius:10px; border:1.5px solid #e2e8f0; background:#fff; color:#666; font-size:14px; font-weight:700; cursor:pointer; }
+    .atab.active { background:#1d4ed8; color:#fff; border-color:#1d4ed8; }
+    .remind-toolbar { display:flex; gap:8px; align-items:center; margin-bottom:1rem; flex-wrap:wrap; }
+    .rq-btn { padding:7px 16px; border-radius:20px; border:1.5px solid #e2e8f0; background:#fff; color:#666; font-size:13px; font-weight:600; cursor:pointer; }
+    .rq-btn.active { background:#1d4ed8; color:#fff; border-color:#1d4ed8; }
+    .remind-toolbar select { flex:1; min-width:150px; padding:8px 10px; border-radius:8px; border:1.5px solid #e2e8f0; font-size:14px; background:#fff; }
+    .remind-summary { font-size:13px; color:#334155; margin-bottom:14px; padding:9px 12px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; }
+    .cls-card { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.05); margin-bottom:14px; overflow:hidden; }
+    .cls-head { padding:12px 14px; background:#dbeafe; }
+    .cls-time { font-size:15px; font-weight:700; color:#1e3a8a; }
+    .cls-meta { font-size:12px; color:#3b5b80; margin-top:3px; }
+    .cls-body { padding:12px 14px; }
+    .stu-row { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #f1f5f9; font-size:13px; }
+    .stu-row:last-child { border-bottom:none; }
+    .stu-name { font-weight:700; min-width:60px; flex-shrink:0; }
+    .stu-contact { flex:1; color:#666; font-size:12px; word-break:break-all; }
+    .mini-btn { padding:4px 9px; font-size:11px; border-radius:6px; border:1px solid #cbd5e1; background:#fff; color:#475569; cursor:pointer; font-weight:600; flex-shrink:0; }
+    .cls-empty { font-size:13px; color:#999; padding:6px 0; }
+    .pend-note { font-size:12px; color:#b45309; margin-top:10px; padding-top:8px; border-top:1px dashed #fde68a; }
+    .msg-box { margin-top:14px; }
+    .msg-box textarea { width:100%; box-sizing:border-box; border:1.5px solid #e2e8f0; border-radius:8px; padding:10px; font-size:13px; line-height:1.7; color:#333; resize:vertical; min-height:150px; font-family:inherit; background:#fafafa; }
+    .copy-msg-btn { margin-top:8px; width:100%; padding:10px; border-radius:8px; border:none; background:#16a34a; color:#fff; font-size:14px; font-weight:700; cursor:pointer; }
+    .copy-msg-btn:active { transform:scale(.99); }
   </style>
 </head>
 <body>
@@ -148,6 +172,12 @@
       </div>
     </div>
 
+    <div class="admin-tabs">
+      <button class="atab active" id="atab-reg" onclick="switchTab('reg')">📋 報名管理</button>
+      <button class="atab" id="atab-remind" onclick="switchTab('remind')">🔔 上課提醒</button>
+    </div>
+
+    <div id="tab-reg">
     <div class="stats">
       <div class="stat"><div class="stat-n pending" id="cnt-pending">-</div><div class="stat-l">⏳ 待確認</div></div>
       <div class="stat"><div class="stat-n paid"    id="cnt-paid">-</div><div class="stat-l">✅ 已繳費</div></div>
@@ -162,6 +192,17 @@
     </div>
 
     <div id="reg-list"><div class="loading">載入中...</div></div>
+    </div><!-- /tab-reg -->
+
+    <div id="tab-remind" style="display:none;">
+      <div class="remind-toolbar">
+        <button class="rq-btn" id="rq-today" onclick="remindQuick('today')">今天</button>
+        <button class="rq-btn active" id="rq-tomorrow" onclick="remindQuick('tomorrow')">明天</button>
+        <select id="remind-date" onchange="remindDateChanged()"></select>
+      </div>
+      <div id="remind-content"><div class="loading">請選擇日期</div></div>
+    </div>
+
   </div>
 
 </div>
@@ -173,17 +214,17 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbxddtd_CFTtvDCBd1aLe9ve
 // ── 時段完整資訊（與 index.html DEFS 完全對應）──
 const SLOT_INFO = {
   's-7-0': {label:'07/01(三) 20:00-21:00', date:'07/01(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-7-1': {label:'07/02(四) 19:00-20:00', date:'07/02(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-7-1': {label:'07/02(四) 19:00-20:00', date:'07/02(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-7-2': {label:'07/02(四) 20:00-21:00', date:'07/02(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
   's-7-3': {label:'07/08(三) 19:00-20:00', date:'07/08(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-7-4': {label:'07/08(三) 20:00-21:00', date:'07/08(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
   's-7-5': {label:'07/15(三) 19:00-20:00', date:'07/15(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-7-6': {label:'07/15(三) 20:00-21:00', date:'07/15(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
   's-7-7': {label:'07/22(三) 19:00-20:00', date:'07/22(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-7-8': {label:'07/23(四) 19:00-20:00', date:'07/23(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-7-8': {label:'07/23(四) 19:00-20:00', date:'07/23(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-7-9': {label:'07/29(三) 19:00-20:00', date:'07/29(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-7-10':{label:'07/29(三) 20:00-21:00', date:'07/29(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-7-11':{label:'07/30(四) 19:00-20:00', date:'07/30(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-7-11':{label:'07/30(四) 19:00-20:00', date:'07/30(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-7-12':{label:'07/30(四) 20:00-21:00', date:'07/30(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
   's-8-0': {label:'08/04(二) 20:00-21:00', date:'08/04(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Miguel'},
   's-8-1': {label:'08/05(三) 19:00-20:00', date:'08/05(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
@@ -191,7 +232,7 @@ const SLOT_INFO = {
   's-8-3': {label:'08/06(四) 20:00-21:00', date:'08/06(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
   's-8-4': {label:'08/11(二) 20:00-21:00', date:'08/11(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Miguel'},
   's-8-5': {label:'08/12(三) 20:00-21:00', date:'08/12(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-8-6': {label:'08/13(四) 19:00-20:00', date:'08/13(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-8-6': {label:'08/13(四) 19:00-20:00', date:'08/13(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-8-7': {label:'08/18(二) 19:00-20:00', date:'08/18(二)', time:'19:00-20:00', cls:'小班・初階', coach:'Miguel'},
   's-8-8': {label:'08/18(二) 20:00-21:00', date:'08/18(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Miguel'},
   's-8-9': {label:'08/25(二) 19:00-20:00', date:'08/25(二)', time:'19:00-20:00', cls:'小班・初階', coach:'Miguel'},
@@ -201,33 +242,33 @@ const SLOT_INFO = {
   's-9-0': {label:'09/01(二) 19:00-20:00', date:'09/01(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
   's-9-1': {label:'09/01(二) 19:00-20:00', date:'09/01(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
   's-9-2': {label:'09/02(三) 19:00-20:00', date:'09/02(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-9-3': {label:'09/03(四) 19:00-20:00', date:'09/03(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-9-3': {label:'09/03(四) 19:00-20:00', date:'09/03(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-9-4': {label:'09/03(四) 20:00-21:00', date:'09/03(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
   's-9-5': {label:'09/08(二) 20:00-21:00', date:'09/08(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
-  's-9-6': {label:'09/10(四) 19:00-20:00', date:'09/10(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-9-6': {label:'09/10(四) 19:00-20:00', date:'09/10(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-9-7': {label:'09/10(四) 20:00-21:00', date:'09/10(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
   's-9-8': {label:'09/15(二) 19:00-20:00', date:'09/15(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
   's-9-9': {label:'09/15(二) 20:00-21:00', date:'09/15(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
   's-9-10':{label:'09/16(三) 19:00-20:00', date:'09/16(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-9-11':{label:'09/16(三) 20:00-21:00', date:'09/16(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-9-12':{label:'09/17(四) 19:00-20:00', date:'09/17(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-9-12':{label:'09/17(四) 19:00-20:00', date:'09/17(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-9-13':{label:'09/17(四) 20:00-21:00', date:'09/17(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
   's-9-14':{label:'09/23(三) 20:00-21:00', date:'09/23(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-9-15':{label:'09/24(四) 19:00-20:00', date:'09/24(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-9-15':{label:'09/24(四) 19:00-20:00', date:'09/24(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-9-16':{label:'09/24(四) 20:00-21:00', date:'09/24(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
   's-9-17':{label:'09/30(三) 19:00-20:00', date:'09/30(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-9-18':{label:'09/30(三) 20:00-21:00', date:'09/30(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
-  's-10-0':{label:'10/01(四) 19:00-20:00', date:'10/01(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-10-0':{label:'10/01(四) 19:00-20:00', date:'10/01(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-10-1':{label:'10/06(二) 19:00-20:00', date:'10/06(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
   's-10-2':{label:'10/07(三) 19:00-20:00', date:'10/07(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-10-3':{label:'10/08(四) 19:00-20:00', date:'10/08(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-10-3':{label:'10/08(四) 19:00-20:00', date:'10/08(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-10-4':{label:'10/08(四) 20:00-21:00', date:'10/08(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
   's-10-5':{label:'10/14(三) 19:00-20:00', date:'10/14(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-10-6':{label:'10/15(四) 19:00-20:00', date:'10/15(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-10-6':{label:'10/15(四) 19:00-20:00', date:'10/15(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-10-7':{label:'10/20(二) 20:00-21:00', date:'10/20(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
-  's-10-8':{label:'10/22(四) 19:00-20:00', date:'10/22(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-10-8':{label:'10/22(四) 19:00-20:00', date:'10/22(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-10-9':{label:'10/27(二) 20:00-21:00', date:'10/27(二)', time:'20:00-21:00', cls:'大班・初階', coach:'雙教練'},
-  's-10-10':{label:'10/29(四) 19:00-20:00',date:'10/29(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-10-10':{label:'10/29(四) 19:00-20:00',date:'10/29(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-11-0':{label:'11/03(二) 19:00-20:00', date:'11/03(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練'},
   's-11-1':{label:'11/04(三) 20:00-21:00', date:'11/04(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam'},
   's-11-2':{label:'11/12(四) 20:00-21:00', date:'11/12(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
@@ -241,17 +282,17 @@ const SLOT_INFO = {
   's-12-3':{label:'12/09(三) 19:00-20:00', date:'12/09(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-12-4':{label:'12/10(四) 20:00-21:00', date:'12/10(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
   's-12-5':{label:'12/16(三) 19:00-20:00', date:'12/16(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-12-6':{label:'12/17(四) 19:00-20:00', date:'12/17(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-12-6':{label:'12/17(四) 19:00-20:00', date:'12/17(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-12-7':{label:'12/17(四) 20:00-21:00', date:'12/17(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
   's-12-8':{label:'12/23(三) 19:00-20:00', date:'12/23(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-12-9':{label:'12/23(三) 19:00-20:00', date:'12/23(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-12-10':{label:'12/23(三) 19:00-20:00',date:'12/23(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-12-11':{label:'12/24(四) 19:00-20:00',date:'12/24(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
-  's-12-12':{label:'12/24(四) 19:00-20:00',date:'12/24(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-12-11':{label:'12/24(四) 19:00-20:00',date:'12/24(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
+  's-12-12':{label:'12/24(四) 19:00-20:00',date:'12/24(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
   's-12-13':{label:'12/24(四) 20:00-21:00',date:'12/24(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
   's-12-14':{label:'12/24(四) 20:00-21:00',date:'12/24(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam'},
   's-12-15':{label:'12/30(三) 19:00-20:00',date:'12/30(三)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
-  's-12-16':{label:'12/31(四) 19:00-20:00',date:'12/31(四)', time:'19:00-20:00', cls:'小班・中階', coach:'Adam'},
+  's-12-16':{label:'12/31(四) 19:00-20:00',date:'12/31(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam'},
 };
 const SLOT_LABELS = Object.fromEntries(Object.entries(SLOT_INFO).map(([k,v])=>[k,v.label]));
 
@@ -406,7 +447,7 @@ let currentInvoiceName = '';
   
 function showInvoice(r) {
   currentInvoiceName = r.name || '學員';
-  const levelMap = { 'beginner':'初階班', 'mid':'中階班', '1v1':'對打班' };
+  const levelMap = { 'beginner':'初階班', 'mid':'初階班', '1v1':'對打班' };
   const levelLabel = levelMap[r.level] || r.level || '—';
 
   const small = parseInt(r.small) || 0;
@@ -602,6 +643,172 @@ function copyInvoiceText() {
     document.execCommand('copy');
     document.body.removeChild(ta);
   });
+}
+
+// ========================================================
+//  🔔 上課提醒面板
+// ========================================================
+function switchTab(name){
+  document.getElementById('tab-reg').style.display    = name==='reg'    ? 'block' : 'none';
+  document.getElementById('tab-remind').style.display = name==='remind' ? 'block' : 'none';
+  document.getElementById('atab-reg').classList.toggle('active', name==='reg');
+  document.getElementById('atab-remind').classList.toggle('active', name==='remind');
+  if(name==='remind'){
+    const sel = document.getElementById('remind-date');
+    if(!sel.options.length) buildRemindDates();
+    if(!sel.value) sel.value = defaultRemindDate();
+    syncQuickActive();
+    renderRemind();
+  }
+}
+
+function canonKey(k){ return SLOT_ALIAS[k] || k; }
+function mmddNum(d){ const m=String(d).match(/(\d{2})\/(\d{2})/); return m ? parseInt(m[1])*100+parseInt(m[2]) : 0; }
+
+function todayMMDD(offset){
+  const t = new Date(); t.setDate(t.getDate() + (offset||0));
+  return String(t.getMonth()+1).padStart(2,'0') + '/' + String(t.getDate()).padStart(2,'0');
+}
+
+function allClassDates(){
+  const seen = new Set(), list = [];
+  for(const [k,v] of Object.entries(SLOT_INFO)){
+    if(SLOT_ALIAS[k]) continue;
+    if(seen.has(v.date)) continue;
+    seen.add(v.date); list.push(v.date);
+  }
+  list.sort((a,b)=> mmddNum(a) - mmddNum(b));
+  return list;
+}
+
+function buildRemindDates(){
+  const sel = document.getElementById('remind-date');
+  sel.innerHTML = allClassDates().map(d=>`<option value="${d}">${d}</option>`).join('');
+}
+
+function defaultRemindDate(){
+  const dates = allClassDates();
+  const tm = todayMMDD(1), td = todayMMDD(0);
+  const todayN = mmddNum(td);
+  return dates.find(x=>x.startsWith(tm))
+      || dates.find(x=>x.startsWith(td))
+      || dates.find(x=>mmddNum(x) >= todayN)
+      || dates[0] || '';
+}
+
+function syncQuickActive(){
+  const v = document.getElementById('remind-date').value || '';
+  document.getElementById('rq-today').classList.toggle('active', v.startsWith(todayMMDD(0)));
+  document.getElementById('rq-tomorrow').classList.toggle('active', v.startsWith(todayMMDD(1)));
+}
+
+function remindQuick(which){
+  const target = which==='today' ? todayMMDD(0) : todayMMDD(1);
+  const sel = document.getElementById('remind-date');
+  if(!sel.options.length) buildRemindDates();
+  let found = null;
+  for(const o of sel.options){ if(o.value.startsWith(target)){ found = o.value; break; } }
+  if(found){ sel.value = found; syncQuickActive(); renderRemind(); }
+  else {
+    syncQuickActive();
+    document.getElementById('remind-content').innerHTML =
+      `<div class="empty">${which==='today'?'今天':'明天'}（${target}）沒有課</div>`;
+  }
+}
+
+function remindDateChanged(){ syncQuickActive(); renderRemind(); }
+
+function relWord(dateStr){
+  if(dateStr.startsWith(todayMMDD(0))) return '今天';
+  if(dateStr.startsWith(todayMMDD(1))) return '明天';
+  return dateStr.slice(0,5);
+}
+
+function escHtml(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
+    .replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderRemind(){
+  const date = document.getElementById('remind-date').value;
+  const box  = document.getElementById('remind-content');
+  if(!date){ box.innerHTML = '<div class="empty">請選擇日期</div>'; return; }
+
+  const classes = Object.entries(SLOT_INFO)
+    .filter(([k,v]) => v.date===date && !SLOT_ALIAS[k])
+    .map(([k,v]) => ({key:k, ...v}))
+    .sort((a,b)=> a.time.localeCompare(b.time));
+
+  if(!classes.length){ box.innerHTML = `<div class="empty">${date} 沒有課</div>`; return; }
+
+  const rows = allRows || [];
+  const inClass = (r,key) => (r.slots||'').split(/[,\n]/).map(x=>canonKey(x.trim())).includes(key);
+  const word = relWord(date);
+
+  let totalPaid = 0;
+  const cardsHtml = classes.map(c => {
+    const paid = rows.filter(r => r.status==='已繳費✅' && inClass(r,c.key));
+    const pend = rows.filter(r => r.status==='待確認'   && inClass(r,c.key));
+    totalPaid += paid.length;
+
+    const stuRows = paid.length ? paid.map(r=>{
+      const line  = String(r.line ||'').replace(/^'/,'');
+      const phone = String(r.phone||'').replace(/^'/,'');
+      const contact = [line?('LINE: '+line):'', phone?('☎ '+phone):''].filter(Boolean).join('　');
+      return `<div class="stu-row">
+        <span class="stu-name">${escHtml(r.name)}</span>
+        <span class="stu-contact">${escHtml(contact)||'—'}</span>
+        ${line?`<button class="mini-btn" data-copy="${escHtml(line)}" onclick="copyToClipboard(this.dataset.copy,this)">複製LINE</button>`:''}
+      </div>`;
+    }).join('') : `<div class="cls-empty">尚無已繳費學生</div>`;
+
+    const pendNote = pend.length
+      ? `<div class="pend-note">⏳ 待確認 ${pend.length} 位：${pend.map(r=>escHtml(r.name)).join('、')}</div>`
+      : '';
+
+    const msg = `🎾 網球課提醒\n\nHi 👋 提醒您 ${word} 有課：\n📅 ${date}\n⏰ ${c.time}（${c.cls}）\n👨‍🏫 ${c.coach} 教練\n📍 中正河濱網球場\n\n請攜帶球拍與水、準時到場～\n下雨停課會再另行通知您 🙏`;
+
+    const msgBox = paid.length ? `<div class="msg-box">
+        <textarea id="msg-${c.key}" readonly>${escHtml(msg)}</textarea>
+        <button class="copy-msg-btn" onclick="copyElText('msg-${c.key}',this)">📋 複製提醒訊息</button>
+      </div>` : '';
+
+    return `<div class="cls-card">
+      <div class="cls-head">
+        <div class="cls-time">⏰ ${c.time}</div>
+        <div class="cls-meta">${c.cls} ｜ ${c.coach} 教練 ｜ 已繳費 ${paid.length} 位</div>
+      </div>
+      <div class="cls-body">
+        ${stuRows}
+        ${pendNote}
+        ${msgBox}
+      </div>
+    </div>`;
+  }).join('');
+
+  box.innerHTML =
+    `<div class="remind-summary">📅 ${date}｜共 ${classes.length} 堂課・已繳費學生合計 ${totalPaid} 位</div>`
+    + cardsHtml;
+}
+
+function copyElText(id, btn){
+  const el = document.getElementById(id);
+  copyToClipboard(el ? (el.value!==undefined ? el.value : el.textContent) : '', btn);
+}
+function copyToClipboard(text, btn){
+  const ok = ()=>{ if(btn){ if(!btn.dataset.o) btn.dataset.o=btn.textContent; btn.textContent='✅ 已複製'; setTimeout(()=>{ btn.textContent=btn.dataset.o; },1500);} };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(ok, ()=>fallbackCopy(text,ok));
+  } else fallbackCopy(text, ok);
+}
+function fallbackCopy(text, ok){
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=text; ta.style.position='fixed'; ta.style.top='0'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta); ok&&ok();
+  }catch(e){ alert('複製失敗，請手動選取文字複製'); }
 }
 </script>
 </body>
