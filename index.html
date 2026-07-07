@@ -239,6 +239,7 @@
     .cal-chip.is-wait { border-color:#7c3aed; box-shadow: inset 0 0 0 1px #7c3aed; }
     .cal-chip.is-locked { border-color:#16a34a; cursor:default; pointer-events:none; }
     .cal-chip.is-booked { border-color:#f59e0b; cursor:default; pointer-events:none; }
+    .cal-chip.is-closed { border-color:#e2e8f0; cursor:default; pointer-events:none; opacity:.55; }
     .cal-chip.is-full { cursor:default; opacity:.85; }
     .cal-chip.is-waitfull { cursor:default; opacity:.5; }
     .cal-chip.is-tournament { cursor:default; opacity:.9; }
@@ -500,16 +501,11 @@
           <div style="width:20px;height:20px;border-radius:50%;background:#185FA5;color:#E6F1FB;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
           <div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">選擇程度</div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="pkg-level-grid">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;" id="pkg-level-grid">
           <div class="pkg-lv pkg-lv-sel" onclick="pkgSelectLevel('beginner',this)">
             <div style="font-size:18px;margin-bottom:4px;">🌱</div>
             <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">初階班</div>
             <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;">從零開始</div>
-          </div>
-          <div class="pkg-lv" onclick="pkgSelectLevel('mid',this)">
-            <div style="font-size:18px;margin-bottom:4px;">🔥</div>
-            <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">中階班</div>
-            <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;">提升穩定度</div>
           </div>
           <div class="pkg-lv" onclick="pkgSelectLevel('rally',this)">
             <div style="font-size:18px;margin-bottom:4px;">⚡</div>
@@ -573,8 +569,7 @@
         <div id="deadline-hint" style="display:block;background:#fffbeb;border:0.5px solid #fcd34d;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#92400e;">⏰ 7月課程報名將於 <b>6/30</b> 截止！</div>
         <select id="level-filter" style="width:100%;padding:8px 12px;border-radius:9px;border:1.5px solid #e2e8f0;font-size:13px;color:#1a1a1a;background:#fff;outline:none;margin-bottom:12px;">
           <option value="">全部時段</option>
-          <option value="beginner">🟢 初階班（週二、週三）</option>
-          <option value="mid">🔵 中階班（週四 19-20）</option>
+          <option value="beginner">🟢 初階班（週二、三、四 19-20）</option>
           <option value="rally">🩷 對打課（週四 20-21）</option>
         </select>
         <div id="habit-card" class="habit-card"></div>
@@ -905,11 +900,11 @@ const DEFS = {
     {d:"07/15(三)",t:"19-20",court:5,type:"wed",cls:"small"},
     {d:"07/15(三)",t:"20-21",court:4,type:"wed",cls:"small"},
     {d:"07/22(三)",t:"19-20",court:6,type:"wed",cls:"small"},
-    {d:"07/23(四)",t:"19-20",court:5,type:"thu",cls:"small"},
+    {d:"07/23(四)",t:"19-20",court:5,type:"thu",cls:"small",closed:true},
     {d:"07/29(三)",t:"19-20",court:5,type:"wed",cls:"small"},
     {d:"07/29(三)",t:"20-21",court:5,type:"wed",cls:"small"},
-    {d:"07/30(四)",t:"19-20",court:6,type:"thu",cls:"small"},
-    {d:"07/30(四)",t:"20-21",court:4,type:"thu",cls:"rally"}
+    {d:"07/30(四)",t:"19-20",court:6,type:"thu",cls:"small",closed:true},
+    {d:"07/30(四)",t:"20-21",court:4,type:"thu",cls:"rally",closed:true}
   ],
   8:[
     {d:"08/04(二)",t:"20-21",court:4,type:"tue",cls:"small"},
@@ -1029,7 +1024,7 @@ function updateProgress() {
 }
 
 function updateOrderSummary() {
-  const levelMap = {beginner:'初階班', mid:'中階班', '1v1':'對打班'};
+  const levelMap = {beginner:'初階班', mid:'初階班', '1v1':'對打班'};
   const levelColors = {beginner:'background:#dcfce7;color:#166534;', mid:'background:#dbeafe;color:#1e40af;', '1v1':'background:#fce7f3;color:#9d174d;'};
 
   // 計算費用
@@ -1049,7 +1044,6 @@ function updateOrderSummary() {
     let clsLabel, clsColor, price;
     if(s.cls==='big')                              { clsLabel='大班初階'; clsColor='background:#dcfce7;color:#166534;'; price='$490'; }
     else if(s.cls==='rally')                       { clsLabel='對打課';   clsColor='background:#fce7f3;color:#9d174d;'; price='$800'; }
-    else if(s.type==='thu' && s.t==='19-20')       { clsLabel='小班中階'; clsColor='background:#dbeafe;color:#1e40af;'; price='$550'; }
     else                                           { clsLabel='小班初階'; clsColor='background:#dcfce7;color:#166534;'; price='$550'; }
     const coachLabel = (curM===8&&s.type==='tue') ? 'Miguel' : s.cls==='big' ? 'Adam+Miguel' : 'Adam';
     return `<div class="os-slot-item">
@@ -1091,7 +1085,7 @@ function updateOrderSummary() {
     if(!pkgPlan || !pkgMonth) return '';
     const p = PKG_PLANS.find(x=>x.key===pkgPlan);
     if(!p) return '';
-    const lvLabel = {beginner:'初階班', mid:'中階班', rally:'對打班'}[pkgLevel] || '';
+    const lvLabel = {beginner:'初階班', mid:'初階班', rally:'對打班'}[pkgLevel] || '';
     return `
     <div class="os-section">
       <div class="os-section-title">套班方案</div>
@@ -1167,7 +1161,6 @@ function parseDateInfo(d){
 function slotMeta(s){
   if(s.cls==='rally') return {label:'對打課', bg:'#fce7f3', text:'#9d174d', sub:'#be185d'};
   if(s.cls==='big')   return {label:'大班初階', bg:'#dcfce7', text:'#166534', sub:'#15803d'};
-  if(s.type==='thu' && s.t==='19-20') return {label:'小班中階', bg:'#dbeafe', text:'#1e40af', sub:'#1d4ed8'};
   return {label:'小班初階', bg:'#dcfce7', text:'#166534', sub:'#15803d'};
 }
 
@@ -1186,8 +1179,7 @@ function renderSlots(){
       if(!filterVal) return true;
       if(s.special === 'tournament') return false;
       if(filterVal === 'rally')    return s.type === 'thu' && s.t === '20-21';
-      if(filterVal === 'mid')      return s.type === 'thu' && s.t === '19-20';
-      if(filterVal === 'beginner') return s.type === 'tue' || s.type === 'wed';
+      if(filterVal === 'beginner') return s.type === 'tue' || s.type === 'wed' || (s.type === 'thu' && s.t === '19-20');
       return true;
     });
   const grid = document.getElementById('slot-grid');
@@ -1236,6 +1228,25 @@ function renderSlots(){
     const pct=Math.min(cnt/max*100,100);
     let barCls=pct>=100?'bar-red':pct>=60?'bar-yellow':'bar-green';
     let cardCls='cal-chip', statusTxt, statusCls, clickAction;
+
+    if(s.closed){
+      const cMeta = slotMeta(s);
+      const cCoach = coachOf(curM, s);
+      const cIsDual = sk(curM, s.origIdx) === 's-9-0';
+      const cCourt = cIsDual ? '第5+6面' : (s.court ? `第${s.court}面` : '');
+      return `<div class="cal-chip is-closed" data-click="none" data-wd="${wd}">
+        <div class="cal-chip-head" style="background:#f1f5f9">
+          <div class="cal-chip-datetime" style="color:#64748b">${s.d.slice(0,5)} ${timeLabel}</div>
+          <div class="cal-chip-toprow">
+            <span class="cal-chip-label" style="color:#475569">${cMeta.label}</span>
+            <span class="cal-chip-count" style="color:#94a3b8">🔒</span>
+          </div>
+        </div>
+        <div class="cal-chip-body">${cCoach}・${cCourt}・${price}</div>
+        <div class="cal-chip-bar-bg"><div class="cal-chip-bar-fill" style="width:0%"></div></div>
+        <div class="cal-chip-status" style="color:#64748b">🚫 暫不開放</div>
+      </div>`;
+    }
 
     if(!full){
       if(isOrderLocked){
@@ -1379,6 +1390,7 @@ function renderHabitCard(){
       const m=parseInt(mStr);
       DEFS[m].forEach((s,idx)=>{
         if(s.special==='tournament') return;
+        if(s.closed) return;
         if(sk(m,idx)==='s-9-1') return;
         const key=sk(m,idx);
         if(selSlots.has(key)) return;
@@ -1701,7 +1713,7 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   const name = document.getElementById('f-name').value.trim();
   const line = document.getElementById('f-line').value.trim();
   const phone = document.getElementById('f-phone').value.trim();
-  const levelMap = {beginner: '初階班', mid: '中階班', '1v1': '對打班'};
+  const levelMap = {beginner: '初階班', mid: '初階班', '1v1': '對打班'};
 
   let small = 0, big = 0, rally = 0;
   [...selSlots].forEach(k => {
@@ -1741,7 +1753,6 @@ document.getElementById('submit-btn').addEventListener('click', async function()
       let classLabel;
       if (s.cls === 'big') classLabel = '大班初階';
       else if (s.cls === 'rally') classLabel = '對打課';
-      else if (s.type === 'thu' && s.t === '19-20') classLabel = '小班中階';
       else classLabel = '小班初階';
       return `${s.d} ${timeLabel}（${classLabel}）`;
     }).filter(str => str !== '').join('<br>');
@@ -1836,7 +1847,6 @@ function slotKeyToDetail(key) {
   let classLabel, levelLabel, coachLabel;
   if (s.cls === 'big')         { classLabel = '大班'; levelLabel = '初階'; }
   else if (s.cls === 'rally')  { classLabel = '對打課'; levelLabel = '—'; }
-  else if (s.type === 'thu' && s.t === '19-20') { classLabel = '小班'; levelLabel = '中階'; }
   else                         { classLabel = '小班'; levelLabel = '初階'; }
   if (s.type === 'tue')        coachLabel = 'Adam + Miguel';
   else if (s.cls === 'rally')  coachLabel = 'Miguel';
@@ -2076,7 +2086,7 @@ const PKG_PLANS=[
   {key:'tue-20',label:'週二 20:00–21:00',type:'tue',time:'20-21',cls:['small','big'],level:'beginner',price:490,coach:'Adam + Miguel',size:'大班 4–10人',note9:'9月才開始大班'},
   {key:'wed-19',label:'週三 19:00–20:00',type:'wed',time:'19-20',cls:['small'],level:'beginner',price:550,coach:'Adam',size:'小班 1–5人',rec:true},
   {key:'wed-20',label:'週三 20:00–21:00',type:'wed',time:'20-21',cls:['small'],level:'beginner',price:550,coach:'Adam',size:'小班 1–5人'},
-  {key:'thu-19',label:'週四 19:00–20:00',type:'thu',time:'19-20',cls:['small'],level:'mid',price:550,coach:'Adam',size:'小班 1–5人'},
+  {key:'thu-19',label:'週四 19:00–20:00',type:'thu',time:'19-20',cls:['small'],level:'beginner',price:550,coach:'Adam',size:'小班 1–5人'},
   {key:'thu-20',label:'週四對打 20:00–21:00',type:'thu',time:'20-21',cls:['rally'],level:'rally',price:800,coach:'Adam',size:'1–3人'},
 ];
 const PKG_MONTHS=[7,8,9,10,11,12];
@@ -2096,6 +2106,7 @@ function pkgGetSlots(planKey,startM){
     (DEFS[m]||[]).forEach((s,i)=>{
       if(PKG_TUE_DOUBLE.has(sk(m,i))) return; // 跳過重複場地
       if(s.special==='tournament') return;
+      if(s.closed) return; // 跳過已關閉場次
       if(s.type!==p.type||s.t!==p.time||!p.cls.includes(s.cls)) return;
       res.push({m,i,s});
     });
@@ -2107,7 +2118,7 @@ function pkgCountInMonth(planKey,m){
   const p=PKG_PLANS.find(x=>x.key===planKey);
   return (DEFS[m]||[]).filter((s,i)=>
     !PKG_TUE_DOUBLE.has(sk(m,i)) &&
-    !s.special&&s.type===p.type&&s.t===p.time&&p.cls.includes(s.cls)
+    !s.special&&!s.closed&&s.type===p.type&&s.t===p.time&&p.cls.includes(s.cls)
   ).length;
 }
 
