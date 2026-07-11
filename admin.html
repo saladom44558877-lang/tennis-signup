@@ -301,6 +301,23 @@ const SLOT_ALIAS = {
   's-9-1': 's-9-0',  // 09/01(二) 19:00-20:00 court5 → 同堂為 court6
 };
 
+// Sheet 裡的 slots 欄位存的其實是「顯示標籤」（如 07/02(四) 19:00-20:00），不是 key。
+// 這裡建立 label → key 的反查表，讓需要比對 key 的地方（例如上課提醒）能正確解析。
+// 12月幾組比賽時段標籤重複（12/23、12/24），比賽不開放選課，不影響此反查表用途。
+const SLOT_KEY_BY_LABEL = {};
+Object.entries(SLOT_INFO).forEach(([k, v]) => {
+  if (!SLOT_KEY_BY_LABEL[v.label]) SLOT_KEY_BY_LABEL[v.label] = k;
+});
+
+// 將原始字串（可能是 key，也可能是 label）解析為正確的 slot key
+function resolveSlotKey(raw) {
+  const clean = String(raw || '').trim();
+  if (!clean) return '';
+  if (SLOT_INFO[clean]) return canonKey(clean);            // 本身就是合法 key
+  if (SLOT_KEY_BY_LABEL[clean]) return canonKey(SLOT_KEY_BY_LABEL[clean]); // 是 label，反查成 key
+  return canonKey(clean);                                    // 都找不到，原樣返回
+}
+
 // 將時段字串中的 key 解碼為可讀標籤，雙教練重複時段自動去重
 function decodeSlotStr(str) {
   if (!str || str === '—') return str;
@@ -743,7 +760,7 @@ function renderRemind(){
   if(!classes.length){ box.innerHTML = `<div class="empty">${date} 沒有課</div>`; return; }
 
   const rows = allRows || [];
-  const inClass = (r,key) => (r.slots||'').split(/[,\n]/).map(x=>canonKey(x.trim())).includes(key);
+  const inClass = (r,key) => (r.slots||'').split(/[,\n]/).map(x=>resolveSlotKey(x)).includes(key);
   const word = relWord(date);
 
   let totalPaid = 0;
