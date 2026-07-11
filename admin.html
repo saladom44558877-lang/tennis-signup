@@ -795,8 +795,29 @@ function renderRemind(){
       : '';
 
     const court = courtLabel(c);
-    const msg = `🎾 網球課提醒\n\nHi 👋 提醒您 ${word} 有課：\n📅 ${date}\n⏰ ${c.time}（${c.cls}）\n👨‍🏫 ${c.coach} 教練\n📍 中正河濱網球場${court ? '　'+court : ''}\nhttps://maps.app.goo.gl/ZYJNHE8QJwikpnTs8\n🚗 **搭 Uber 的同學**建議導航到：\n「100 台北市中正區螢雪里詔安街38巷2弄1號」\nhttps://maps.app.goo.gl/FoguUjhCvp3M26Xs5\n走過天橋就是球場囉！\n\n☀️ **記得準備：**\n💧 水\n🍌 上課前先吃點東西\n👕 運動服\n👟 運動鞋（有網球鞋更好\n🎾 球拍教練都會準備，不用另外攜帶～\n下雨停課會提前1小時另公布 🙏`;
-
+    const msg = const msg = [
+  '🎾 網球課提醒',
+  '',
+  `Hi 👋 提醒您 ${word} 有課：`,
+  `📅 ${date}`,
+  `⏰ ${c.time}（${c.cls}）`,
+  `👨‍🏫 ${c.coach} 教練`,
+  `📍 中正河濱網球場${court ? '　'+court : ''}`,
+  'https://maps.app.goo.gl/ZYJNHE8QJwikpnTs8',
+  '🚗 **搭 Uber 的同學**建議導航到：',
+  '「100 台北市中正區螢雪里詔安街38巷2弄1號」',
+  'https://maps.app.goo.gl/FoguUjhCvp3M26Xs5',
+  '走過天橋就是球場囉！',
+  '',
+  '☀️ **記得準備：**',
+  '💧 水',
+  '🍌 上課前先吃點東西',
+  '👕 運動服',
+  '👟 運動鞋（有網球鞋更好',
+  '🎾 球拍教練都會準備，不用另外攜帶～',
+  '下雨停課會提前1小時另公布 🙏'
+].join('\n');
+      
     const msgBox = paid.length ? `<div class="msg-box">
         <textarea id="msg-${c.key}" readonly>${escHtml(msg)}</textarea>
         <button class="copy-msg-btn" onclick="copyElText('msg-${c.key}',this)">📋 複製提醒訊息</button>
