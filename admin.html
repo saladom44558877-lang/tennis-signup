@@ -58,6 +58,11 @@
     .btn-confirm:hover { background: #15803d; }
     .btn-cancel { flex: 1; padding: 9px; background: #fff; color: #dc2626; border: 1.5px solid #dc2626; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
     .btn-cancel:hover { background: #fee2e2; }
+    .btn-refund { flex: 1; padding: 9px; background: #fff; color: #db2777; border: 1.5px solid #db2777; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-refund:hover { background: #fdf2f8; }
+
+    .status-refund { background: #fce7f3; color: #9d174d; }
+    .reg-card.refund { border-left-color: #db2777; opacity: .75; }
 
     .empty { text-align: center; padding: 3rem; color: #888; font-size: 14px; }
     .refresh-btn { padding: 7px 16px; background: #1d4ed8; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
@@ -132,6 +137,37 @@
     .msg-box textarea { width:100%; box-sizing:border-box; border:1.5px solid #e2e8f0; border-radius:8px; padding:10px; font-size:13px; line-height:1.7; color:#333; resize:vertical; min-height:150px; font-family:inherit; background:#fafafa; }
     .copy-msg-btn { margin-top:8px; width:100%; padding:10px; border-radius:8px; border:none; background:#16a34a; color:#fff; font-size:14px; font-weight:700; cursor:pointer; }
     .copy-msg-btn:active { transform:scale(.99); }
+
+    /* 退費 Modal */
+    .rf-field { margin-bottom: 14px; }
+    .rf-label { font-size: 12px; font-weight: 700; color: #6b7280; margin-bottom: 6px; display: block; }
+    .rf-input, .rf-select { width: 100%; padding: 10px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; }
+    .rf-input:focus, .rf-select:focus { border-color: #db2777; }
+    .rf-hint { font-size: 11px; color: #999; margin-top: 4px; }
+    .rf-summary { background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; font-size: 12.5px; color: #831843; line-height: 1.8; }
+    .btn-refund-submit { width: 100%; padding: 11px; background: #db2777; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .btn-refund-submit:hover { background: #be185d; }
+    .btn-refund-submit:disabled { background: #f3d3e3; cursor: not-allowed; }
+    .btn-refund-submit.confirming { background: #9f1239; }
+
+    /* 金流總覽 */
+    .cash-toolbar { display:flex; gap:8px; align-items:center; margin-bottom:1rem; flex-wrap:wrap; }
+    .cash-toolbar select { padding:8px 10px; border-radius:8px; border:1.5px solid #e2e8f0; font-size:14px; background:#fff; }
+    .cash-stats { display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-bottom:1.25rem; }
+    .cash-stat { background:#fff; border-radius:12px; padding:14px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,.05); }
+    .cash-stat-n { font-size:20px; font-weight:700; }
+    .cash-stat-n.income { color:#16a34a; }
+    .cash-stat-n.refund { color:#db2777; }
+    .cash-stat-n.net { color:#1d4ed8; }
+    .cash-stat-l { font-size:11px; color:#888; margin-top:2px; }
+    .cash-row { display:flex; justify-content:space-between; align-items:center; background:#fff; border-radius:10px; padding:10px 14px; margin-bottom:8px; box-shadow:0 1px 4px rgba(0,0,0,.05); border-left:3px solid #e2e8f0; font-size:13px; }
+    .cash-row.income { border-left-color:#22c55e; }
+    .cash-row.refund { border-left-color:#db2777; }
+    .cash-row-name { font-weight:700; }
+    .cash-row-meta { font-size:11px; color:#888; margin-top:2px; }
+    .cash-row-amt { font-weight:700; font-size:14px; }
+    .cash-row-amt.income { color:#16a34a; }
+    .cash-row-amt.refund { color:#db2777; }
   </style>
 </head>
 <body>
@@ -150,6 +186,18 @@
     </div>
   </div>
 </div>
+
+<!-- 退費 Modal -->
+<div class="modal-overlay" id="refund-modal" onclick="if(event.target===this)closeRefundModal()">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <div class="modal-hd-title">💸 學員退費</div>
+      <button class="modal-close" onclick="closeRefundModal()">×</button>
+    </div>
+    <div id="refund-content" style="padding:18px;"><div class="loading">載入中...</div></div>
+  </div>
+</div>
+
 <div class="container">
 
   <!-- 登入 -->
@@ -175,6 +223,7 @@
     <div class="admin-tabs">
       <button class="atab active" id="atab-reg" onclick="switchTab('reg')">📋 報名管理</button>
       <button class="atab" id="atab-remind" onclick="switchTab('remind')">🔔 上課提醒</button>
+      <button class="atab" id="atab-cash" onclick="switchTab('cash')">💰 金流總覽</button>
     </div>
 
     <div id="tab-reg">
@@ -189,6 +238,7 @@
       <button class="filter-btn" onclick="setFilter('pending',this)">⏳ 待確認</button>
       <button class="filter-btn" onclick="setFilter('paid',this)">✅ 已繳費</button>
       <button class="filter-btn" onclick="setFilter('cancel',this)">❌ 已取消</button>
+      <button class="filter-btn" onclick="setFilter('refund',this)">💸 已退費</button>
     </div>
 
     <div id="reg-list"><div class="loading">載入中...</div></div>
@@ -201,6 +251,22 @@
         <select id="remind-date" onchange="remindDateChanged()"></select>
       </div>
       <div id="remind-content"><div class="loading">請選擇日期</div></div>
+    </div>
+
+    <div id="tab-cash" style="display:none;">
+      <div class="cash-toolbar">
+        <select id="cash-month" onchange="loadAccounting()">
+          <option value="all">全部月份</option>
+          <option value="07">7月</option>
+          <option value="08">8月</option>
+          <option value="09">9月</option>
+          <option value="10">10月</option>
+          <option value="11">11月</option>
+          <option value="12">12月</option>
+        </select>
+        <button class="refresh-btn" onclick="loadAccounting()">🔄 重新整理</button>
+      </div>
+      <div id="cash-content"><div class="loading">載入中...</div></div>
     </div>
 
   </div>
@@ -393,6 +459,7 @@ function renderList() {
     if (curFilter === 'pending') return r.status === '待確認';
     if (curFilter === 'paid')    return r.status === '已繳費✅';
     if (curFilter === 'cancel')  return r.status === '已取消❌';
+    if (curFilter === 'refund')  return r.status === '已退費';
     return true;
   }).reverse(); // 最新在最上面
 
@@ -401,17 +468,24 @@ function renderList() {
     return;
   }
 
-  const statusClass = { '待確認':'pending', '已繳費✅':'paid', '已取消❌':'cancel' };
-  const statusBadge = { '待確認':'status-pending', '已繳費✅':'status-paid', '已取消❌':'status-cancel' };
+  const statusClass = { '待確認':'pending', '已繳費✅':'paid', '已取消❌':'cancel', '已退費':'refund' };
+  const statusBadge = { '待確認':'status-pending', '已繳費✅':'status-paid', '已取消❌':'status-cancel', '已退費':'status-refund' };
 
   document.getElementById('reg-list').innerHTML = filtered.map(r => {
     const sc = statusClass[r.status] || 'pending';
     const sb = statusBadge[r.status] || 'status-pending';
     const isPending = r.status === '待確認';
     const isCancelled = r.status === '已取消❌';
+    const isPaid = r.status === '已繳費✅';
+    const isRefunded = r.status === '已退費';
     // 解碼時段 key → 可讀格式
     const slotsDisplay   = decodeSlotStr(r.slots   || '');
     const waitlistDisplay = decodeSlotStr(r.waitlist || '');
+    const refundInfo = isRefunded ? `<div class="reg-slots" style="background:#fdf2f8;border-color:#fbcfe8;color:#831843;">
+        <b>退費日期：</b>${r.refundDate || '—'}<br>
+        <b>退費金額：</b>NT$ ${r.refundAmount || 0}<br>
+        <b>退費原因：</b>${r.refundReason || '—'}${r.refundHandler ? ' ｜ <b>經手人：</b>'+r.refundHandler : ''}
+      </div>` : '';
     return `<div class="reg-card ${sc}">
       <div class="reg-top">
         <div>
@@ -428,11 +502,14 @@ function renderList() {
       </div>
       ${slotsDisplay ? `<div class="reg-slots"><b>正選時段：</b><br>${slotsDisplay.replace(/\n/g,'<br>')}</div>` : ''}
       ${waitlistDisplay ? `<div class="reg-slots" style="background:#faf5ff;border-color:#e9d5ff;"><b>候補時段：</b><br>${waitlistDisplay.replace(/\n/g,'<br>')}</div>` : ''}
-      ${!isCancelled ? `<div class="reg-actions">
+      ${refundInfo}
+      ${!isCancelled && !isRefunded ? `<div class="reg-actions">
         ${isPending ? `<button class="btn-confirm" onclick="confirmPayment(${r.rowIndex})">✅ 確認已繳費</button>` : '<div style="flex:1;"></div>'}
         <button class="btn-invoice" onclick='showInvoice(${JSON.stringify(r).replace(/'/g,"&#39;")})'>📋 繳費單</button>
         <button class="btn-cancel" onclick="cancelReg(${r.rowIndex})">${isPending ? '❌ 取消報名' : '🔄 標記取消'}</button>
-      </div>` : ''}
+      </div>${isPaid ? `<div class="reg-actions">
+        <button class="btn-refund" onclick="openRefundModal(${r.rowIndex})">💸 學員退費</button>
+      </div>` : ''}` : ''}
     </div>`;
   }).join('');
 }
@@ -455,6 +532,141 @@ async function cancelReg(rowIndex) {
     const data = await res.json();
     if (data.status === 'ok') await loadData();
   } catch(e) { alert('操作失敗，請重試'); }
+}
+
+// ── 退費 ─────────────────────────────────────────────
+
+const REFUND_REASONS = ['個人因素', '搬家', '傷病', '停班', '天氣', '其他'];
+let refundRowIndex = null;
+
+async function openRefundModal(rowIndex) {
+  refundRowIndex = rowIndex;
+  const box = document.getElementById('refund-content');
+  box.innerHTML = '<div class="loading">計算建議金額中...</div>';
+  document.getElementById('refund-modal').classList.add('open');
+  try {
+    const res = await fetch(`${GAS_URL}?action=getRefundSuggestion&rowIndex=${rowIndex}&pass=${encodeURIComponent(adminPass)}`);
+    const data = await res.json();
+    if (data.status !== 'ok') {
+      box.innerHTML = `<div class="empty">${data.message || '無法載入退費資訊'}</div>`;
+      return;
+    }
+    const reasons = (data.reasons && data.reasons.length ? data.reasons : REFUND_REASONS);
+    box.innerHTML = `
+      <div class="rf-summary">
+        <b>學員：</b>${data.name} ｜ <b>訂單：</b>${data.orderId || '—'}<br>
+        <b>原繳費金額：</b>NT$ ${data.originalFee} ｜ <b>堂數：</b>${data.classCount} 堂
+      </div>
+      <div class="rf-field">
+        <label class="rf-label">退費金額（可修改）</label>
+        <input type="number" id="rf-amount" class="rf-input" value="${data.suggestedAmount}" min="0" max="${data.originalFee}">
+        <div class="rf-hint">預設帶入建議金額，可依實際情況調整</div>
+      </div>
+      <div class="rf-field">
+        <label class="rf-label">退費原因</label>
+        <select id="rf-reason" class="rf-select">
+          ${reasons.map(r => `<option value="${r}">${r}</option>`).join('')}
+        </select>
+      </div>
+      <button class="btn-refund-submit" id="rf-submit-btn" onclick="submitRefund()">確認退費</button>
+    `;
+  } catch(e) {
+    box.innerHTML = '<div class="empty">載入失敗，請重試</div>';
+  }
+}
+
+function closeRefundModal() {
+  document.getElementById('refund-modal').classList.remove('open');
+  refundRowIndex = null;
+}
+
+// 兩次點擊確認（避免手滑誤觸退費）
+async function submitRefund() {
+  const btn = document.getElementById('rf-submit-btn');
+  if (!btn.dataset.confirming) {
+    btn.dataset.confirming = '1';
+    btn.classList.add('confirming');
+    btn.textContent = '再次點擊以確認退費';
+    setTimeout(() => {
+      if (btn.dataset.confirming) {
+        delete btn.dataset.confirming;
+        btn.classList.remove('confirming');
+        btn.textContent = '確認退費';
+      }
+    }, 4000);
+    return;
+  }
+
+  const amount = parseInt(document.getElementById('rf-amount').value) || 0;
+  const reason = document.getElementById('rf-reason').value;
+  btn.disabled = true;
+  btn.textContent = '處理中...';
+
+  try {
+    const payload = encodeURIComponent(JSON.stringify({ refundAmount: amount, reason, handler: '' }));
+    const res = await fetch(`${GAS_URL}?action=refund&rowIndex=${refundRowIndex}&pass=${encodeURIComponent(adminPass)}&data=${payload}`);
+    const data = await res.json();
+    if (data.status === 'ok') {
+      closeRefundModal();
+      await loadData();
+    } else {
+      alert(data.message || '退費失敗，請重試');
+      btn.disabled = false;
+      btn.textContent = '確認退費';
+      delete btn.dataset.confirming;
+      btn.classList.remove('confirming');
+    }
+  } catch(e) {
+    alert('操作失敗，請重試');
+    btn.disabled = false;
+    btn.textContent = '確認退費';
+  }
+}
+
+// ── 金流總覽 ─────────────────────────────────────────
+
+async function loadAccounting() {
+  const month = document.getElementById('cash-month').value;
+  const box = document.getElementById('cash-content');
+  box.innerHTML = '<div class="loading">載入中...</div>';
+  try {
+    const res = await fetch(`${GAS_URL}?action=getAccounting&month=${month}&pass=${encodeURIComponent(adminPass)}`);
+    const data = await res.json();
+    renderAccounting(data);
+  } catch(e) {
+    box.innerHTML = '<div class="empty">載入失敗，請重試</div>';
+  }
+}
+
+function renderAccounting(data) {
+  const box = document.getElementById('cash-content');
+  const records = (data.records || []).slice().sort((a,b) => String(b.date).localeCompare(String(a.date)));
+
+  const statsHtml = `<div class="cash-stats">
+    <div class="cash-stat"><div class="cash-stat-n income">NT$ ${(data.totalIncome||0).toLocaleString()}</div><div class="cash-stat-l">💰 總收入</div></div>
+    <div class="cash-stat"><div class="cash-stat-n refund">NT$ ${(data.totalRefund||0).toLocaleString()}</div><div class="cash-stat-l">💸 總退費</div></div>
+    <div class="cash-stat"><div class="cash-stat-n net">NT$ ${(data.netIncome||0).toLocaleString()}</div><div class="cash-stat-l">📊 淨收入</div></div>
+  </div>`;
+
+  if (!records.length) {
+    box.innerHTML = statsHtml + '<div class="empty">此區間沒有交易紀錄</div>';
+    return;
+  }
+
+  const rowsHtml = records.map(r => {
+    const isIncome = r.type === '收款';
+    const cls = isIncome ? 'income' : 'refund';
+    const amtDisplay = (isIncome ? '+' : '') + 'NT$ ' + Math.abs(r.amount).toLocaleString();
+    return `<div class="cash-row ${cls}">
+      <div>
+        <div class="cash-row-name">${escHtml(r.name)}</div>
+        <div class="cash-row-meta">${escHtml(r.date || '')} ｜ ${r.type}${r.reason ? '（'+escHtml(r.reason)+'）' : ''}</div>
+      </div>
+      <div class="cash-row-amt ${cls}">${amtDisplay}</div>
+    </div>`;
+  }).join('');
+
+  box.innerHTML = statsHtml + rowsHtml;
 }
 
 // ── 繳費單 ─────────────────────────────────────────────
@@ -668,14 +880,19 @@ function copyInvoiceText() {
 function switchTab(name){
   document.getElementById('tab-reg').style.display    = name==='reg'    ? 'block' : 'none';
   document.getElementById('tab-remind').style.display = name==='remind' ? 'block' : 'none';
+  document.getElementById('tab-cash').style.display   = name==='cash'   ? 'block' : 'none';
   document.getElementById('atab-reg').classList.toggle('active', name==='reg');
   document.getElementById('atab-remind').classList.toggle('active', name==='remind');
+  document.getElementById('atab-cash').classList.toggle('active', name==='cash');
   if(name==='remind'){
     const sel = document.getElementById('remind-date');
     if(!sel.options.length) buildRemindDates();
     if(!sel.value) sel.value = defaultRemindDate();
     syncQuickActive();
     renderRemind();
+  }
+  if(name==='cash'){
+    loadAccounting();
   }
 }
 
