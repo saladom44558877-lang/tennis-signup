@@ -97,6 +97,25 @@
     .inv-bank-label { color: #3b82f6; }
     .inv-bank-val { font-weight: 700; color: #1e3a8a; font-family: 'Courier New', monospace; letter-spacing: .04em; }
     .inv-note { background: #fef9c3; border-radius: 8px; padding: 10px 13px; font-size: 12px; color: #78350f; line-height: 1.7; }
+
+    /* 金流總覽 */
+    .cash-toolbar { display:flex; gap:8px; align-items:center; margin-bottom:1rem; flex-wrap:wrap; }
+    .cash-toolbar select { padding:8px 10px; border-radius:8px; border:1.5px solid #e2e8f0; font-size:14px; background:#fff; }
+    .cash-stats { display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-bottom:1.25rem; }
+    .cash-stat { background:#fff; border-radius:12px; padding:14px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,.05); }
+    .cash-stat-n { font-size:20px; font-weight:700; }
+    .cash-stat-n.income { color:#16a34a; }
+    .cash-stat-n.refund { color:#db2777; }
+    .cash-stat-n.net { color:#1d4ed8; }
+    .cash-stat-l { font-size:11px; color:#888; margin-top:2px; }
+    .cash-row { display:flex; justify-content:space-between; align-items:center; background:#fff; border-radius:10px; padding:10px 14px; margin-bottom:8px; box-shadow:0 1px 4px rgba(0,0,0,.05); border-left:3px solid #e2e8f0; font-size:13px; }
+    .cash-row.income { border-left-color:#22c55e; }
+    .cash-row.refund { border-left-color:#db2777; }
+    .cash-row-name { font-weight:700; }
+    .cash-row-meta { font-size:11px; color:#888; margin-top:2px; }
+    .cash-row-amt { font-weight:700; font-size:14px; }
+    .cash-row-amt.income { color:#16a34a; }
+    .cash-row-amt.refund { color:#db2777; }
     .modal-ft { display: flex; gap: 8px; padding: 12px 18px; border-top: 1px solid #f1f5f9; position: sticky; bottom: 0; background: #fff; border-radius: 0 0 16px 16px; }
     .modal-ft button { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; }
     .btn-copy-inv { background: #f1f5f9; color: #374151; }
@@ -176,6 +195,7 @@
       <button class="atab active" id="atab-reg" onclick="switchTab('reg')">📋 報名管理</button>
       <button class="atab" id="atab-remind" onclick="switchTab('remind')">🔔 上課提醒</button>
       <button class="atab" id="atab-coach" onclick="switchTab('coach')">⚙️ 課程設定</button>
+      <button class="atab" id="atab-cash" onclick="switchTab('cash')">💰 金流總覽</button>
     </div>
 
     <div id="tab-reg">
@@ -207,6 +227,22 @@
     <div id="tab-coach" style="display:none;">
       <div class="remind-summary">在這裡指定每堂課的教練、或標記某堂已被學生私下預訂（會限制名額並顯示標籤），儲存後會直接反映在報名頁面（index）給學生看。留空則維持預設。</div>
       <div id="coach-content"><div class="loading">載入中...</div></div>
+    </div>
+
+    <div id="tab-cash" style="display:none;">
+      <div class="cash-toolbar">
+        <select id="cash-month" onchange="loadAccounting()">
+          <option value="all">全部月份</option>
+          <option value="07">7月</option>
+          <option value="08">8月</option>
+          <option value="09">9月</option>
+          <option value="10">10月</option>
+          <option value="11">11月</option>
+          <option value="12">12月</option>
+        </select>
+        <button class="refresh-btn" onclick="loadAccounting()">🔄 重新整理</button>
+      </div>
+      <div id="cash-content"><div class="loading">載入中...</div></div>
     </div>
 
   </div>
@@ -467,6 +503,52 @@ async function cancelReg(rowIndex) {
   } catch(e) { alert('操作失敗，請重試'); }
 }
 
+// ── 金流總覽 ─────────────────────────────────────────
+
+async function loadAccounting() {
+  const month = document.getElementById('cash-month').value;
+  const box = document.getElementById('cash-content');
+  box.innerHTML = '<div class="loading">載入中...</div>';
+  try {
+    const res = await fetch(`${GAS_URL}?action=getAccounting&month=${month}&pass=${encodeURIComponent(adminPass)}`);
+    const data = await res.json();
+    renderAccounting(data);
+  } catch(e) {
+    box.innerHTML = '<div class="empty">載入失敗，請重試</div>';
+  }
+}
+
+function renderAccounting(data) {
+  const box = document.getElementById('cash-content');
+  const records = (data.records || []).slice().sort((a,b) => String(b.date).localeCompare(String(a.date)));
+
+  const statsHtml = `<div class="cash-stats">
+    <div class="cash-stat"><div class="cash-stat-n income">NT$ ${(data.totalIncome||0).toLocaleString()}</div><div class="cash-stat-l">💰 總收入</div></div>
+    <div class="cash-stat"><div class="cash-stat-n refund">NT$ ${(data.totalRefund||0).toLocaleString()}</div><div class="cash-stat-l">💸 總退費</div></div>
+    <div class="cash-stat"><div class="cash-stat-n net">NT$ ${(data.netIncome||0).toLocaleString()}</div><div class="cash-stat-l">📊 淨收入</div></div>
+  </div>`;
+
+  if (!records.length) {
+    box.innerHTML = statsHtml + '<div class="empty">此區間沒有交易紀錄</div>';
+    return;
+  }
+
+  const rowsHtml = records.map(r => {
+    const isIncome = r.type === '收款';
+    const cls = isIncome ? 'income' : 'refund';
+    const amtDisplay = (isIncome ? '+' : '') + 'NT$ ' + Math.abs(r.amount).toLocaleString();
+    return `<div class="cash-row ${cls}">
+      <div>
+        <div class="cash-row-name">${escHtml(r.name)}</div>
+        <div class="cash-row-meta">${escHtml(r.date || '')} ｜ ${r.type}${r.reason ? '（'+escHtml(r.reason)+'）' : ''}</div>
+      </div>
+      <div class="cash-row-amt ${cls}">${amtDisplay}</div>
+    </div>`;
+  }).join('');
+
+  box.innerHTML = statsHtml + rowsHtml;
+}
+
 // ── 繳費單 ─────────────────────────────────────────────
 
 let invoiceTextCache = '';
@@ -683,9 +765,11 @@ function switchTab(name){
   document.getElementById('tab-reg').style.display    = name==='reg'    ? 'block' : 'none';
   document.getElementById('tab-remind').style.display = name==='remind' ? 'block' : 'none';
   document.getElementById('tab-coach').style.display  = name==='coach'  ? 'block' : 'none';
+  document.getElementById('tab-cash').style.display   = name==='cash'   ? 'block' : 'none';
   document.getElementById('atab-reg').classList.toggle('active', name==='reg');
   document.getElementById('atab-remind').classList.toggle('active', name==='remind');
   document.getElementById('atab-coach').classList.toggle('active', name==='coach');
+  document.getElementById('atab-cash').classList.toggle('active', name==='cash');
   if(name==='remind'){
     const sel = document.getElementById('remind-date');
     if(!sel.options.length) buildRemindDates();
@@ -695,6 +779,9 @@ function switchTab(name){
   }
   if(name==='coach'){
     renderCoachTab();
+  }
+  if(name==='cash'){
+    loadAccounting();
   }
 }
 
