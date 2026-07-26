@@ -58,11 +58,6 @@
     .btn-confirm:hover { background: #15803d; }
     .btn-cancel { flex: 1; padding: 9px; background: #fff; color: #dc2626; border: 1.5px solid #dc2626; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
     .btn-cancel:hover { background: #fee2e2; }
-    .btn-refund { flex: 1; padding: 9px; background: #fff; color: #db2777; border: 1.5px solid #db2777; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
-    .btn-refund:hover { background: #fdf2f8; }
-
-    .status-refund { background: #fce7f3; color: #9d174d; }
-    .reg-card.refund { border-left-color: #db2777; opacity: .75; }
 
     .empty { text-align: center; padding: 3rem; color: #888; font-size: 14px; }
     .refresh-btn { padding: 7px 16px; background: #1d4ed8; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
@@ -137,37 +132,6 @@
     .msg-box textarea { width:100%; box-sizing:border-box; border:1.5px solid #e2e8f0; border-radius:8px; padding:10px; font-size:13px; line-height:1.7; color:#333; resize:vertical; min-height:150px; font-family:inherit; background:#fafafa; }
     .copy-msg-btn { margin-top:8px; width:100%; padding:10px; border-radius:8px; border:none; background:#16a34a; color:#fff; font-size:14px; font-weight:700; cursor:pointer; }
     .copy-msg-btn:active { transform:scale(.99); }
-
-    /* 退費 Modal */
-    .rf-field { margin-bottom: 14px; }
-    .rf-label { font-size: 12px; font-weight: 700; color: #6b7280; margin-bottom: 6px; display: block; }
-    .rf-input, .rf-select { width: 100%; padding: 10px 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; }
-    .rf-input:focus, .rf-select:focus { border-color: #db2777; }
-    .rf-hint { font-size: 11px; color: #999; margin-top: 4px; }
-    .rf-summary { background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; font-size: 12.5px; color: #831843; line-height: 1.8; }
-    .btn-refund-submit { width: 100%; padding: 11px; background: #db2777; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; }
-    .btn-refund-submit:hover { background: #be185d; }
-    .btn-refund-submit:disabled { background: #f3d3e3; cursor: not-allowed; }
-    .btn-refund-submit.confirming { background: #9f1239; }
-
-    /* 金流總覽 */
-    .cash-toolbar { display:flex; gap:8px; align-items:center; margin-bottom:1rem; flex-wrap:wrap; }
-    .cash-toolbar select { padding:8px 10px; border-radius:8px; border:1.5px solid #e2e8f0; font-size:14px; background:#fff; }
-    .cash-stats { display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-bottom:1.25rem; }
-    .cash-stat { background:#fff; border-radius:12px; padding:14px; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,.05); }
-    .cash-stat-n { font-size:20px; font-weight:700; }
-    .cash-stat-n.income { color:#16a34a; }
-    .cash-stat-n.refund { color:#db2777; }
-    .cash-stat-n.net { color:#1d4ed8; }
-    .cash-stat-l { font-size:11px; color:#888; margin-top:2px; }
-    .cash-row { display:flex; justify-content:space-between; align-items:center; background:#fff; border-radius:10px; padding:10px 14px; margin-bottom:8px; box-shadow:0 1px 4px rgba(0,0,0,.05); border-left:3px solid #e2e8f0; font-size:13px; }
-    .cash-row.income { border-left-color:#22c55e; }
-    .cash-row.refund { border-left-color:#db2777; }
-    .cash-row-name { font-weight:700; }
-    .cash-row-meta { font-size:11px; color:#888; margin-top:2px; }
-    .cash-row-amt { font-weight:700; font-size:14px; }
-    .cash-row-amt.income { color:#16a34a; }
-    .cash-row-amt.refund { color:#db2777; }
   </style>
 </head>
 <body>
@@ -186,18 +150,6 @@
     </div>
   </div>
 </div>
-
-<!-- 退費 Modal -->
-<div class="modal-overlay" id="refund-modal" onclick="if(event.target===this)closeRefundModal()">
-  <div class="modal-box">
-    <div class="modal-hd">
-      <div class="modal-hd-title">💸 學員退費</div>
-      <button class="modal-close" onclick="closeRefundModal()">×</button>
-    </div>
-    <div id="refund-content" style="padding:18px;"><div class="loading">載入中...</div></div>
-  </div>
-</div>
-
 <div class="container">
 
   <!-- 登入 -->
@@ -223,7 +175,7 @@
     <div class="admin-tabs">
       <button class="atab active" id="atab-reg" onclick="switchTab('reg')">📋 報名管理</button>
       <button class="atab" id="atab-remind" onclick="switchTab('remind')">🔔 上課提醒</button>
-      <button class="atab" id="atab-cash" onclick="switchTab('cash')">💰 金流總覽</button>
+      <button class="atab" id="atab-coach" onclick="switchTab('coach')">🧑‍🏫 教練管理</button>
     </div>
 
     <div id="tab-reg">
@@ -238,7 +190,6 @@
       <button class="filter-btn" onclick="setFilter('pending',this)">⏳ 待確認</button>
       <button class="filter-btn" onclick="setFilter('paid',this)">✅ 已繳費</button>
       <button class="filter-btn" onclick="setFilter('cancel',this)">❌ 已取消</button>
-      <button class="filter-btn" onclick="setFilter('refund',this)">💸 已退費</button>
     </div>
 
     <div id="reg-list"><div class="loading">載入中...</div></div>
@@ -253,20 +204,9 @@
       <div id="remind-content"><div class="loading">請選擇日期</div></div>
     </div>
 
-    <div id="tab-cash" style="display:none;">
-      <div class="cash-toolbar">
-        <select id="cash-month" onchange="loadAccounting()">
-          <option value="all">全部月份</option>
-          <option value="07">7月</option>
-          <option value="08">8月</option>
-          <option value="09">9月</option>
-          <option value="10">10月</option>
-          <option value="11">11月</option>
-          <option value="12">12月</option>
-        </select>
-        <button class="refresh-btn" onclick="loadAccounting()">🔄 重新整理</button>
-      </div>
-      <div id="cash-content"><div class="loading">載入中...</div></div>
+    <div id="tab-coach" style="display:none;">
+      <div class="remind-summary">在這裡指定每堂課的教練，儲存後會直接顯示在報名頁面（index）給學生看。留空則不顯示教練。</div>
+      <div id="coach-content"><div class="loading">載入中...</div></div>
     </div>
 
   </div>
@@ -300,9 +240,9 @@ const SLOT_INFO = {
   's-8-5':{label:'08/12(三) 20:00-21:00', date:'08/12(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam', court:5},
   's-8-6':{label:'08/13(四) 19:00-20:00', date:'08/13(四)', time:'19:00-20:00', cls:'小班・初階', coach:'Adam', court:4},
   's-8-7':{label:'08/18(二) 19:00-20:00', date:'08/18(二)', time:'19:00-20:00', cls:'小班・初階', coach:'Miguel', court:6},
-  's-8-8':{label:'08/18(二) 20:00-21:00', date:'08/18(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Miguel', court:6},
+  's-8-8':{label:'08/18(二) 20:00-21:00', date:'08/18(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam', court:6},
   's-8-9':{label:'08/25(二) 19:00-20:00', date:'08/25(二)', time:'19:00-20:00', cls:'小班・初階', coach:'Miguel', court:5},
-  's-8-10':{label:'08/25(二) 20:00-21:00', date:'08/25(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Miguel', court:5},
+  's-8-10':{label:'08/25(二) 20:00-21:00', date:'08/25(二)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam', court:5},
   's-8-11':{label:'08/26(三) 20:00-21:00', date:'08/26(三)', time:'20:00-21:00', cls:'小班・初階', coach:'Adam', court:5},
   's-8-12':{label:'08/27(四) 20:00-21:00', date:'08/27(四)', time:'20:00-21:00', cls:'對打課',    coach:'Adam', court:4},
   's-9-0':{label:'09/01(二) 19:00-20:00', date:'09/01(二)', time:'19:00-20:00', cls:'大班・初階', coach:'雙教練', court:6},
@@ -401,6 +341,7 @@ function decodeSlotStr(str) {
 let adminPass = '';
 let allRows = [];
 let curFilter = 'all';
+let coachAssignments = {};
 
 function login() {
   const pass = document.getElementById('pass-input').value.trim();
@@ -432,6 +373,7 @@ async function loadData() {
     allRows = data.rows || [];
     renderStats();
     renderList();
+    loadCoaches();
   } catch(e) {
     document.getElementById('reg-list').innerHTML = '<div class="empty">載入失敗，請重試</div>';
   }
@@ -459,7 +401,6 @@ function renderList() {
     if (curFilter === 'pending') return r.status === '待確認';
     if (curFilter === 'paid')    return r.status === '已繳費✅';
     if (curFilter === 'cancel')  return r.status === '已取消❌';
-    if (curFilter === 'refund')  return r.status === '已退費';
     return true;
   }).reverse(); // 最新在最上面
 
@@ -468,24 +409,17 @@ function renderList() {
     return;
   }
 
-  const statusClass = { '待確認':'pending', '已繳費✅':'paid', '已取消❌':'cancel', '已退費':'refund' };
-  const statusBadge = { '待確認':'status-pending', '已繳費✅':'status-paid', '已取消❌':'status-cancel', '已退費':'status-refund' };
+  const statusClass = { '待確認':'pending', '已繳費✅':'paid', '已取消❌':'cancel' };
+  const statusBadge = { '待確認':'status-pending', '已繳費✅':'status-paid', '已取消❌':'status-cancel' };
 
   document.getElementById('reg-list').innerHTML = filtered.map(r => {
     const sc = statusClass[r.status] || 'pending';
     const sb = statusBadge[r.status] || 'status-pending';
     const isPending = r.status === '待確認';
     const isCancelled = r.status === '已取消❌';
-    const isPaid = r.status === '已繳費✅';
-    const isRefunded = r.status === '已退費';
     // 解碼時段 key → 可讀格式
     const slotsDisplay   = decodeSlotStr(r.slots   || '');
     const waitlistDisplay = decodeSlotStr(r.waitlist || '');
-    const refundInfo = isRefunded ? `<div class="reg-slots" style="background:#fdf2f8;border-color:#fbcfe8;color:#831843;">
-        <b>退費日期：</b>${r.refundDate || '—'}<br>
-        <b>退費金額：</b>NT$ ${r.refundAmount || 0}<br>
-        <b>退費原因：</b>${r.refundReason || '—'}${r.refundHandler ? ' ｜ <b>經手人：</b>'+r.refundHandler : ''}
-      </div>` : '';
     return `<div class="reg-card ${sc}">
       <div class="reg-top">
         <div>
@@ -502,14 +436,11 @@ function renderList() {
       </div>
       ${slotsDisplay ? `<div class="reg-slots"><b>正選時段：</b><br>${slotsDisplay.replace(/\n/g,'<br>')}</div>` : ''}
       ${waitlistDisplay ? `<div class="reg-slots" style="background:#faf5ff;border-color:#e9d5ff;"><b>候補時段：</b><br>${waitlistDisplay.replace(/\n/g,'<br>')}</div>` : ''}
-      ${refundInfo}
-      ${!isCancelled && !isRefunded ? `<div class="reg-actions">
+      ${!isCancelled ? `<div class="reg-actions">
         ${isPending ? `<button class="btn-confirm" onclick="confirmPayment(${r.rowIndex})">✅ 確認已繳費</button>` : '<div style="flex:1;"></div>'}
         <button class="btn-invoice" onclick='showInvoice(${JSON.stringify(r).replace(/'/g,"&#39;")})'>📋 繳費單</button>
         <button class="btn-cancel" onclick="cancelReg(${r.rowIndex})">${isPending ? '❌ 取消報名' : '🔄 標記取消'}</button>
-      </div>${isPaid ? `<div class="reg-actions">
-        <button class="btn-refund" onclick="openRefundModal(${r.rowIndex})">💸 學員退費</button>
-      </div>` : ''}` : ''}
+      </div>` : ''}
     </div>`;
   }).join('');
 }
@@ -532,141 +463,6 @@ async function cancelReg(rowIndex) {
     const data = await res.json();
     if (data.status === 'ok') await loadData();
   } catch(e) { alert('操作失敗，請重試'); }
-}
-
-// ── 退費 ─────────────────────────────────────────────
-
-const REFUND_REASONS = ['個人因素', '搬家', '傷病', '停班', '天氣', '其他'];
-let refundRowIndex = null;
-
-async function openRefundModal(rowIndex) {
-  refundRowIndex = rowIndex;
-  const box = document.getElementById('refund-content');
-  box.innerHTML = '<div class="loading">計算建議金額中...</div>';
-  document.getElementById('refund-modal').classList.add('open');
-  try {
-    const res = await fetch(`${GAS_URL}?action=getRefundSuggestion&rowIndex=${rowIndex}&pass=${encodeURIComponent(adminPass)}`);
-    const data = await res.json();
-    if (data.status !== 'ok') {
-      box.innerHTML = `<div class="empty">${data.message || '無法載入退費資訊'}</div>`;
-      return;
-    }
-    const reasons = (data.reasons && data.reasons.length ? data.reasons : REFUND_REASONS);
-    box.innerHTML = `
-      <div class="rf-summary">
-        <b>學員：</b>${data.name} ｜ <b>訂單：</b>${data.orderId || '—'}<br>
-        <b>原繳費金額：</b>NT$ ${data.originalFee} ｜ <b>堂數：</b>${data.classCount} 堂
-      </div>
-      <div class="rf-field">
-        <label class="rf-label">退費金額（可修改）</label>
-        <input type="number" id="rf-amount" class="rf-input" value="${data.suggestedAmount}" min="0" max="${data.originalFee}">
-        <div class="rf-hint">預設帶入建議金額，可依實際情況調整</div>
-      </div>
-      <div class="rf-field">
-        <label class="rf-label">退費原因</label>
-        <select id="rf-reason" class="rf-select">
-          ${reasons.map(r => `<option value="${r}">${r}</option>`).join('')}
-        </select>
-      </div>
-      <button class="btn-refund-submit" id="rf-submit-btn" onclick="submitRefund()">確認退費</button>
-    `;
-  } catch(e) {
-    box.innerHTML = '<div class="empty">載入失敗，請重試</div>';
-  }
-}
-
-function closeRefundModal() {
-  document.getElementById('refund-modal').classList.remove('open');
-  refundRowIndex = null;
-}
-
-// 兩次點擊確認（避免手滑誤觸退費）
-async function submitRefund() {
-  const btn = document.getElementById('rf-submit-btn');
-  if (!btn.dataset.confirming) {
-    btn.dataset.confirming = '1';
-    btn.classList.add('confirming');
-    btn.textContent = '再次點擊以確認退費';
-    setTimeout(() => {
-      if (btn.dataset.confirming) {
-        delete btn.dataset.confirming;
-        btn.classList.remove('confirming');
-        btn.textContent = '確認退費';
-      }
-    }, 4000);
-    return;
-  }
-
-  const amount = parseInt(document.getElementById('rf-amount').value) || 0;
-  const reason = document.getElementById('rf-reason').value;
-  btn.disabled = true;
-  btn.textContent = '處理中...';
-
-  try {
-    const payload = encodeURIComponent(JSON.stringify({ refundAmount: amount, reason, handler: '' }));
-    const res = await fetch(`${GAS_URL}?action=refund&rowIndex=${refundRowIndex}&pass=${encodeURIComponent(adminPass)}&data=${payload}`);
-    const data = await res.json();
-    if (data.status === 'ok') {
-      closeRefundModal();
-      await loadData();
-    } else {
-      alert(data.message || '退費失敗，請重試');
-      btn.disabled = false;
-      btn.textContent = '確認退費';
-      delete btn.dataset.confirming;
-      btn.classList.remove('confirming');
-    }
-  } catch(e) {
-    alert('操作失敗，請重試');
-    btn.disabled = false;
-    btn.textContent = '確認退費';
-  }
-}
-
-// ── 金流總覽 ─────────────────────────────────────────
-
-async function loadAccounting() {
-  const month = document.getElementById('cash-month').value;
-  const box = document.getElementById('cash-content');
-  box.innerHTML = '<div class="loading">載入中...</div>';
-  try {
-    const res = await fetch(`${GAS_URL}?action=getAccounting&month=${month}&pass=${encodeURIComponent(adminPass)}`);
-    const data = await res.json();
-    renderAccounting(data);
-  } catch(e) {
-    box.innerHTML = '<div class="empty">載入失敗，請重試</div>';
-  }
-}
-
-function renderAccounting(data) {
-  const box = document.getElementById('cash-content');
-  const records = (data.records || []).slice().sort((a,b) => String(b.date).localeCompare(String(a.date)));
-
-  const statsHtml = `<div class="cash-stats">
-    <div class="cash-stat"><div class="cash-stat-n income">NT$ ${(data.totalIncome||0).toLocaleString()}</div><div class="cash-stat-l">💰 總收入</div></div>
-    <div class="cash-stat"><div class="cash-stat-n refund">NT$ ${(data.totalRefund||0).toLocaleString()}</div><div class="cash-stat-l">💸 總退費</div></div>
-    <div class="cash-stat"><div class="cash-stat-n net">NT$ ${(data.netIncome||0).toLocaleString()}</div><div class="cash-stat-l">📊 淨收入</div></div>
-  </div>`;
-
-  if (!records.length) {
-    box.innerHTML = statsHtml + '<div class="empty">此區間沒有交易紀錄</div>';
-    return;
-  }
-
-  const rowsHtml = records.map(r => {
-    const isIncome = r.type === '收款';
-    const cls = isIncome ? 'income' : 'refund';
-    const amtDisplay = (isIncome ? '+' : '') + 'NT$ ' + Math.abs(r.amount).toLocaleString();
-    return `<div class="cash-row ${cls}">
-      <div>
-        <div class="cash-row-name">${escHtml(r.name)}</div>
-        <div class="cash-row-meta">${escHtml(r.date || '')} ｜ ${r.type}${r.reason ? '（'+escHtml(r.reason)+'）' : ''}</div>
-      </div>
-      <div class="cash-row-amt ${cls}">${amtDisplay}</div>
-    </div>`;
-  }).join('');
-
-  box.innerHTML = statsHtml + rowsHtml;
 }
 
 // ── 繳費單 ─────────────────────────────────────────────
@@ -728,14 +524,12 @@ function showInvoice(r) {
         <div style="min-width:76px;font-size:10px;font-weight:700;color:#9ca3af;">日期</div>
         <div style="min-width:88px;font-size:10px;font-weight:700;color:#9ca3af;">時段</div>
         <div style="font-size:10px;font-weight:700;color:#9ca3af;flex:1;">班別</div>
-        <div style="font-size:10px;font-weight:700;color:#9ca3af;">教練</div>
       </div>` +
       items.map(s => `
       <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f1f5f9;font-size:12px;">
         <div style="min-width:76px;font-weight:700;color:#111;">${s.date}</div>
         <div style="min-width:88px;color:#555;">${s.time}</div>
         <div style="color:#7c3aed;font-weight:600;flex:1;">${s.cls}</div>
-        <div style="color:#6b7280;white-space:nowrap;">${s.coach}</div>
       </div>`).join('')
     : '<div class="inv-row"><span class="inv-val">—</span></div>';
 
@@ -744,7 +538,7 @@ function showInvoice(r) {
 
   // 純文字（複製用）
   const slotsTxt = slotItems.length
-    ? slotItems.map(s => `  ・${s.date} ${s.time} ${s.cls}・${s.coach}`).join('\n')
+    ? slotItems.map(s => `  ・${s.date} ${s.time} ${s.cls}`).join('\n')
     : '  —';
   const tournamentTxt = hasDiscount && wantsTournament
     ? '\n🎾 符合免費參加 12/23-24 團體賽資格！'
@@ -880,10 +674,10 @@ function copyInvoiceText() {
 function switchTab(name){
   document.getElementById('tab-reg').style.display    = name==='reg'    ? 'block' : 'none';
   document.getElementById('tab-remind').style.display = name==='remind' ? 'block' : 'none';
-  document.getElementById('tab-cash').style.display   = name==='cash'   ? 'block' : 'none';
+  document.getElementById('tab-coach').style.display  = name==='coach'  ? 'block' : 'none';
   document.getElementById('atab-reg').classList.toggle('active', name==='reg');
   document.getElementById('atab-remind').classList.toggle('active', name==='remind');
-  document.getElementById('atab-cash').classList.toggle('active', name==='cash');
+  document.getElementById('atab-coach').classList.toggle('active', name==='coach');
   if(name==='remind'){
     const sel = document.getElementById('remind-date');
     if(!sel.options.length) buildRemindDates();
@@ -891,12 +685,72 @@ function switchTab(name){
     syncQuickActive();
     renderRemind();
   }
-  if(name==='cash'){
-    loadAccounting();
+  if(name==='coach'){
+    renderCoachTab();
   }
 }
 
 function canonKey(k){ return SLOT_ALIAS[k] || k; }
+
+// ========================================================
+//  🧑‍🏫 教練管理面板
+// ========================================================
+async function loadCoaches(){
+  try{
+    const res = await fetch(`${GAS_URL}?action=getCoaches`);
+    const data = await res.json();
+    coachAssignments = data.coaches || {};
+  }catch(e){ console.log('讀取教練資料失敗'); }
+  if(document.getElementById('tab-coach').style.display !== 'none') renderCoachTab();
+}
+
+function renderCoachTab(){
+  const box = document.getElementById('coach-content');
+  const keys = Object.keys(SLOT_INFO).filter(k => !SLOT_ALIAS[k]);
+  keys.sort((a,b)=>{
+    const A = SLOT_INFO[a], B = SLOT_INFO[b];
+    const dA = mmddNum(A.date), dB = mmddNum(B.date);
+    if(dA !== dB) return dA - dB;
+    return A.time.localeCompare(B.time);
+  });
+  box.innerHTML = keys.map(k=>{
+    const info = SLOT_INFO[k];
+    const cur = coachAssignments[k] || '';
+    return `<div class="cls-card">
+      <div class="cls-head">
+        <div class="cls-time">📅 ${info.date} ⏰ ${info.time}</div>
+        <div class="cls-meta">${info.cls} ｜ ${courtLabel({key:k, court:info.court})}</div>
+      </div>
+      <div class="cls-body" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="text" id="coach-input-${k}" value="${escHtml(cur)}" placeholder="尚未指定教練" style="flex:1;min-width:120px;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;">
+        <button class="mini-btn" onclick="document.getElementById('coach-input-${k}').value='Adam'">Adam</button>
+        <button class="mini-btn" onclick="document.getElementById('coach-input-${k}').value='Miguel'">Miguel</button>
+        <button class="mini-btn" onclick="document.getElementById('coach-input-${k}').value=''">清空</button>
+        <button class="copy-msg-btn" style="width:auto;padding:8px 16px;margin-top:0;" onclick="saveCoach('${k}',this)">💾 儲存</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function saveCoach(key, btn){
+  const input = document.getElementById(`coach-input-${key}`);
+  const val = input.value.trim();
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '儲存中...';
+  try{
+    const res = await fetch(`${GAS_URL}?action=setCoach&pass=${encodeURIComponent(adminPass)}&slotKey=${encodeURIComponent(key)}&coach=${encodeURIComponent(val)}`);
+    const data = await res.json();
+    if(data.status === 'ok'){
+      coachAssignments[key] = val;
+      btn.textContent = '✅ 已儲存';
+    } else {
+      btn.textContent = '❌ ' + (data.message || '失敗');
+    }
+  }catch(e){
+    btn.textContent = '❌ 連線失敗';
+  }
+  setTimeout(()=>{ btn.textContent = orig; btn.disabled = false; }, 1500);
+}
 
 // 球場顯示：一般為「第N面」；雙教練合併時段（如 09/01 court5+court6）顯示為「5+6面」
 function courtLabel(c){
@@ -1018,7 +872,6 @@ function renderRemind(){
   `Hi 👋 提醒您 ${word} 有課：`,
   `📅 ${date}`,
   `⏰ ${c.time}（${c.cls}）`,
-  `👨‍🏫 ${c.coach} 教練`,
   `📍 中正河濱網球場${court ? '　'+court : ''}`,
   'https://maps.app.goo.gl/ZYJNHE8QJwikpnTs8',
   '🚗 **搭 Uber 的同學**建議導航到：',
@@ -1043,7 +896,7 @@ function renderRemind(){
     return `<div class="cls-card">
       <div class="cls-head">
         <div class="cls-time">⏰ ${c.time}</div>
-        <div class="cls-meta">${c.cls} ｜ ${c.coach} 教練 ｜ ${courtLabel(c)} ｜ 已繳費 ${paid.length} 位</div>
+        <div class="cls-meta">${c.cls} ｜ ${courtLabel(c)} ｜ 已繳費 ${paid.length} 位</div>
       </div>
       <div class="cls-body">
         ${stuRows}
