@@ -911,9 +911,9 @@ const DEFS = {
     {d:"08/12(三)",t:"20-21",court:5,type:"wed",cls:"small"},
     {d:"08/13(四)",t:"19-20",court:4,type:"thu",cls:"small",closed:true},
     {d:"08/18(二)",t:"19-20",court:6,type:"tue",cls:"small"},
-    {d:"08/18(二)",t:"20-21",court:6,type:"tue",cls:"small",reserved:true},
+    {d:"08/18(二)",t:"20-21",court:6,type:"tue",cls:"small"},
     {d:"08/25(二)",t:"19-20",court:5,type:"tue",cls:"small"},
-    {d:"08/25(二)",t:"20-21",court:5,type:"tue",cls:"small",reserved:true},
+    {d:"08/25(二)",t:"20-21",court:5,type:"tue",cls:"small"},
     {d:"08/26(三)",t:"20-21",court:5,type:"wed",cls:"small"},
     {d:"08/27(四)",t:"20-21",court:4,type:"thu",cls:"rally",closed:true}
   ],
@@ -922,19 +922,19 @@ const DEFS = {
     {d:"09/01(二)",t:"19-20",court:5,type:"tue",cls:"small"},
     {d:"09/02(三)",t:"19-20",court:5,type:"wed",cls:"small"},
     {d:"09/03(四)",t:"19-20",court:5,type:"thu",cls:"small"},
-    {d:"09/03(四)",t:"20-21",court:5,type:"thu",cls:"rally",reserved:true},
+    {d:"09/03(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
     {d:"09/08(二)",t:"20-21",court:6,type:"tue",cls:"small"},
     {d:"09/10(四)",t:"19-20",court:6,type:"thu",cls:"small"},
-    {d:"09/10(四)",t:"20-21",court:4,type:"thu",cls:"rally",reserved:true},
+    {d:"09/10(四)",t:"20-21",court:4,type:"thu",cls:"rally"},
     {d:"09/15(二)",t:"19-20",court:4,type:"tue",cls:"small"},
     {d:"09/15(二)",t:"20-21",court:5,type:"tue",cls:"small"},
     {d:"09/16(三)",t:"19-20",court:6,type:"wed",cls:"small"},
     {d:"09/16(三)",t:"20-21",court:6,type:"wed",cls:"small"},
     {d:"09/17(四)",t:"19-20",court:4,type:"thu",cls:"small"},
-    {d:"09/17(四)",t:"20-21",court:6,type:"thu",cls:"rally",reserved:true},
+    {d:"09/17(四)",t:"20-21",court:6,type:"thu",cls:"rally"},
     {d:"09/23(三)",t:"20-21",court:4,type:"wed",cls:"small"},
     {d:"09/24(四)",t:"19-20",court:6,type:"thu",cls:"small"},
-    {d:"09/24(四)",t:"20-21",court:4,type:"thu",cls:"rally",reserved:true},
+    {d:"09/24(四)",t:"20-21",court:4,type:"thu",cls:"rally"},
     {d:"09/30(三)",t:"19-20",court:6,type:"wed",cls:"small"},
     {d:"09/30(三)",t:"20-21",court:6,type:"wed",cls:"small"}
   ],
@@ -987,6 +987,7 @@ let tournamentIntent='';
 let skillRatings = { forehand:0, backhand:0, volley:0, serve:0, smash:0 };
 let counts={}, wcounts={};
 let coachOverrides={};
+let slotOverrides={};
 let bookedPaid=new Set();
 let bookedPending=new Set();
 let bookedSlots=new Set();
@@ -1144,10 +1145,20 @@ async function loadCoaches() {
   renderSlots();
 }
 
+async function loadSlotOverrides() {
+  try {
+    const res = await fetch(GAS_URL + "?action=getSlotOverrides");
+    const data = await res.json();
+    slotOverrides = data.overrides || {};
+  } catch(e) { console.log('讀取名額標記失敗'); }
+  renderSlots();
+}
+
 // =============================================
 // 渲染時段（容量／候補／鎖定等邏輯完全不變，僅改變呈現版面）
 // =============================================
 function maxOf(cls){ return cls==='big'? MAX_B : cls==='rally'? 3 : MAX_S; }
+function slotMax(key, cls){ const ov = slotOverrides[key]; return (ov && ov.capacity) ? ov.capacity : maxOf(cls); }
 function sk(m,i){ return 's-'+m+'-'+i; }
 function wk(m,i){ return 'w-'+m+'-'+i; }
 
@@ -1226,7 +1237,7 @@ function renderSlots(){
   function renderChip(s, wd){
     const timeLabel = s.t === '19-20' ? '19:00' : s.t === '20-21' ? '20:00' : s.t;
     const key=sk(curM,s.origIdx), wkey=wk(curM,s.origIdx);
-    const max=maxOf(s.cls);
+    const max=slotMax(key, s.cls);
     const cnt=counts[key]||0, wcnt=wcounts[wkey]||0;
     const full=cnt>=max, waitFull=wcnt>=MAX_W;
     const isSel=selSlots.has(key), isWait=waitSlots.has(wkey);
@@ -1306,6 +1317,7 @@ function renderSlots(){
     const coachLabel = coachOf(curM, s);
     const isDualCourt = sk(curM, s.origIdx) === 's-9-0';
     const courtLabel = isDualCourt ? '第5+6面' : (s.court ? `第${s.court}面` : '');
+    const bookedTag = (slotOverrides[key] && slotOverrides[key].tag) ? '📌 ' + slotOverrides[key].tag : '';
 
     return `<div class="${cardCls}" data-click="${clickAction}" data-wd="${wd}">
       <div class="cal-chip-head" style="background:${meta.bg}">
@@ -1315,7 +1327,7 @@ function renderSlots(){
           <span class="cal-chip-count" style="color:${meta.sub}">${cnt}/${max}</span>
         </div>
       </div>
-      <div class="cal-chip-body">${[coachLabel,courtLabel,price].filter(Boolean).join('・')}</div>
+      <div class="cal-chip-body">${[bookedTag,coachLabel,courtLabel,price].filter(Boolean).join('・')}</div>
       <div class="cal-chip-bar-bg"><div class="cal-chip-bar-fill" style="width:${pct}%;background:${BAR_COLOR[barCls]}"></div></div>
       <div class="cal-chip-status" style="color:${STATUS_COLOR[statusCls]}">${statusTxt}</div>
     </div>`;
@@ -1423,7 +1435,7 @@ function renderHabitCard(){
         if(selSlots.has(key)) return;
         const {wd}=parseDateInfo(s.d);
         if(wd!==domWd) return;
-        const max=maxOf(s.cls), cnt=counts[key]||0;
+        const max=slotMax(key, s.cls), cnt=counts[key]||0;
         if(cnt<max) avail++;
       });
     });
@@ -2312,6 +2324,7 @@ function confirmPackageAndNext(){
 pkgRenderPlans();
 loadCounts();
 loadCoaches();
+loadSlotOverrides();
 </script>
 </body>
 </html>
