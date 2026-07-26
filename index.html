@@ -774,11 +774,11 @@
       <div class="class-types" style="grid-template-columns:1fr 1fr;">
         <div class="ct ct-small">
           <div class="ct-title">📌 小班</div>
-          <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">週二／三／四<br>👤 1–3人<br>🧑‍🏫 教練依時段公告<br>💰 $550／堂</div>
+          <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">週二／三／四<br>👤 1–3人<br>💰 $550／堂</div>
         </div>
         <div class="ct" style="background:rgba(255,255,255,.12);">
           <div class="ct-title">🎾 對打課</div>
-          <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">週四 20-21<br>👤 1–3人<br>🧑‍🏫 Adam教練<br>💰 $800／堂</div>
+          <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">週四 20-21<br>👤 1–3人<br>💰 $800／堂</div>
         </div>
       </div>
     </div>
@@ -986,6 +986,7 @@ let curM=7, level='beginner', selSlots=new Set(), waitSlots=new Set();
 let tournamentIntent='';
 let skillRatings = { forehand:0, backhand:0, volley:0, serve:0, smash:0 };
 let counts={}, wcounts={};
+let coachOverrides={};
 let bookedPaid=new Set();
 let bookedPending=new Set();
 let bookedSlots=new Set();
@@ -1041,7 +1042,7 @@ function updateOrderSummary() {
     if(s.cls==='big')                              { clsLabel='大班初階'; clsColor='background:#dcfce7;color:#166534;'; price='$490'; }
     else if(s.cls==='rally')                       { clsLabel='對打課';   clsColor='background:#fce7f3;color:#9d174d;'; price='$800'; }
     else                                           { clsLabel='小班初階'; clsColor='background:#dcfce7;color:#166534;'; price='$550'; }
-    const coachLabel = (curM===8&&s.type==='tue') ? 'Miguel' : (s.type==='tue'&&(curM===9||curM===10||curM===11)) ? '' : s.cls==='big' ? 'Adam+Miguel' : 'Adam';
+    const coachLabel = coachOverrides[sk(m,i)] ? coachOverrides[sk(m,i)]+'教練' : '';
     return `<div class="os-slot-item">
       <div class="os-slot-date">${s.d}</div>
       <div class="os-slot-time">${coachLabel?`${timeLabel}｜${coachLabel}`:timeLabel}</div>
@@ -1091,7 +1092,7 @@ function updateOrderSummary() {
           <span style="font-size:13px;font-weight:500;color:#1a1a1a;">${p.label}</span>
           <span style="font-size:11px;color:#666;">從 ${pkgMonth} 月起</span>
         </div>
-        <div style="font-size:11px;color:#666;">${[p.coach?`👤 ${p.coach}`:'',p.size,`$${p.price}／堂`].filter(Boolean).join('・')}</div>
+        <div style="font-size:11px;color:#666;">${[p.size,`$${p.price}／堂`].filter(Boolean).join('・')}</div>
       </div>
     </div>`;
   })();
@@ -1134,6 +1135,15 @@ async function loadCounts() {
   document.getElementById('deadline-hint').style.display = curM === 7 ? 'block' : 'none';
 }
 
+async function loadCoaches() {
+  try {
+    const res = await fetch(GAS_URL + "?action=getCoaches");
+    const data = await res.json();
+    coachOverrides = data.coaches || {};
+  } catch(e) { console.log('讀取教練資料失敗'); }
+  renderSlots();
+}
+
 // =============================================
 // 渲染時段（容量／候補／鎖定等邏輯完全不變，僅改變呈現版面）
 // =============================================
@@ -1161,9 +1171,8 @@ function slotMeta(s){
 }
 
 function coachOf(m, s){
-  if(m===8 && s.type==='tue') return 'Miguel教練';
-  if(s.type==='tue' && (m===9 || m===10 || m===11)) return ''; // 原大班課程改小班，教練尚未公告
-  return s.cls==='big' ? '雙教練' : 'Adam教練';
+  const label = coachOverrides[sk(m, s.origIdx)];
+  return label ? label + '教練' : '';
 }
 
 function renderSlots(){
@@ -1862,14 +1871,11 @@ function slotKeyToDetail(key) {
   const parts = key.split('-'); const m = parseInt(parts[1]), i = parseInt(parts[2]);
   const s = DEFS[m] && DEFS[m][i]; if (!s) return null;
   const timeLabel = s.t === '19-20' ? '19:00–20:00' : s.t === '20-21' ? '20:00–21:00' : s.t;
-  let classLabel, levelLabel, coachLabel;
+  let classLabel, levelLabel;
   if (s.cls === 'big')         { classLabel = '大班'; levelLabel = '初階'; }
   else if (s.cls === 'rally')  { classLabel = '對打課'; levelLabel = '—'; }
   else                         { classLabel = '小班'; levelLabel = '初階'; }
-  if (s.type === 'tue' && (m===9||m===10||m===11)) coachLabel = '';
-  else if (s.type === 'tue')  coachLabel = 'Adam + Miguel';
-  else if (s.cls === 'rally') coachLabel = 'Miguel';
-  else                        coachLabel = 'Adam';
+  const coachLabel = coachOverrides[key] ? coachOverrides[key]+'教練' : '';
   return { date: s.d, time: timeLabel, cls: classLabel, level: levelLabel, coach: coachLabel };
 }
 
@@ -2170,9 +2176,6 @@ function pkgRenderPlans(){
       <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px;">${p.label}</div>
       <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px;">${p.size}</div>
       <div style="font-size:20px;font-weight:500;color:var(--color-text-primary);">$${p.price}<span style="font-size:11px;color:var(--color-text-secondary);font-weight:400;"> ／堂</span></div>
-      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:8px;padding-top:8px;border-top:.5px solid var(--color-border-tertiary);line-height:1.7;">
-        ${p.coach?`👤 ${p.coach}`:'👤 教練尚未公告'}
-      </div>
     </div>`;
   }).join('');
 }
@@ -2308,6 +2311,7 @@ function confirmPackageAndNext(){
 // =============================================
 pkgRenderPlans();
 loadCounts();
+loadCoaches();
 </script>
 </body>
 </html>
