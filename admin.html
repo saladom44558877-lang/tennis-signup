@@ -175,7 +175,7 @@
     <div class="admin-tabs">
       <button class="atab active" id="atab-reg" onclick="switchTab('reg')">📋 報名管理</button>
       <button class="atab" id="atab-remind" onclick="switchTab('remind')">🔔 上課提醒</button>
-      <button class="atab" id="atab-coach" onclick="switchTab('coach')">🧑‍🏫 教練管理</button>
+      <button class="atab" id="atab-coach" onclick="switchTab('coach')">⚙️ 課程設定</button>
     </div>
 
     <div id="tab-reg">
@@ -205,7 +205,7 @@
     </div>
 
     <div id="tab-coach" style="display:none;">
-      <div class="remind-summary">在這裡指定每堂課的教練，儲存後會直接顯示在報名頁面（index）給學生看。留空則不顯示教練。</div>
+      <div class="remind-summary">在這裡指定每堂課的教練、或標記某堂已被學生私下預訂（會限制名額並顯示標籤），儲存後會直接反映在報名頁面（index）給學生看。留空則維持預設。</div>
       <div id="coach-content"><div class="loading">載入中...</div></div>
     </div>
 
@@ -342,6 +342,7 @@ let adminPass = '';
 let allRows = [];
 let curFilter = 'all';
 let coachAssignments = {};
+let slotOverrides = {};
 
 function login() {
   const pass = document.getElementById('pass-input').value.trim();
@@ -374,6 +375,7 @@ async function loadData() {
     renderStats();
     renderList();
     loadCoaches();
+    loadSlotOverrides();
   } catch(e) {
     document.getElementById('reg-list').innerHTML = '<div class="empty">載入失敗，請重試</div>';
   }
@@ -693,7 +695,7 @@ function switchTab(name){
 function canonKey(k){ return SLOT_ALIAS[k] || k; }
 
 // ========================================================
-//  🧑‍🏫 教練管理面板
+//  ⚙️ 課程設定面板（教練 + 名額/預訂標記）
 // ========================================================
 async function loadCoaches(){
   try{
@@ -701,6 +703,15 @@ async function loadCoaches(){
     const data = await res.json();
     coachAssignments = data.coaches || {};
   }catch(e){ console.log('讀取教練資料失敗'); }
+  if(document.getElementById('tab-coach').style.display !== 'none') renderCoachTab();
+}
+
+async function loadSlotOverrides(){
+  try{
+    const res = await fetch(`${GAS_URL}?action=getSlotOverrides`);
+    const data = await res.json();
+    slotOverrides = data.overrides || {};
+  }catch(e){ console.log('讀取名額標記失敗'); }
   if(document.getElementById('tab-coach').style.display !== 'none') renderCoachTab();
 }
 
@@ -716,17 +727,29 @@ function renderCoachTab(){
   box.innerHTML = keys.map(k=>{
     const info = SLOT_INFO[k];
     const cur = coachAssignments[k] || '';
+    const ov = slotOverrides[k] || {};
+    const curCap = ov.capacity || '';
+    const curTag = ov.tag || '';
     return `<div class="cls-card">
       <div class="cls-head">
         <div class="cls-time">📅 ${info.date} ⏰ ${info.time}</div>
-        <div class="cls-meta">${info.cls} ｜ ${courtLabel({key:k, court:info.court})}</div>
+        <div class="cls-meta">${info.cls} ｜ ${courtLabel({key:k, court:info.court})}${curTag?` ｜ 📌 ${escHtml(curTag)}`:''}</div>
       </div>
-      <div class="cls-body" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <input type="text" id="coach-input-${k}" value="${escHtml(cur)}" placeholder="尚未指定教練" style="flex:1;min-width:120px;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;">
-        <button class="mini-btn" onclick="document.getElementById('coach-input-${k}').value='Adam'">Adam</button>
-        <button class="mini-btn" onclick="document.getElementById('coach-input-${k}').value='Miguel'">Miguel</button>
-        <button class="mini-btn" onclick="document.getElementById('coach-input-${k}').value=''">清空</button>
-        <button class="copy-msg-btn" style="width:auto;padding:8px 16px;margin-top:0;" onclick="saveCoach('${k}',this)">💾 儲存</button>
+      <div class="cls-body">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input type="text" id="coach-input-${k}" value="${escHtml(cur)}" placeholder="尚未指定教練" style="flex:1;min-width:120px;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;">
+          <button class="mini-btn" onclick="document.getElementById('coach-input-${k}').value='Adam'">Adam</button>
+          <button class="mini-btn" onclick="document.getElementById('coach-input-${k}').value='Miguel'">Miguel</button>
+          <button class="mini-btn" onclick="document.getElementById('coach-input-${k}').value=''">清空</button>
+          <button class="copy-msg-btn" style="width:auto;padding:8px 16px;margin-top:0;" onclick="saveCoach('${k}',this)">💾 儲存教練</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed #e2e8f0;">
+          <input type="number" id="cap-input-${k}" value="${curCap}" placeholder="預設名額" min="1" style="width:90px;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;">
+          <input type="text" id="tag-input-${k}" value="${escHtml(curTag)}" placeholder="標籤（如：已預訂）" style="flex:1;min-width:100px;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;">
+          <button class="mini-btn" onclick="document.getElementById('cap-input-${k}').value='1';document.getElementById('tag-input-${k}').value='已預訂';">📌 標記已預訂（限1位）</button>
+          <button class="mini-btn" onclick="document.getElementById('cap-input-${k}').value='';document.getElementById('tag-input-${k}').value='';">清除限定</button>
+          <button class="copy-msg-btn" style="width:auto;padding:8px 16px;margin-top:0;background:linear-gradient(135deg,#d97706,#b45309);" onclick="saveSlotOverride('${k}',this)">💾 儲存名額標記</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -752,7 +775,25 @@ async function saveCoach(key, btn){
   setTimeout(()=>{ btn.textContent = orig; btn.disabled = false; }, 1500);
 }
 
-// 球場顯示：一般為「第N面」；雙教練合併時段（如 09/01 court5+court6）顯示為「5+6面」
+async function saveSlotOverride(key, btn){
+  const cap = document.getElementById(`cap-input-${key}`).value.trim();
+  const tag = document.getElementById(`tag-input-${key}`).value.trim();
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '儲存中...';
+  try{
+    const res = await fetch(`${GAS_URL}?action=setSlotOverride&pass=${encodeURIComponent(adminPass)}&slotKey=${encodeURIComponent(key)}&capacity=${encodeURIComponent(cap)}&tag=${encodeURIComponent(tag)}`);
+    const data = await res.json();
+    if(data.status === 'ok'){
+      slotOverrides[key] = { capacity: cap ? parseInt(cap) : null, tag };
+      btn.textContent = '✅ 已儲存';
+    } else {
+      btn.textContent = '❌ ' + (data.message || '失敗');
+    }
+  }catch(e){
+    btn.textContent = '❌ 連線失敗';
+  }
+  setTimeout(()=>{ btn.textContent = orig; btn.disabled = false; }, 1500);
+}
 function courtLabel(c){
   const aliasSrc = Object.keys(SLOT_ALIAS).find(k => SLOT_ALIAS[k] === c.key);
   if(aliasSrc && SLOT_INFO[aliasSrc] && SLOT_INFO[aliasSrc].court){
