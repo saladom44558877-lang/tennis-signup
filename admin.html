@@ -488,10 +488,14 @@ function showInvoice(r) {
   const classCount = parts.join('・') || '—';
 
   // 費用與折扣計算
-  const feeRaw = parseFloat(String(r.fee).replace(/[^0-9.]/g, '')) || 0;
-  const hasDiscount = totalClasses >= 6;
-  const discountAmt = hasDiscount ? Math.round(feeRaw * 0.05) : 0;
-  const finalFee    = hasDiscount ? Math.round(feeRaw * 0.95) : feeRaw;
+  // ⚠️ r.fee 是報名當下「已經折扣後」的最終金額（index.html 送出時就算好了），
+  // 這裡不能再打一次95折，否則會變成折扣兩次。改用當時實際記錄的 r.discount 回推原價。
+  const finalFee    = parseFloat(String(r.fee).replace(/[^0-9.]/g, '')) || 0;
+  const discountAmt = (r.discount && String(r.discount).trim() !== '—')
+    ? parseFloat(String(r.discount).replace(/[^0-9.]/g, '')) || 0
+    : 0;
+  const hasDiscount = discountAmt > 0;
+  const feeRaw      = finalFee + discountAmt; // 回推的原價（僅顯示用）
   const feeDisplay      = `NT$ ${feeRaw.toLocaleString()}`;
   const discountDisplay = `- NT$ ${discountAmt.toLocaleString()}`;
   const finalDisplay    = `NT$ ${finalFee.toLocaleString()}`;
