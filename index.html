@@ -586,14 +586,14 @@
         <div class="fee-box">
           <div class="fee-title">📊 你的報名費用</div>
           <div class="fee-row"><span>小班</span><span id="fs">0 堂 × $550 = $0</span></div>
-          <div class="fee-row"><span>大班</span><span id="fb">0 堂 × $490 = $0</span></div>
+          <div class="fee-row" style="display:none"><span>大班</span><span id="fb">0 堂 × $490 = $0</span></div>
           <div class="fee-row"><span>對打課</span><span id="fr">0 堂 × $800 = $0</span></div>
           <div class="fee-row" id="fd" style="display:none"><span class="fee-disc">🎉 6堂95折優惠</span><span class="fee-disc" id="fd-amt"></span></div>
           <div class="fee-row"><span>場地費（上課當天收）</span><span>$80 × <span id="fc">0</span> 堂</span></div>
           <div class="fee-row"><span>課程費合計</span><span id="ft" style="color:#1d4ed8">$0</span></div>
           <div id="fg" class="fee-gift" style="display:none">🏆 選滿6堂！免費參加 12/23–24 網球團體賽（免報名費 $600）</div>
           <div class="fee-note">
-            ・6堂套票95折（小班、大班、對打課皆可混搭）<br>
+            ・6堂套票95折（小班、對打課皆可混搭）<br>
             ・場地費 $80/堂，上課當天收取<br>
             ・候補確認入班後再計費
           </div>
@@ -721,7 +721,7 @@
         <div class="rule-row"><span class="r-icon">🎾</span><span>課表於報名完成後，由教練確認並統一公告給學員</span></div>
         <div class="rule-row"><span class="r-icon">🌧️</span><span>下雨天停課，退費不補課</span></div>
         <div class="rule-row"><span class="r-icon">🙋</span><span>請假仍需負擔當堂場地費 $80，請於上課前 1 小時告知</span></div>
-        <div class="rule-row"><span class="r-icon">👥</span><span>小班 1–5 人｜大班 4–10 人｜對打課 1–3 人，未達最低人數不開課</span></div>
+        <div class="rule-row"><span class="r-icon">👥</span><span>小班 1–3 人｜對打課 1–3 人，未達最低人數不開課</span></div>
         <div class="rule-row"><span class="r-icon">🟣</span><span>額滿可填候補，每時段上限 3 位，有名額時優先通知</span></div>
       </div>
       <label class="chk">
@@ -771,14 +771,10 @@
     <div class="hero" style="margin-bottom:1rem;">
       <div class="hero-title">🎾 Adam & Miguel 網球課程</div>
       <div class="hero-sub">中正河濱公園網球場｜教練逐一調整動作｜名額有限</div>
-      <div class="class-types">
+      <div class="class-types" style="grid-template-columns:1fr 1fr;">
         <div class="ct ct-small">
           <div class="ct-title">📌 小班</div>
-          <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">週三／四<br>👤 1–5人<br>🧑‍🏫 Adam教練<br>💰 $550／堂</div>
-        </div>
-        <div class="ct ct-big">
-          <div class="ct-title">📌 大班</div>
-          <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">週二（9月起）<br>👤 4–10人<br>🧑‍🏫 Adam＋Miguel<br>💰 $490／堂</div>
+          <div style="font-size:11px;opacity:.9;margin-top:4px;line-height:2;">週二／三／四<br>👤 1–3人<br>🧑‍🏫 教練依時段公告<br>💰 $550／堂</div>
         </div>
         <div class="ct" style="background:rgba(255,255,255,.12);">
           <div class="ct-title">🎾 對打課</div>
@@ -871,7 +867,7 @@
       <div style="font-size:12px;color:#78350f;line-height:1.9;">
         ✅ 報名 <b>6堂以上</b> 享課程費 <b>95折</b><br>
         🏆 報名 <b>6堂以上</b> 免費參加 <b>12/23–24 年末團體賽</b>（省 $600）<br>
-        📌 小班、大班、對打課皆可混搭計算
+        📌 小班、對打課皆可混搭計算
       </div>
     </div>
 
@@ -910,59 +906,59 @@ const DEFS = {
     {d:"08/04(二)",t:"20-21",court:4,type:"tue",cls:"small"},
     {d:"08/05(三)",t:"19-20",court:6,type:"wed",cls:"small"},
     {d:"08/05(三)",t:"20-21",court:5,type:"wed",cls:"small"},
-    {d:"08/06(四)",t:"20-21",court:6,type:"thu",cls:"rally"},
+    {d:"08/06(四)",t:"20-21",court:6,type:"thu",cls:"rally",closed:true},
     {d:"08/11(二)",t:"20-21",court:4,type:"tue",cls:"small"},
     {d:"08/12(三)",t:"20-21",court:5,type:"wed",cls:"small"},
-    {d:"08/13(四)",t:"19-20",court:4,type:"thu",cls:"small"},
+    {d:"08/13(四)",t:"19-20",court:4,type:"thu",cls:"small",closed:true},
     {d:"08/18(二)",t:"19-20",court:6,type:"tue",cls:"small"},
-    {d:"08/18(二)",t:"20-21",court:6,type:"tue",cls:"small"},
+    {d:"08/18(二)",t:"20-21",court:6,type:"tue",cls:"small",reserved:true},
     {d:"08/25(二)",t:"19-20",court:5,type:"tue",cls:"small"},
-    {d:"08/25(二)",t:"20-21",court:5,type:"tue",cls:"small"},
+    {d:"08/25(二)",t:"20-21",court:5,type:"tue",cls:"small",reserved:true},
     {d:"08/26(三)",t:"20-21",court:5,type:"wed",cls:"small"},
-    {d:"08/27(四)",t:"20-21",court:4,type:"thu",cls:"rally"}
+    {d:"08/27(四)",t:"20-21",court:4,type:"thu",cls:"rally",closed:true}
   ],
   9:[
-    {d:"09/01(二)",t:"19-20",court:6,type:"tue",cls:"big"},
-    {d:"09/01(二)",t:"19-20",court:5,type:"tue",cls:"big"},
+    {d:"09/01(二)",t:"19-20",court:6,type:"tue",cls:"small"},
+    {d:"09/01(二)",t:"19-20",court:5,type:"tue",cls:"small"},
     {d:"09/02(三)",t:"19-20",court:5,type:"wed",cls:"small"},
     {d:"09/03(四)",t:"19-20",court:5,type:"thu",cls:"small"},
-    {d:"09/03(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
-    {d:"09/08(二)",t:"20-21",court:6,type:"tue",cls:"big"},
+    {d:"09/03(四)",t:"20-21",court:5,type:"thu",cls:"rally",reserved:true},
+    {d:"09/08(二)",t:"20-21",court:6,type:"tue",cls:"small"},
     {d:"09/10(四)",t:"19-20",court:6,type:"thu",cls:"small"},
-    {d:"09/10(四)",t:"20-21",court:4,type:"thu",cls:"rally"},
-    {d:"09/15(二)",t:"19-20",court:4,type:"tue",cls:"big"},
-    {d:"09/15(二)",t:"20-21",court:5,type:"tue",cls:"big"},
+    {d:"09/10(四)",t:"20-21",court:4,type:"thu",cls:"rally",reserved:true},
+    {d:"09/15(二)",t:"19-20",court:4,type:"tue",cls:"small"},
+    {d:"09/15(二)",t:"20-21",court:5,type:"tue",cls:"small"},
     {d:"09/16(三)",t:"19-20",court:6,type:"wed",cls:"small"},
     {d:"09/16(三)",t:"20-21",court:6,type:"wed",cls:"small"},
     {d:"09/17(四)",t:"19-20",court:4,type:"thu",cls:"small"},
-    {d:"09/17(四)",t:"20-21",court:6,type:"thu",cls:"rally"},
+    {d:"09/17(四)",t:"20-21",court:6,type:"thu",cls:"rally",reserved:true},
     {d:"09/23(三)",t:"20-21",court:4,type:"wed",cls:"small"},
     {d:"09/24(四)",t:"19-20",court:6,type:"thu",cls:"small"},
-    {d:"09/24(四)",t:"20-21",court:4,type:"thu",cls:"rally"},
+    {d:"09/24(四)",t:"20-21",court:4,type:"thu",cls:"rally",reserved:true},
     {d:"09/30(三)",t:"19-20",court:6,type:"wed",cls:"small"},
     {d:"09/30(三)",t:"20-21",court:6,type:"wed",cls:"small"}
   ],
   10:[
     {d:"10/01(四)",t:"19-20",court:5,type:"thu",cls:"small"},
-    {d:"10/06(二)",t:"19-20",court:5,type:"tue",cls:"big"},
+    {d:"10/06(二)",t:"19-20",court:5,type:"tue",cls:"small"},
     {d:"10/07(三)",t:"19-20",court:6,type:"wed",cls:"small"},
     {d:"10/08(四)",t:"19-20",court:6,type:"thu",cls:"small"},
     {d:"10/08(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
     {d:"10/14(三)",t:"19-20",court:5,type:"wed",cls:"small"},
     {d:"10/15(四)",t:"19-20",court:6,type:"thu",cls:"small"},
-    {d:"10/20(二)",t:"20-21",court:4,type:"tue",cls:"big"},
+    {d:"10/20(二)",t:"20-21",court:4,type:"tue",cls:"small"},
     {d:"10/22(四)",t:"19-20",court:5,type:"thu",cls:"small"},
-    {d:"10/27(二)",t:"20-21",court:6,type:"tue",cls:"big"},
+    {d:"10/27(二)",t:"20-21",court:6,type:"tue",cls:"small"},
     {d:"10/29(四)",t:"19-20",court:5,type:"thu",cls:"small"}
   ],
   11:[
-    {d:"11/03(二)",t:"19-20",court:4,type:"tue",cls:"big"},
+    {d:"11/03(二)",t:"19-20",court:4,type:"tue",cls:"small"},
     {d:"11/04(三)",t:"20-21",court:6,type:"wed",cls:"small"},
     {d:"11/12(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
-    {d:"11/17(二)",t:"19-20",court:4,type:"tue",cls:"big"},
-    {d:"11/17(二)",t:"20-21",court:6,type:"tue",cls:"big"},
+    {d:"11/17(二)",t:"19-20",court:4,type:"tue",cls:"small"},
+    {d:"11/17(二)",t:"20-21",court:6,type:"tue",cls:"small"},
     {d:"11/19(四)",t:"20-21",court:5,type:"thu",cls:"rally"},
-    {d:"11/24(二)",t:"20-21",court:5,type:"tue",cls:"big"}
+    {d:"11/24(二)",t:"20-21",court:5,type:"tue",cls:"small"}
   ],
   12:[
     {d:"12/02(三)",t:"19-20",court:6,type:"wed",cls:"small"},
@@ -985,7 +981,7 @@ const DEFS = {
   ]
 };
 
-const MAX_S=5, MAX_B=10, MAX_W=3;
+const MAX_S=3, MAX_B=10, MAX_W=3;
 let curM=7, level='beginner', selSlots=new Set(), waitSlots=new Set();
 let tournamentIntent='';
 let skillRatings = { forehand:0, backhand:0, volley:0, serve:0, smash:0 };
@@ -1045,10 +1041,10 @@ function updateOrderSummary() {
     if(s.cls==='big')                              { clsLabel='大班初階'; clsColor='background:#dcfce7;color:#166534;'; price='$490'; }
     else if(s.cls==='rally')                       { clsLabel='對打課';   clsColor='background:#fce7f3;color:#9d174d;'; price='$800'; }
     else                                           { clsLabel='小班初階'; clsColor='background:#dcfce7;color:#166534;'; price='$550'; }
-    const coachLabel = (curM===8&&s.type==='tue') ? 'Miguel' : s.cls==='big' ? 'Adam+Miguel' : 'Adam';
+    const coachLabel = (curM===8&&s.type==='tue') ? 'Miguel' : (s.type==='tue'&&(curM===9||curM===10||curM===11)) ? '' : s.cls==='big' ? 'Adam+Miguel' : 'Adam';
     return `<div class="os-slot-item">
       <div class="os-slot-date">${s.d}</div>
-      <div class="os-slot-time">${timeLabel}｜${coachLabel}</div>
+      <div class="os-slot-time">${coachLabel?`${timeLabel}｜${coachLabel}`:timeLabel}</div>
       <span class="os-slot-badge" style="${clsColor}">${clsLabel}</span>
       <button class="os-remove-btn" onclick="osSumRemoveSlot('${k}')" title="移除此時段">✕</button>
     </div>`;
@@ -1095,7 +1091,7 @@ function updateOrderSummary() {
           <span style="font-size:13px;font-weight:500;color:#1a1a1a;">${p.label}</span>
           <span style="font-size:11px;color:#666;">從 ${pkgMonth} 月起</span>
         </div>
-        <div style="font-size:11px;color:#666;">👤 ${p.coach}・${p.size}・$${p.price}／堂</div>
+        <div style="font-size:11px;color:#666;">${[p.coach?`👤 ${p.coach}`:'',p.size,`$${p.price}／堂`].filter(Boolean).join('・')}</div>
       </div>
     </div>`;
   })();
@@ -1165,7 +1161,9 @@ function slotMeta(s){
 }
 
 function coachOf(m, s){
-  return (m===8 && s.type==='tue') ? 'Miguel教練' : (s.cls==='big' ? '雙教練' : 'Adam教練');
+  if(m===8 && s.type==='tue') return 'Miguel教練';
+  if(s.type==='tue' && (m===9 || m===10 || m===11)) return ''; // 原大班課程改小班，教練尚未公告
+  return s.cls==='big' ? '雙教練' : 'Adam教練';
 }
 
 function renderSlots(){
@@ -1242,9 +1240,28 @@ function renderSlots(){
             <span class="cal-chip-count" style="color:#94a3b8">🔒</span>
           </div>
         </div>
-        <div class="cal-chip-body">${cCoach}・${cCourt}・${price}</div>
+        <div class="cal-chip-body">${[cCoach,cCourt,price].filter(Boolean).join('・')}</div>
         <div class="cal-chip-bar-bg"><div class="cal-chip-bar-fill" style="width:0%"></div></div>
         <div class="cal-chip-status" style="color:#64748b">🚫 暫不開放</div>
+      </div>`;
+    }
+
+    if(s.reserved){
+      const rMeta = slotMeta(s);
+      const rCoach = coachOf(curM, s);
+      const rIsDual = sk(curM, s.origIdx) === 's-9-0';
+      const rCourt = rIsDual ? '第5+6面' : (s.court ? `第${s.court}面` : '');
+      return `<div class="cal-chip is-closed" data-click="none" data-wd="${wd}">
+        <div class="cal-chip-head" style="background:#fef3c7">
+          <div class="cal-chip-datetime" style="color:#92400e">${s.d.slice(0,5)} ${timeLabel}</div>
+          <div class="cal-chip-toprow">
+            <span class="cal-chip-label" style="color:#92400e">${rMeta.label}</span>
+            <span class="cal-chip-count" style="color:#b45309">🔒</span>
+          </div>
+        </div>
+        <div class="cal-chip-body">${[rCoach,rCourt,price].filter(Boolean).join('・')}</div>
+        <div class="cal-chip-bar-bg"><div class="cal-chip-bar-fill" style="width:100%;background:#f59e0b"></div></div>
+        <div class="cal-chip-status" style="color:#b45309">✅ 已預訂</div>
       </div>`;
     }
 
@@ -1289,7 +1306,7 @@ function renderSlots(){
           <span class="cal-chip-count" style="color:${meta.sub}">${cnt}/${max}</span>
         </div>
       </div>
-      <div class="cal-chip-body">${coachLabel}・${courtLabel}・${price}</div>
+      <div class="cal-chip-body">${[coachLabel,courtLabel,price].filter(Boolean).join('・')}</div>
       <div class="cal-chip-bar-bg"><div class="cal-chip-bar-fill" style="width:${pct}%;background:${BAR_COLOR[barCls]}"></div></div>
       <div class="cal-chip-status" style="color:${STATUS_COLOR[statusCls]}">${statusTxt}</div>
     </div>`;
@@ -1391,6 +1408,7 @@ function renderHabitCard(){
       DEFS[m].forEach((s,idx)=>{
         if(s.special==='tournament') return;
         if(s.closed) return;
+        if(s.reserved) return;
         if(sk(m,idx)==='s-9-1') return;
         const key=sk(m,idx);
         if(selSlots.has(key)) return;
@@ -1848,9 +1866,10 @@ function slotKeyToDetail(key) {
   if (s.cls === 'big')         { classLabel = '大班'; levelLabel = '初階'; }
   else if (s.cls === 'rally')  { classLabel = '對打課'; levelLabel = '—'; }
   else                         { classLabel = '小班'; levelLabel = '初階'; }
-  if (s.type === 'tue')        coachLabel = 'Adam + Miguel';
-  else if (s.cls === 'rally')  coachLabel = 'Miguel';
-  else                         coachLabel = 'Adam';
+  if (s.type === 'tue' && (m===9||m===10||m===11)) coachLabel = '';
+  else if (s.type === 'tue')  coachLabel = 'Adam + Miguel';
+  else if (s.cls === 'rally') coachLabel = 'Miguel';
+  else                        coachLabel = 'Adam';
   return { date: s.d, time: timeLabel, cls: classLabel, level: levelLabel, coach: coachLabel };
 }
 
@@ -1864,7 +1883,7 @@ function buildSlotTable(slots) {
       <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;">
         <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:#eff6ff;color:#1d4ed8;">${d.cls}</span>
         <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:#f0fdf4;color:#166534;">${d.level}</span>
-        <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:#faf5ff;color:#6b21a8;">${d.coach}</span>
+        ${d.coach?`<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:#faf5ff;color:#6b21a8;">${d.coach}</span>`:''}
       </div>
     </div>`;
   }).filter(Boolean).join('');
@@ -2082,11 +2101,11 @@ function showSharedForm(fromFlow){
 // 套班功能（程度 → 班別 → 起始月 → 時段）
 // =============================================
 const PKG_PLANS=[
-  {key:'tue-19',label:'週二 19:00–20:00',type:'tue',time:'19-20',cls:['small','big'],level:'beginner',price:490,coach:'Adam + Miguel',size:'大班 4–10人',note9:'9月才開始大班'},
-  {key:'tue-20',label:'週二 20:00–21:00',type:'tue',time:'20-21',cls:['small','big'],level:'beginner',price:490,coach:'Adam + Miguel',size:'大班 4–10人',note9:'9月才開始大班'},
-  {key:'wed-19',label:'週三 19:00–20:00',type:'wed',time:'19-20',cls:['small'],level:'beginner',price:550,coach:'Adam',size:'小班 1–5人',rec:true},
-  {key:'wed-20',label:'週三 20:00–21:00',type:'wed',time:'20-21',cls:['small'],level:'beginner',price:550,coach:'Adam',size:'小班 1–5人'},
-  {key:'thu-19',label:'週四 19:00–20:00',type:'thu',time:'19-20',cls:['small'],level:'beginner',price:550,coach:'Adam',size:'小班 1–5人'},
+  {key:'tue-19',label:'週二 19:00–20:00',type:'tue',time:'19-20',cls:['small'],level:'beginner',price:550,coach:'',size:'小班 1–3人'},
+  {key:'tue-20',label:'週二 20:00–21:00',type:'tue',time:'20-21',cls:['small'],level:'beginner',price:550,coach:'',size:'小班 1–3人'},
+  {key:'wed-19',label:'週三 19:00–20:00',type:'wed',time:'19-20',cls:['small'],level:'beginner',price:550,coach:'Adam',size:'小班 1–3人',rec:true},
+  {key:'wed-20',label:'週三 20:00–21:00',type:'wed',time:'20-21',cls:['small'],level:'beginner',price:550,coach:'Adam',size:'小班 1–3人'},
+  {key:'thu-19',label:'週四 19:00–20:00',type:'thu',time:'19-20',cls:['small'],level:'beginner',price:550,coach:'Adam',size:'小班 1–3人'},
   {key:'thu-20',label:'週四對打 20:00–21:00',type:'thu',time:'20-21',cls:['rally'],level:'rally',price:800,coach:'Adam',size:'1–3人'},
 ];
 const PKG_MONTHS=[7,8,9,10,11,12];
@@ -2107,6 +2126,7 @@ function pkgGetSlots(planKey,startM){
       if(PKG_TUE_DOUBLE.has(sk(m,i))) return; // 跳過重複場地
       if(s.special==='tournament') return;
       if(s.closed) return; // 跳過已關閉場次
+      if(s.reserved) return; // 跳過限定已預訂場次
       if(s.type!==p.type||s.t!==p.time||!p.cls.includes(s.cls)) return;
       res.push({m,i,s});
     });
@@ -2118,7 +2138,7 @@ function pkgCountInMonth(planKey,m){
   const p=PKG_PLANS.find(x=>x.key===planKey);
   return (DEFS[m]||[]).filter((s,i)=>
     !PKG_TUE_DOUBLE.has(sk(m,i)) &&
-    !s.special&&!s.closed&&s.type===p.type&&s.t===p.time&&p.cls.includes(s.cls)
+    !s.special&&!s.closed&&!s.reserved&&s.type===p.type&&s.t===p.time&&p.cls.includes(s.cls)
   ).length;
 }
 
@@ -2151,8 +2171,7 @@ function pkgRenderPlans(){
       <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px;">${p.size}</div>
       <div style="font-size:20px;font-weight:500;color:var(--color-text-primary);">$${p.price}<span style="font-size:11px;color:var(--color-text-secondary);font-weight:400;"> ／堂</span></div>
       <div style="font-size:11px;color:var(--color-text-secondary);margin-top:8px;padding-top:8px;border-top:.5px solid var(--color-border-tertiary);line-height:1.7;">
-        👤 ${p.coach}
-        ${p.note9?`<div style="font-size:11px;color:#854F0B;background:#FAEEDA;border-radius:var(--border-radius-md);padding:4px 8px;margin-top:5px;">ℹ️ ${p.note9}， 9 月以前為小班</div>`:''}
+        ${p.coach?`👤 ${p.coach}`:'👤 教練尚未公告'}
       </div>
     </div>`;
   }).join('');
