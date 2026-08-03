@@ -239,6 +239,7 @@
     .cal-chip.is-wait { border-color:#7c3aed; box-shadow: inset 0 0 0 1px #7c3aed; }
     .cal-chip.is-locked { border-color:#16a34a; cursor:default; pointer-events:none; }
     .cal-chip.is-booked { border-color:#f59e0b; cursor:default; pointer-events:none; }
+    .cal-chip.is-dupwarn { border-color:#f59e0b; box-shadow: inset 0 0 0 1.5px #f59e0b; }
     .cal-chip.is-closed { border-color:#e2e8f0; cursor:default; pointer-events:none; opacity:.55; }
     .cal-chip.is-full { cursor:default; opacity:.85; }
     .cal-chip.is-waitfull { cursor:default; opacity:.5; }
@@ -999,21 +1000,61 @@ let slotOverrides={};
 let bookedPaid=new Set();
 let bookedPending=new Set();
 let bookedSlots=new Set();
-let bookedOrders=[]; // 完整訂單清單（含姓名），用來判斷時段衝突是否為「同一人」
+let bookedOrders=[]; // 完整訂單清單，用來判斷同一支電話/LINE 底下是否有時段重複（僅供提醒，不擋下單）
 
-// 取得目前這個時段，在既有訂單中登記的所有人姓名（同一 LINE/電話下可能有不同姓名，例如家人共用聯絡方式）
-function slotHolderNames(key){
-  return bookedOrders.filter(o => (o.slots||[]).includes(key)).map(o => (o.name||'').trim().toLowerCase());
-}
-// 判斷這個時段是否真的跟「目前正在填寫的這位學生」重複（同聯絡方式 + 同姓名），
-// 而不是同聯絡方式下的不同人（例如兩兄妹共用同一支手機報名同一堂課，應該允許）
+// 判斷這個時段是否跟同一支電話/LINE 底下的其他訂單重複。
+// 直接比對聯絡方式（不比對姓名），因為學生常常每次打的姓名拼法不一致（例如 Jane / JANE珍），
+// 用姓名比對容易漏抓真正的重複。這個判斷只用來「提醒」，不會擋下選課或送出報名。
 function isDuplicateConflict(key){
   if(currentOrderOwnSlots.has(key)) return false;
-  if(!bookedPaid.has(key) && !bookedPending.has(key)) return false;
-  const myName=(document.getElementById('f-name').value||'').trim().toLowerCase();
-  if(!myName) return true; // 姓名尚未填寫時，保守起見仍視為衝突，避免漏擋
-  const holders = slotHolderNames(key);
-  return holders.length===0 ? true : holders.some(n => n===myName);
+  return bookedPaid.has(key) || bookedPending.has(key);
+}
+
+// 找出 bookedOrders 裡，同一支電話/LINE 底下有哪些時段被登記了不只一次（不分姓名）
+function findOwnDuplicateSlots(){
+  const km = new Map(); // slotKey -> orders[]
+  bookedOrders.forEach(o=>{
+    (o.slots||[]).forEach(k=>{
+      if(!km.has(k)) km.set(k, []);
+      km.get(k).push(o);
+    });
+  });
+  const dups = [];
+  km.forEach((orders,k)=>{
+    if(orders.length>1) dups.push({ key:k, count:orders.length, names:[...new Set(orders.map(o=>o.name||'—'))] });
+  });
+  return dups;
+}
+
+// 更新「找到既有訂單」提示區塊：一般摘要 + 若有重複報名同一堂課，額外顯眼提示並提供直接編輯入口
+// （純提醒用途，不會鎖住時段或阻止送出報名）
+function updateBookedHint(){
+  const el=document.getElementById('line-booked-hint');
+  if(!el) return;
+  if(bookedSlots.size===0){ el.style.display='none'; return; }
+  el.style.display='block';
+  const paidCount=bookedPaid.size, pendCount=bookedPending.size;
+  let msg='找到既有訂單：';
+  if(paidCount>0) msg+=` 已確認 ${paidCount} 堂（黃色）`;
+  if(pendCount>0) msg+=` 待確認 ${pendCount} 堂（藍色可調整）`;
+  msg += '。';
+
+  const dups = findOwnDuplicateSlots();
+  let dupHtml = '';
+  if(dups.length>0){
+    const items = dups.map(d=>{
+      const detail = slotKeyToDetail(d.key);
+      const label = detail ? `${detail.date} ${detail.time}` : d.key;
+      const nameTxt = d.names.length>1 ? `（${d.names.join('、')}）` : '';
+      return `<div style="margin-top:4px;">🔴 <b>${label}</b>：同一支電話/LINE 下重複出現 ${d.count} 次${nameTxt}</div>`;
+    }).join('');
+    dupHtml = `<div style="margin-top:8px;padding-top:8px;border-top:1px solid #fcd34d;color:#b91c1c;font-weight:700;">
+      ⚠️ 提醒：這個聯絡方式底下有時段重複，請確認是否為重複報名（不會影響您送出報名）：
+      ${items}
+      <button type="button" onclick="jumpToEditOrders()" style="margin-top:8px;background:#dc2626;color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">前往查詢並取消其中一筆 →</button>
+    </div>`;
+  }
+  el.innerHTML = msg + dupHtml;
 }
 let autoCheckTimer=null;
 let isOrderLocked=false;
@@ -1266,9 +1307,7 @@ function renderSlots(){
     const cnt=counts[key]||0, wcnt=wcounts[wkey]||0;
     const full=cnt>=max, waitFull=wcnt>=MAX_W;
     const isSel=selSlots.has(key), isWait=waitSlots.has(wkey);
-    const isOwnSlot=currentOrderOwnSlots.has(key);
-    const isPaidBooked=!isOrderLocked && bookedPaid.has(key) && isDuplicateConflict(key);
-    const isPendingBookedElsewhere=!isOrderLocked && bookedPending.has(key) && isDuplicateConflict(key);
+    const hasDupWarning=!isOrderLocked && (bookedPaid.has(key) || bookedPending.has(key)) && isDuplicateConflict(key);
     const price=s.cls==='big'?'$490':s.cls==='rally'?'$800':'$550';
     const pct=Math.min(cnt/max*100,100);
     let barCls=pct>=100?'bar-red':pct>=60?'bar-yellow':'bar-green';
@@ -1317,15 +1356,12 @@ function renderSlots(){
         if(isSel){ cardCls+=' is-locked'; statusTxt='✅ 已確認'; statusCls='s-ok'; }
         else { cardCls+=' is-full'; statusTxt='—'; statusCls='s-full'; }
         clickAction='none'; barCls = isSel ? 'bar-green' : barCls;
-      } else if(isPaidBooked){
-        cardCls+=' is-booked'; statusTxt='此時段已有確認訂單'; statusCls='s-warn'; barCls='bar-yellow'; clickAction='none';
-      } else if(isPendingBookedElsewhere){
-        cardCls+=' is-booked'; statusTxt='此時段已有待確認訂單'; statusCls='s-warn'; barCls='bar-yellow'; clickAction='none';
       } else {
         if(isSel) cardCls+=' is-sel';
         const rem=max-cnt;
         statusTxt=cnt===0?`可報名（0/${max}）`:`剩 ${rem} 位（${cnt}/${max}）`;
         statusCls=cnt/max>=0.6?'s-warn':'s-ok'; clickAction='sel:'+key;
+        if(hasDupWarning){ cardCls+=' is-dupwarn'; statusTxt='⚠️ 您已有訂單・'+statusTxt; statusCls='s-warn'; }
       }
     } else if(!waitFull){
       if(isOrderLocked){
@@ -1754,20 +1790,7 @@ async function checkExistingOrders(lineId){
         if(o.isPaid) (o.slots||[]).forEach(k=>{ bookedPaid.add(k); bookedSlots.add(k); });
         else         (o.slots||[]).forEach(k=>{ bookedPending.add(k); bookedSlots.add(k); });
       });
-      // 防呆：若使用者在輸入 LINE ID 前已手動選了時段，且該時段其實是「自己」的其他訂單，主動取消勾選避免重複報名
-      // （若時段是同聯絡方式下不同姓名的人所持有，例如家人共用聯絡方式，則不取消勾選）
-      [...selSlots].forEach(k=>{
-        if(isDuplicateConflict(k)) selSlots.delete(k);
-      });
-      const el=document.getElementById('line-booked-hint');
-      if(el && bookedSlots.size>0){
-        el.style.display='block';
-        const paidCount=bookedPaid.size, pendCount=bookedPending.size;
-        let msg='找到既有訂單：';
-        if(paidCount>0) msg+=` 已確認 ${paidCount} 堂（黃色）`;
-        if(pendCount>0) msg+=` 待確認 ${pendCount} 堂（藍色可調整）`;
-        el.textContent=msg+'。';
-      } else if(el){ el.style.display='none'; }
+      updateBookedHint();
     } else {
       const el=document.getElementById('line-booked-hint'); if(el) el.style.display='none';
     }
@@ -1787,8 +1810,7 @@ document.getElementById('submit-btn').addEventListener('click', async function()
   const line = document.getElementById('f-line').value.trim();
   const phone = document.getElementById('f-phone').value.trim();
 
-  // 防呆：送出前再次檢查是否與自己既有的訂單（待確認或已繳費）重複報名同一時段
-  // （若同一聯絡方式下是不同姓名的人，例如家人共用電話/LINE，則不視為重複）
+  // 提醒（不阻擋）：送出前再次檢查是否與同一支電話/LINE 底下的既有訂單重複到同一時段
   const dupKeys = [...selSlots].filter(k => isDuplicateConflict(k));
   if (dupKeys.length > 0) {
     const dupLabels = dupKeys.map(k => {
@@ -1797,8 +1819,7 @@ document.getElementById('submit-btn').addEventListener('click', async function()
       const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
       return `${s.d} ${timeLabel}`;
     }).join('\n');
-    alert('您已經對以下時段報名過（待確認或已繳費），請勿重複報名：\n\n' + dupLabels + '\n\n如需調整既有訂單，請使用「查詢/編輯訂單」功能。');
-    return;
+    alert('提醒：這個 LINE ID／電話底下已經有以下時段的訂單了：\n\n' + dupLabels + '\n\n如果是重複報名，建議之後用「查詢/編輯訂單」取消其中一筆；如果是不同人（例如家人）要一起上課，可以忽略這則提醒繼續送出。');
   }
 
   this.disabled = true; this.textContent = '送出中...';
@@ -1879,12 +1900,10 @@ document.getElementById('submit-btn').addEventListener('click', async function()
 // =============================================
 // 老學員查詢訂單
 // =============================================
-document.getElementById('btn-load-old').addEventListener('click', async function() {
-  const searchLine = document.getElementById('f-search-line').value.trim();
-  const msgEl = document.getElementById('search-msg');
-  if (!searchLine) { alert('請先輸入 LINE ID 或聯絡電話再點擊帶入'); return; }
-  this.disabled = true; this.textContent = '搜尋中...';
-  msgEl.textContent = '正在比對訂單紀錄...';
+async function searchOldOrders(searchLine, btnEl, msgEl){
+  if (!searchLine) { if(msgEl){ msgEl.style.color='#dc2626'; msgEl.textContent='請先輸入 LINE ID 或聯絡電話再點擊帶入'; } return; }
+  if(btnEl){ btnEl.disabled = true; btnEl.textContent = '搜尋中...'; }
+  if(msgEl){ msgEl.style.color = '#888'; msgEl.textContent = '正在比對訂單紀錄...'; }
   document.getElementById('f-line').value = searchLine;
 
   try {
@@ -1900,32 +1919,39 @@ document.getElementById('btn-load-old').addEventListener('click', async function
         if(o.isPaid) (o.slots||[]).forEach(k=>{ bookedPaid.add(k); bookedSlots.add(k); });
         else         (o.slots||[]).forEach(k=>{ bookedPending.add(k); bookedSlots.add(k); });
       });
-      const hintEl = document.getElementById('line-booked-hint');
-      if(hintEl && bookedSlots.size > 0){
-        hintEl.style.display = 'block';
-        const paidCount=bookedPaid.size, pendCount=bookedPending.size;
-        let msg='找到既有訂單：';
-        if(paidCount>0) msg+=` 已確認 ${paidCount} 堂（黃色）`;
-        if(pendCount>0) msg+=` 待確認 ${pendCount} 堂（藍色可調整）`;
-        hintEl.textContent = msg+'。';
-      }
+      updateBookedHint();
       renderSlots();
-      showOrderList(orders, msgEl);
+      if(msgEl) showOrderList(orders, msgEl);
     } else {
       isOrderLocked = false; currentOrderId = ''; currentOrderOwnSlots = new Set(); bookedOrders = [];
       const hintEl = document.getElementById('line-booked-hint');
       if(hintEl) hintEl.style.display = 'none';
       renderSlots();
-      msgEl.style.color = '#dc2626';
-      msgEl.textContent = '❌ 找不到此 LINE ID 的報名紀錄，請確認輸入是否正確（大小寫需一致）。';
+      if(msgEl){ msgEl.style.color = '#dc2626'; msgEl.textContent = '❌ 找不到此 LINE ID 的報名紀錄，請確認輸入是否正確（大小寫需一致）。'; }
     }
   } catch(e) {
-    msgEl.style.color = '#dc2626';
-    msgEl.textContent = '連線失敗或權限不足，請確認後台部署設定。';
+    if(msgEl){ msgEl.style.color = '#dc2626'; msgEl.textContent = '連線失敗或權限不足，請確認後台部署設定。'; }
   } finally {
-    this.disabled = false; this.textContent = '查詢訂單';
+    if(btnEl){ btnEl.disabled = false; btnEl.textContent = '查詢訂單'; }
   }
+}
+
+document.getElementById('btn-load-old').addEventListener('click', async function() {
+  const searchLine = document.getElementById('f-search-line').value.trim();
+  const msgEl = document.getElementById('search-msg');
+  await searchOldOrders(searchLine, this, msgEl);
 });
+
+// 從「報名摘要」的重複時段提示，直接跳到查詢/編輯訂單畫面並自動帶入查詢
+function jumpToEditOrders(){
+  const val = document.getElementById('f-line').value.trim();
+  if(!val) return;
+  document.getElementById('f-search-line').value = val;
+  showFlow('search');
+  const msgEl = document.getElementById('search-msg');
+  const btnEl = document.getElementById('btn-load-old');
+  searchOldOrders(val, btnEl, msgEl);
+}
 
 // =============================================
 // 訂單列表相關函式（完全不動）
@@ -1975,7 +2001,7 @@ function showOrderList(orders, msgEl) {
     return `<div style="border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:8px;background:#fff;overflow:hidden;">
       <div onclick="toggleSlotTable('${panelId}','${iconId}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;user-select:none;">
         <div>
-          <div style="font-size:12px;font-weight:700;color:#1a1a1a;">${o.orderId||'—'}</div>
+          <div style="font-size:12px;font-weight:700;color:#1a1a1a;">${o.orderId||'—'}${o.name ? '　'+o.name : ''}</div>
           <div style="font-size:11px;color:#888;margin-top:2px;">${o.fee||''}｜${slotCount} 堂
             <span id="${iconId}" style="font-size:10px;color:#93c5fd;margin-left:4px;">▼ 點擊查看時段</span>
           </div>
