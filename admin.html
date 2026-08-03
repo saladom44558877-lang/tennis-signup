@@ -53,6 +53,23 @@
     .reg-info { font-size: 12px; color: #555; line-height: 2; }
     .reg-info b { color: #1a1a1a; }
     .reg-slots { font-size: 11px; color: #666; background: #f8fafc; border-radius: 8px; padding: 8px 10px; margin: 8px 0; line-height: 1.9; border: 1px solid #e2e8f0; }
+    .status-refund { background: #fce7f3; color: #9d174d; }
+    .student-search { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 13px; margin-bottom: 12px; box-sizing: border-box; }
+    .student-card { background: #fff; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.05); overflow: hidden; }
+    .student-head { padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px; user-select: none; }
+    .student-name { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+    .student-sub { font-size: 11px; color: #888; margin-top: 2px; }
+    .student-chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .student-chip { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+    .chip-classes { background: #eff6ff; color: #1d4ed8; }
+    .chip-paid { background: #dcfce7; color: #166534; }
+    .chip-pending { background: #fef3c7; color: #92400e; }
+    .chip-cancel { background: #fee2e2; color: #991b1b; }
+    .chip-refund { background: #fce7f3; color: #9d174d; }
+    .student-body { display: none; border-top: 1px solid #f1f5f9; padding: 12px 16px 14px; background: #f8fafc; }
+    .student-order-row { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; font-size: 12px; color: #555; line-height: 1.8; }
+    .student-order-row b { color: #1a1a1a; }
+    .student-order-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
     .reg-actions { display: flex; gap: 8px; margin-top: 10px; }
     .btn-confirm { flex: 1; padding: 9px; background: #16a34a; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
     .btn-confirm:hover { background: #15803d; }
@@ -196,6 +213,7 @@
       <button class="atab" id="atab-remind" onclick="switchTab('remind')">🔔 上課提醒</button>
       <button class="atab" id="atab-coach" onclick="switchTab('coach')">⚙️ 課程設定</button>
       <button class="atab" id="atab-cash" onclick="switchTab('cash')">💰 金流總覽</button>
+      <button class="atab" id="atab-students" onclick="switchTab('students')">👥 學生總覽</button>
     </div>
 
     <div id="tab-reg">
@@ -243,6 +261,11 @@
         <button class="refresh-btn" onclick="loadAccounting()">🔄 重新整理</button>
       </div>
       <div id="cash-content"><div class="loading">載入中...</div></div>
+    </div>
+
+    <div id="tab-students" style="display:none;">
+      <input type="text" class="student-search" id="student-search" placeholder="搜尋學生姓名、LINE ID 或電話..." oninput="renderStudentsTab()">
+      <div id="students-content"><div class="loading">載入中...</div></div>
     </div>
 
   </div>
@@ -481,6 +504,148 @@ function renderList() {
       </div>` : ''}
     </div>`;
   }).join('');
+}
+
+// ========================================================
+//  👥 學生總覽（依 LINE ID / 電話彙整每位學生的所有訂單）
+// ========================================================
+function feeToNum(str){ return parseInt((str||'0').toString().replace(/[^\d-]/g,'')) || 0; }
+
+// 分組邏輯：姓名 + 聯絡方式（電話優先，其次 LINE ID）
+// 這是根據實際資料調整過的判斷方式，因為單純用 LINE ID 或電話分組會有兩種已知問題：
+// 1) 同一位學生的 LINE ID 欄位歷史上曾填入不一致的內容（如暱稱、備註文字），但姓名、電話較穩定
+// 2) 有些學生（如家人）共用同一組電話/LINE，但其實是不同人、應該分開列出
+// 姓名+聯絡方式的組合沒辦法 100% 解決，但比單一欄位更準確；若姓名或聯絡方式其中一項對不上，
+// 同一人仍可能被拆成兩張卡片——教練可透過卡片上顯示的電話/LINE 自行比對是否為同一人。
+function studentKeyOf(r){
+  const name  = (r.name  || '').toString().trim().toLowerCase();
+  const line  = (r.line  || '').toString().trim();
+  const phone = (r.phone || '').toString().trim();
+  const contact = phone || line || '';
+  if (name && contact) return name + '||' + contact;
+  return contact || ('name:' + name) || 'unknown';
+}
+
+function buildStudentGroups(){
+  const groups = {};
+  allRows.forEach(r => {
+    const key = studentKeyOf(r);
+    if (!groups[key]) {
+      groups[key] = { key, name: r.name, line: r.line, phone: r.phone, orders: [] };
+    }
+    groups[key].orders.push(r);
+    // 名稱/聯絡方式以最新一筆（時間最晚）為主，補齊缺漏欄位
+    groups[key].name  = groups[key].name  || r.name;
+    groups[key].line  = groups[key].line  || r.line;
+    groups[key].phone = groups[key].phone || r.phone;
+  });
+  return Object.values(groups);
+}
+
+// 課程費欄位在 Google Sheets 中常會被自動轉成純數字（貨幣格式），而非帶 "$" 的文字，
+// 這裡統一用數字重新格式化顯示，避免畫面忽有 $ 忽無
+function formatFeeDisplay(feeRaw){
+  return '$' + feeToNum(feeRaw).toLocaleString();
+}
+function formatDiscountDisplay(discRaw){
+  if (discRaw === undefined || discRaw === null || discRaw === '' || discRaw === '—') return '—';
+  const n = feeToNum(discRaw);
+  if (n === 0) return '—';
+  return (n < 0 ? '-$' : '-$') + Math.abs(n).toLocaleString();
+}
+
+function renderStudentsTab(){
+  const container = document.getElementById('students-content');
+  if (!allRows || allRows.length === 0) {
+    container.innerHTML = '<div class="empty">目前沒有報名資料</div>';
+    return;
+  }
+
+  const kw = (document.getElementById('student-search').value || '').trim().toLowerCase();
+  let groups = buildStudentGroups();
+
+  if (kw) {
+    groups = groups.filter(g =>
+      (g.name || '').toLowerCase().includes(kw) ||
+      (g.line || '').toString().toLowerCase().includes(kw) ||
+      (g.phone || '').toString().toLowerCase().includes(kw)
+    );
+  }
+
+  // 依「最近一次報名時間」排序，最新學生在最上面
+  groups.sort((a,b) => {
+    const ta = a.orders.map(o=>o.time||'').sort().pop() || '';
+    const tb = b.orders.map(o=>o.time||'').sort().pop() || '';
+    return tb.localeCompare(ta);
+  });
+
+  if (groups.length === 0) {
+    container.innerHTML = '<div class="empty">找不到符合的學生</div>';
+    return;
+  }
+
+  const statusBadge = { '待確認':'status-pending', '已繳費✅':'status-paid', '已取消❌':'status-cancel', '已退費':'status-refund' };
+
+  container.innerHTML = groups.map((g, idx) => {
+    const paidOrders    = g.orders.filter(o => o.status === '已繳費✅');
+    const pendingOrders = g.orders.filter(o => o.status === '待確認');
+    const cancelOrders  = g.orders.filter(o => o.status === '已取消❌');
+    const refundOrders  = g.orders.filter(o => o.status === '已退費');
+
+    const totalPaid    = paidOrders.reduce((s,o)=>s+feeToNum(o.fee), 0);
+    const totalPending = pendingOrders.reduce((s,o)=>s+feeToNum(o.fee), 0);
+    const totalRefund  = refundOrders.reduce((s,o)=>s+feeToNum(o.refundAmount), 0);
+    const activeClasses = [...paidOrders, ...pendingOrders]
+      .reduce((s,o)=> s + (parseInt(o.small)||0) + (parseInt(o.big)||0) + (parseInt(o.rally)||0), 0);
+
+    const bodyId = `student-body-${idx}`, iconId = `student-icon-${idx}`;
+
+    const orderRows = g.orders
+      .slice()
+      .sort((a,b) => (b.time||'').localeCompare(a.time||''))
+      .map(o => {
+        const sb = statusBadge[o.status] || 'status-pending';
+        const slotsDisplay = decodeSlotStr(o.slots || '');
+        const refundLine = o.status === '已退費'
+          ? `<br><b>退費金額：</b>$${feeToNum(o.refundAmount).toLocaleString()}｜<b>原因：</b>${o.refundReason||'—'}｜<b>經手人：</b>${o.refundHandler||'—'}`
+          : '';
+        return `<div class="student-order-row">
+          <div class="student-order-top">
+            <span>${o.orderId||'—'}</span>
+            <span class="reg-status ${sb}">${o.status}</span>
+          </div>
+          <b>報名時間：</b>${o.time||'—'}｜<b>程度：</b>${o.level||'—'}<br>
+          <b>課程費：</b>${formatFeeDisplay(o.fee)}${formatDiscountDisplay(o.discount)!=='—' ? '（折扣 '+formatDiscountDisplay(o.discount)+'）' : ''}｜
+          <b>堂數：</b>小班${o.small||0}・大班${o.big||0}・對打${o.rally||0}${refundLine}
+          ${slotsDisplay ? `<div class="reg-slots" style="margin-top:6px;">${slotsDisplay.replace(/\n/g,'<br>')}</div>` : ''}
+        </div>`;
+      }).join('');
+
+    return `<div class="student-card">
+      <div class="student-head" onclick="toggleStudentBody('${bodyId}','${iconId}')">
+        <div>
+          <div class="student-name">${g.name || '（未填姓名）'}</div>
+          <div class="student-sub">LINE：${g.line || '—'} ｜ 電話：${g.phone || '—'} <span id="${iconId}">▼ 點擊展開所有訂單</span></div>
+        </div>
+        <div class="student-chips">
+          <span class="student-chip chip-classes">共 ${activeClasses} 堂</span>
+          <span class="student-chip chip-paid">已收 $${totalPaid.toLocaleString()}</span>
+          ${totalPending>0 ? `<span class="student-chip chip-pending">待收 $${totalPending.toLocaleString()}</span>` : ''}
+          ${cancelOrders.length>0 ? `<span class="student-chip chip-cancel">取消 ${cancelOrders.length}</span>` : ''}
+          ${refundOrders.length>0 ? `<span class="student-chip chip-refund">退費 $${totalRefund.toLocaleString()}</span>` : ''}
+        </div>
+      </div>
+      <div class="student-body" id="${bodyId}">${orderRows}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleStudentBody(bodyId, iconId){
+  const body = document.getElementById(bodyId), icon = document.getElementById(iconId);
+  if (!body) return;
+  const isOpen = body.style.display === 'block';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (icon) icon.textContent = isOpen ? '▼ 點擊展開所有訂單' : '▲ 點擊收合';
 }
 
 async function confirmPayment(rowIndex) {
@@ -766,10 +931,12 @@ function switchTab(name){
   document.getElementById('tab-remind').style.display = name==='remind' ? 'block' : 'none';
   document.getElementById('tab-coach').style.display  = name==='coach'  ? 'block' : 'none';
   document.getElementById('tab-cash').style.display   = name==='cash'   ? 'block' : 'none';
+  document.getElementById('tab-students').style.display = name==='students' ? 'block' : 'none';
   document.getElementById('atab-reg').classList.toggle('active', name==='reg');
   document.getElementById('atab-remind').classList.toggle('active', name==='remind');
   document.getElementById('atab-coach').classList.toggle('active', name==='coach');
   document.getElementById('atab-cash').classList.toggle('active', name==='cash');
+  document.getElementById('atab-students').classList.toggle('active', name==='students');
   if(name==='remind'){
     const sel = document.getElementById('remind-date');
     if(!sel.options.length) buildRemindDates();
@@ -782,6 +949,9 @@ function switchTab(name){
   }
   if(name==='cash'){
     loadAccounting();
+  }
+  if(name==='students'){
+    renderStudentsTab();
   }
 }
 
