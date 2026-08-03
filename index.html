@@ -982,6 +982,14 @@ const DEFS = {
 };
 
 const MAX_S=3, MAX_B=10, MAX_W=3;
+// 課程僅涵蓋 2026/07~2026/12，依「今天」自動算出目前應顯示的最早月份
+// 已經過去的整月不再顯示給學員選課（例如現在是 8 月，就不再顯示 7 月分頁）
+const COURSE_YEAR = 2026;
+const _today = new Date();
+const CURRENT_ACTIVE_MONTH = (_today.getFullYear() < COURSE_YEAR) ? 7
+  : (_today.getFullYear() > COURSE_YEAR) ? 13
+  : (_today.getMonth() + 1);
+
 let curM=7, level='beginner', selSlots=new Set(), waitSlots=new Set();
 let tournamentIntent='';
 let skillRatings = { forehand:0, backhand:0, volley:0, serve:0, smash:0 };
@@ -991,9 +999,26 @@ let slotOverrides={};
 let bookedPaid=new Set();
 let bookedPending=new Set();
 let bookedSlots=new Set();
+let bookedOrders=[]; // 完整訂單清單（含姓名），用來判斷時段衝突是否為「同一人」
+
+// 取得目前這個時段，在既有訂單中登記的所有人姓名（同一 LINE/電話下可能有不同姓名，例如家人共用聯絡方式）
+function slotHolderNames(key){
+  return bookedOrders.filter(o => (o.slots||[]).includes(key)).map(o => (o.name||'').trim().toLowerCase());
+}
+// 判斷這個時段是否真的跟「目前正在填寫的這位學生」重複（同聯絡方式 + 同姓名），
+// 而不是同聯絡方式下的不同人（例如兩兄妹共用同一支手機報名同一堂課，應該允許）
+function isDuplicateConflict(key){
+  if(currentOrderOwnSlots.has(key)) return false;
+  if(!bookedPaid.has(key) && !bookedPending.has(key)) return false;
+  const myName=(document.getElementById('f-name').value||'').trim().toLowerCase();
+  if(!myName) return true; // 姓名尚未填寫時，保守起見仍視為衝突，避免漏擋
+  const holders = slotHolderNames(key);
+  return holders.length===0 ? true : holders.some(n => n===myName);
+}
 let autoCheckTimer=null;
 let isOrderLocked=false;
 let currentOrderId='';
+let currentOrderOwnSlots=new Set(); // 目前正在編輯之訂單本身的時段（不算重複衝突）
 let currentStep=1;
 
 // =============================================
@@ -1241,7 +1266,9 @@ function renderSlots(){
     const cnt=counts[key]||0, wcnt=wcounts[wkey]||0;
     const full=cnt>=max, waitFull=wcnt>=MAX_W;
     const isSel=selSlots.has(key), isWait=waitSlots.has(wkey);
-    const isPaidBooked=!isOrderLocked && bookedPaid.has(key);
+    const isOwnSlot=currentOrderOwnSlots.has(key);
+    const isPaidBooked=!isOrderLocked && bookedPaid.has(key) && isDuplicateConflict(key);
+    const isPendingBookedElsewhere=!isOrderLocked && bookedPending.has(key) && isDuplicateConflict(key);
     const price=s.cls==='big'?'$490':s.cls==='rally'?'$800':'$550';
     const pct=Math.min(cnt/max*100,100);
     let barCls=pct>=100?'bar-red':pct>=60?'bar-yellow':'bar-green';
@@ -1292,6 +1319,8 @@ function renderSlots(){
         clickAction='none'; barCls = isSel ? 'bar-green' : barCls;
       } else if(isPaidBooked){
         cardCls+=' is-booked'; statusTxt='此時段已有確認訂單'; statusCls='s-warn'; barCls='bar-yellow'; clickAction='none';
+      } else if(isPendingBookedElsewhere){
+        cardCls+=' is-booked'; statusTxt='此時段已有待確認訂單'; statusCls='s-warn'; barCls='bar-yellow'; clickAction='none';
       } else {
         if(isSel) cardCls+=' is-sel';
         const rem=max-cnt;
@@ -1720,9 +1749,15 @@ async function checkExistingOrders(lineId){
     const result=await res.json();
     bookedPaid.clear(); bookedPending.clear(); bookedSlots.clear();
     if(result.status==='ok' && result.orders){
+      bookedOrders = result.orders;
       result.orders.forEach(o=>{
         if(o.isPaid) (o.slots||[]).forEach(k=>{ bookedPaid.add(k); bookedSlots.add(k); });
         else         (o.slots||[]).forEach(k=>{ bookedPending.add(k); bookedSlots.add(k); });
+      });
+      // 防呆：若使用者在輸入 LINE ID 前已手動選了時段，且該時段其實是「自己」的其他訂單，主動取消勾選避免重複報名
+      // （若時段是同聯絡方式下不同姓名的人所持有，例如家人共用聯絡方式，則不取消勾選）
+      [...selSlots].forEach(k=>{
+        if(isDuplicateConflict(k)) selSlots.delete(k);
       });
       const el=document.getElementById('line-booked-hint');
       if(el && bookedSlots.size>0){
@@ -1747,11 +1782,26 @@ document.getElementById('level-filter').addEventListener('change', renderSlots);
 // =============================================
 document.getElementById('submit-btn').addEventListener('click', async function(){
   if (isOrderLocked) { alert('此訂單已確認繳費，無法修改，請聯繫 Adam 教練'); return; }
-  this.disabled = true; this.textContent = '送出中...';
 
   const name = document.getElementById('f-name').value.trim();
   const line = document.getElementById('f-line').value.trim();
   const phone = document.getElementById('f-phone').value.trim();
+
+  // 防呆：送出前再次檢查是否與自己既有的訂單（待確認或已繳費）重複報名同一時段
+  // （若同一聯絡方式下是不同姓名的人，例如家人共用電話/LINE，則不視為重複）
+  const dupKeys = [...selSlots].filter(k => isDuplicateConflict(k));
+  if (dupKeys.length > 0) {
+    const dupLabels = dupKeys.map(k => {
+      const parts = k.split('-'); const m = parseInt(parts[1]), i = parseInt(parts[2]);
+      const s = DEFS[m] && DEFS[m][i]; if (!s) return k;
+      const timeLabel = s.t === '19-20' ? '19:00-20:00' : s.t === '20-21' ? '20:00-21:00' : s.t;
+      return `${s.d} ${timeLabel}`;
+    }).join('\n');
+    alert('您已經對以下時段報名過（待確認或已繳費），請勿重複報名：\n\n' + dupLabels + '\n\n如需調整既有訂單，請使用「查詢/編輯訂單」功能。');
+    return;
+  }
+
+  this.disabled = true; this.textContent = '送出中...';
   const levelMap = {beginner: '初階班', mid: '初階班', '1v1': '對打班'};
 
   let small = 0, big = 0, rally = 0;
@@ -1845,6 +1895,7 @@ document.getElementById('btn-load-old').addEventListener('click', async function
 
     if (result.status === 'ok' && result.orders && result.orders.length > 0) {
       const orders = result.orders;
+      bookedOrders = orders;
       orders.forEach(o => {
         if(o.isPaid) (o.slots||[]).forEach(k=>{ bookedPaid.add(k); bookedSlots.add(k); });
         else         (o.slots||[]).forEach(k=>{ bookedPending.add(k); bookedSlots.add(k); });
@@ -1861,7 +1912,7 @@ document.getElementById('btn-load-old').addEventListener('click', async function
       renderSlots();
       showOrderList(orders, msgEl);
     } else {
-      isOrderLocked = false; currentOrderId = '';
+      isOrderLocked = false; currentOrderId = ''; currentOrderOwnSlots = new Set(); bookedOrders = [];
       const hintEl = document.getElementById('line-booked-hint');
       if(hintEl) hintEl.style.display = 'none';
       renderSlots();
@@ -1956,7 +2007,19 @@ function loadOrderById(idx) {
   const o = window._pendingOrders && window._pendingOrders[idx];
   if (!o || o.isPaid) return;
   isOrderLocked = false; currentOrderId = o.orderId || '';
+  currentOrderOwnSlots = new Set(o.slots||[]);
   (o.slots||[]).forEach(k => selSlots.add(k));
+  // 若這筆訂單的時段落在已被隱藏的過去月份（見 initMonthTabs），暫時把該月分頁顯示出來並切換過去，
+  // 這樣學生才能實際看到／調整這筆待確認訂單裡的時段
+  const orderMonths = (o.slots||[]).map(k => parseInt((k.split('-')[1])||'0')).filter(m=>m);
+  if (orderMonths.length) {
+    const earliestM = Math.min(...orderMonths);
+    const tab = document.querySelector(`#month-tabs .mtab[data-m="${earliestM}"]`);
+    if (tab && tab.style.display === 'none') tab.style.display = '';
+    document.querySelectorAll('#month-tabs .mtab').forEach(t=>t.classList.remove('active'));
+    if (tab) tab.classList.add('active');
+    curM = earliestM;
+  }
   renderWaitlist(); calcFee(); updateSelInfo(); renderSlots(); checkBtn3();
 }
 
@@ -1969,6 +2032,7 @@ async function cancelOrder(idx) {
     if (data.status === 'ok') {
       window._pendingOrders.splice(idx, 1);
       bookedPending.clear(); bookedPaid.clear(); bookedSlots.clear();
+      bookedOrders = window._pendingOrders;
       window._pendingOrders.forEach(ord => {
         if(ord.isPaid) (ord.slots||[]).forEach(k=>{ bookedPaid.add(k); bookedSlots.add(k); });
         else           (ord.slots||[]).forEach(k=>{ bookedPending.add(k); bookedSlots.add(k); });
@@ -2209,7 +2273,7 @@ function pkgSelectPlan(key,el){
 }
 
 function pkgRenderMonths(){
-  const validMs=PKG_MONTHS.filter(m=>pkgCountInMonth(pkgPlan,m)>=1&&pkgGetSlots(pkgPlan,m).length>=6);
+  const validMs=PKG_MONTHS.filter(m=>m>=CURRENT_ACTIVE_MONTH && pkgCountInMonth(pkgPlan,m)>=1&&pkgGetSlots(pkgPlan,m).length>=6);
   const opts=document.getElementById('pkg-month-opts');
   opts.innerHTML=validMs.map(m=>{
     const bd=pkgGetBreakdown(pkgPlan,m);
@@ -2321,6 +2385,32 @@ function confirmPackageAndNext(){
 // =============================================
 // 初始化
 // =============================================
+(function initMonthTabs(){
+  const tabs = [...document.querySelectorAll('#month-tabs .mtab')];
+  let firstVisible = null;
+  tabs.forEach(tab=>{
+    const m = parseInt(tab.dataset.m);
+    tab.classList.remove('active');
+    if(m < CURRENT_ACTIVE_MONTH){
+      tab.style.display = 'none';
+    } else {
+      tab.style.display = '';
+      if(firstVisible === null) firstVisible = m;
+    }
+  });
+  if(firstVisible !== null){
+    curM = firstVisible;
+  } else {
+    // 所有月份都已過去（正式課程已結束）：預設停留在 12 月，並提示已無開放課程
+    curM = 12;
+    const grid = document.getElementById('slot-grid');
+    if(grid) grid.innerHTML = '<div style="padding:20px;text-align:center;color:#888;font-size:13px;">目前無開放報名之課程月份，如有需要請直接聯繫教練。</div>';
+  }
+  tabs.forEach(tab=>{
+    if(parseInt(tab.dataset.m) === curM) tab.classList.add('active');
+  });
+})();
+
 pkgRenderPlans();
 loadCounts();
 loadCoaches();
