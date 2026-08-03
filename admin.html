@@ -61,6 +61,8 @@
     .student-name { font-size: 16px; font-weight: 700; color: #1a1a1a; }
     .student-sub { font-size: 11px; color: #888; margin-top: 3px; }
     .student-multi-warn { font-size: 11px; color: #b45309; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 6px 9px; margin-top: 8px; }
+    .student-dup-warn { font-size: 12px; color: #7f1d1d; background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 8px; padding: 8px 10px; margin-top: 10px; font-weight: 700; }
+    .slot-dup-highlight { color: #dc2626; font-weight: 800; background: #fee2e2; padding: 1px 5px; border-radius: 4px; }
     .student-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
     .student-chip { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
     .chip-classes { background: #eff6ff; color: #1d4ed8; }
@@ -559,6 +561,24 @@ function formatDiscountDisplay(discRaw){
   return '-$' + Math.abs(n).toLocaleString();
 }
 
+// 找出同一支電話底下，「待確認」或「已繳費」的訂單中，有哪些時段被登記了不只一次
+// 回傳 Map：label -> 持有這個時段的訂單清單 [{orderId, name, status}]
+function findDuplicateSlotLabels(g){
+  const labelHolders = new Map(); // label -> [{orderId,name,status}]
+  g.orders.forEach(o => {
+    if (o.status !== '待確認' && o.status !== '已繳費✅') return; // 已取消/已退費不列入重複判斷
+    const decoded = decodeSlotStr(o.slots || ''); // 已對單一訂單內部去重
+    if (!decoded || decoded === '—') return;
+    decoded.split('\n').filter(Boolean).forEach(label => {
+      if (!labelHolders.has(label)) labelHolders.set(label, []);
+      labelHolders.get(label).push({ orderId: o.orderId||'—', name: o.name||'—', status: o.status });
+    });
+  });
+  const dup = new Map();
+  labelHolders.forEach((holders, label) => { if (holders.length > 1) dup.set(label, holders); });
+  return dup;
+}
+
 function groupSummary(g){
   const paidOrders    = g.orders.filter(o => o.status === '已繳費✅');
   const pendingOrders = g.orders.filter(o => o.status === '待確認');
@@ -615,9 +635,10 @@ function renderStudentsTab(){
       const namesArr = [...g.names];
       const namesLabel = namesArr.join('、') || '（未填姓名）';
       const multiTag = namesArr.length > 1 ? ' ⚠️多人共用此電話' : '';
+      const dupTag = findDuplicateSlotLabels(g).size > 0 ? ' 🔴重複時段' : '';
       const phoneLabel = g.phone || ([...g.lines][0] || '無聯絡方式');
       const s = groupSummary(g);
-      return `<option value="${g.key.replace(/"/g,'&quot;')}">${phoneLabel} － ${namesLabel}${multiTag}（共${s.activeClasses}堂・已收$${s.totalPaid.toLocaleString()}）</option>`;
+      return `<option value="${g.key.replace(/"/g,'&quot;')}">${phoneLabel} － ${namesLabel}${multiTag}${dupTag}（共${s.activeClasses}堂・已收$${s.totalPaid.toLocaleString()}）</option>`;
     }).join('');
 
   // 篩選後盡量保留原本選取的項目，找不到則清空詳細畫面
@@ -646,6 +667,20 @@ function renderStudentDetail(){
   const namesArr = [...g.names];
   const linesArr = [...g.lines];
   const statusBadge = { '待確認':'status-pending', '已繳費✅':'status-paid', '已取消❌':'status-cancel', '已退費':'status-refund' };
+  const dupSlotMap = findDuplicateSlotLabels(g);
+
+  let dupWarningHtml = '';
+  if (dupSlotMap.size > 0) {
+    const items = [...dupSlotMap.entries()].map(([label, holders]) => {
+      const holderTxt = holders.map(h => `${h.name}（${h.orderId}・${h.status}）`).join('、');
+      return `<div style="margin-top:4px;"><b style="color:#b91c1c;">${label}</b>：${holderTxt}</div>`;
+    }).join('');
+    dupWarningHtml = `
+      <div class="student-dup-warn">
+        <div>🔴 這支電話下有 ${dupSlotMap.size} 個時段被登記了不只一次，請確認是否為重複報名：</div>
+        ${items}
+      </div>`;
+  }
 
   // 若同一電話下有多個不同姓名（例如家人共用），個別列出每個人的堂數/金額，避免混在一起看不清楚
   let nameBreakdownHtml = '';
@@ -669,6 +704,11 @@ function renderStudentDetail(){
     .map(o => {
       const sb = statusBadge[o.status] || 'status-pending';
       const slotsDisplay = decodeSlotStr(o.slots || '');
+      const slotsHtml = slotsDisplay ? slotsDisplay.split('\n').map(label =>
+        dupSlotMap.has(label)
+          ? `<span class="slot-dup-highlight">${label}</span>`
+          : label
+      ).join('<br>') : '';
       const refundLine = o.status === '已退費'
         ? `<br><b>退費金額：</b>$${feeToNum(o.refundAmount).toLocaleString()}｜<b>原因：</b>${o.refundReason||'—'}｜<b>經手人：</b>${o.refundHandler||'—'}`
         : '';
@@ -680,7 +720,7 @@ function renderStudentDetail(){
         <b>報名時間：</b>${o.time||'—'}｜<b>程度：</b>${o.level||'—'}<br>
         <b>課程費：</b>${formatFeeDisplay(o.fee)}${formatDiscountDisplay(o.discount)!=='—' ? '（折扣 '+formatDiscountDisplay(o.discount)+'）' : ''}｜
         <b>堂數：</b>小班${o.small||0}・大班${o.big||0}・對打${o.rally||0}${refundLine}
-        ${slotsDisplay ? `<div class="reg-slots" style="margin-top:6px;">${slotsDisplay.replace(/\n/g,'<br>')}</div>` : ''}
+        ${slotsHtml ? `<div class="reg-slots" style="margin-top:6px;">${slotsHtml}</div>` : ''}
       </div>`;
     }).join('');
 
@@ -696,6 +736,7 @@ function renderStudentDetail(){
           ${s.cancelOrders.length>0 ? `<span class="student-chip chip-cancel">取消 ${s.cancelOrders.length}</span>` : ''}
           ${s.refundOrders.length>0 ? `<span class="student-chip chip-refund">退費 $${s.totalRefund.toLocaleString()}</span>` : ''}
         </div>
+        ${dupWarningHtml}
       </div>
       ${nameBreakdownHtml}
       <div class="student-body">${orderRows}</div>
