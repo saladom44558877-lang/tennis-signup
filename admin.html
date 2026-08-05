@@ -53,30 +53,6 @@
     .reg-info { font-size: 12px; color: #555; line-height: 2; }
     .reg-info b { color: #1a1a1a; }
     .reg-slots { font-size: 11px; color: #666; background: #f8fafc; border-radius: 8px; padding: 8px 10px; margin: 8px 0; line-height: 1.9; border: 1px solid #e2e8f0; }
-    .status-refund { background: #fce7f3; color: #9d174d; }
-    .student-search { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 13px; margin-bottom: 10px; box-sizing: border-box; }
-    .student-select { width: 100%; padding: 11px 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-size: 13px; margin-bottom: 14px; box-sizing: border-box; background: #fff; color: #1a1a1a; }
-    .student-detail-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.05); overflow: hidden; margin-bottom: 10px; }
-    .student-detail-head { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; }
-    .student-name { font-size: 16px; font-weight: 700; color: #1a1a1a; }
-    .student-sub { font-size: 11px; color: #888; margin-top: 3px; }
-    .student-multi-warn { font-size: 11px; color: #b45309; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 6px 9px; margin-top: 8px; }
-    .student-dup-warn { font-size: 12px; color: #7f1d1d; background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 8px; padding: 8px 10px; margin-top: 10px; font-weight: 700; }
-    .slot-dup-highlight { color: #dc2626; font-weight: 800; background: #fee2e2; padding: 1px 5px; border-radius: 4px; }
-    .student-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
-    .student-chip { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
-    .chip-classes { background: #eff6ff; color: #1d4ed8; }
-    .chip-paid { background: #dcfce7; color: #166534; }
-    .chip-pending { background: #fef3c7; color: #92400e; }
-    .chip-cancel { background: #fee2e2; color: #991b1b; }
-    .chip-refund { background: #fce7f3; color: #9d174d; }
-    .student-name-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 10px 16px 4px; width: calc(100% - 32px); }
-    .student-name-table th { text-align: left; color: #888; font-weight: 600; padding: 4px 6px; border-bottom: 1px solid #f1f5f9; }
-    .student-name-table td { padding: 5px 6px; border-bottom: 1px solid #f8fafc; color: #333; }
-    .student-body { padding: 12px 16px 14px; background: #f8fafc; }
-    .student-order-row { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; font-size: 12px; color: #555; line-height: 1.8; }
-    .student-order-row b { color: #1a1a1a; }
-    .student-order-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
     .reg-actions { display: flex; gap: 8px; margin-top: 10px; }
     .btn-confirm { flex: 1; padding: 9px; background: #16a34a; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
     .btn-confirm:hover { background: #15803d; }
@@ -193,6 +169,21 @@
     </div>
   </div>
 </div>
+<!-- 改時段 Modal -->
+<div class="modal-overlay" id="reschedule-modal" onclick="if(event.target===this)closeReschedule()">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <div class="modal-hd-title">🔁 修改上課時段</div>
+      <button class="modal-close" onclick="closeReschedule()">×</button>
+    </div>
+    <div class="inv" id="reschedule-content"></div>
+    <div class="modal-ft">
+      <button class="btn-copy-inv" onclick="closeReschedule()">取消</button>
+      <button class="btn-print-inv" id="reschedule-confirm-btn" onclick="confirmReschedule()">確認變更</button>
+    </div>
+  </div>
+</div>
+
 <div class="container">
 
   <!-- 登入 -->
@@ -220,7 +211,7 @@
       <button class="atab" id="atab-remind" onclick="switchTab('remind')">🔔 上課提醒</button>
       <button class="atab" id="atab-coach" onclick="switchTab('coach')">⚙️ 課程設定</button>
       <button class="atab" id="atab-cash" onclick="switchTab('cash')">💰 金流總覽</button>
-      <button class="atab" id="atab-students" onclick="switchTab('students')">👥 學生總覽</button>
+      <button class="atab" id="atab-roster" onclick="switchTab('roster')">📝 每日登記</button>
     </div>
 
     <div id="tab-reg">
@@ -270,12 +261,14 @@
       <div id="cash-content"><div class="loading">載入中...</div></div>
     </div>
 
-    <div id="tab-students" style="display:none;">
-      <input type="text" class="student-search" id="student-search" placeholder="搜尋姓名、電話或 LINE ID 以篩選下拉選單..." oninput="renderStudentsTab()">
-      <select class="student-select" id="student-select" onchange="renderStudentDetail()">
-        <option value="">請選擇學生（下方依電話號碼分類）...</option>
-      </select>
-      <div id="students-content"></div>
+    <div id="tab-roster" style="display:none;">
+      <div class="remind-toolbar">
+        <button class="rq-btn" id="ro-today" onclick="rosterQuick('today')">今天</button>
+        <button class="rq-btn active" id="ro-tomorrow" onclick="rosterQuick('tomorrow')">明天</button>
+        <select id="roster-date" onchange="rosterDateChanged()"></select>
+        <button class="refresh-btn" onclick="loadRoster()">🔄 重新整理</button>
+      </div>
+      <div id="roster-content"><div class="loading">請選擇日期</div></div>
     </div>
 
   </div>
@@ -508,239 +501,12 @@ function renderList() {
       ${slotsDisplay ? `<div class="reg-slots"><b>正選時段：</b><br>${slotsDisplay.replace(/\n/g,'<br>')}</div>` : ''}
       ${waitlistDisplay ? `<div class="reg-slots" style="background:#faf5ff;border-color:#e9d5ff;"><b>候補時段：</b><br>${waitlistDisplay.replace(/\n/g,'<br>')}</div>` : ''}
       ${!isCancelled ? `<div class="reg-actions">
-        ${isPending ? `<button class="btn-confirm" onclick="confirmPayment(${r.rowIndex})">✅ 確認已繳費</button>` : '<div style="flex:1;"></div>'}
+        ${isPending ? `<button class="btn-confirm" onclick="confirmPayment(${r.rowIndex})">✅ 確認已繳費</button>` : `<button class="btn-invoice" style="color:#0891b2;border-color:#0891b2;" onclick='openReschedule(${JSON.stringify(r).replace(/'/g,"&#39;")})'>🔁 改時段</button>`}
         <button class="btn-invoice" onclick='showInvoice(${JSON.stringify(r).replace(/'/g,"&#39;")})'>📋 繳費單</button>
         <button class="btn-cancel" onclick="cancelReg(${r.rowIndex})">${isPending ? '❌ 取消報名' : '🔄 標記取消'}</button>
       </div>` : ''}
     </div>`;
   }).join('');
-}
-
-// ========================================================
-//  👥 學生總覽（以電話號碼為單位彙整；電話缺漏時退而求其次用 LINE ID）
-// ========================================================
-function feeToNum(str){ return parseInt((str||'0').toString().replace(/[^\d-]/g,'')) || 0; }
-
-// 分組邏輯：以電話號碼為主要單位。
-// 電話缺漏才用 LINE ID 代替；兩者都沒有才用姓名。
-// 注意：若家人共用同一支電話（例如兩兄妹都用同一組電話報名），會被歸在同一個電話底下，
-// 詳細畫面會列出電話下的所有姓名，並個別列出每個人的堂數/金額，避免混在一起看不清楚。
-function studentKeyOf(r){
-  const phone = (r.phone || '').toString().trim();
-  const line  = (r.line  || '').toString().trim();
-  if (phone) return 'p:' + phone;
-  if (line)  return 'l:' + line;
-  return 'n:' + (r.name || '').toString().trim();
-}
-
-function buildStudentGroups(){
-  const groups = {};
-  allRows.forEach(r => {
-    const key = studentKeyOf(r);
-    if (!groups[key]) {
-      groups[key] = { key, phone: (r.phone||'').toString().trim(), lines: new Set(), names: new Set(), orders: [] };
-    }
-    const g = groups[key];
-    g.orders.push(r);
-    if (!g.phone && r.phone) g.phone = (r.phone||'').toString().trim();
-    if (r.line) g.lines.add((r.line||'').toString().trim());
-    if (r.name) g.names.add((r.name||'').toString().trim());
-  });
-  return Object.values(groups);
-}
-
-// 課程費欄位在 Google Sheets 中常會被自動轉成純數字（貨幣格式），而非帶 "$" 的文字，
-// 這裡統一用數字重新格式化顯示，避免畫面忽有 $ 忽無
-function formatFeeDisplay(feeRaw){
-  return '$' + feeToNum(feeRaw).toLocaleString();
-}
-function formatDiscountDisplay(discRaw){
-  if (discRaw === undefined || discRaw === null || discRaw === '' || discRaw === '—') return '—';
-  const n = feeToNum(discRaw);
-  if (n === 0) return '—';
-  return '-$' + Math.abs(n).toLocaleString();
-}
-
-// 找出同一支電話底下，「待確認」或「已繳費」的訂單中，有哪些時段被登記了不只一次
-// 回傳 Map：label -> 持有這個時段的訂單清單 [{orderId, name, status}]
-function findDuplicateSlotLabels(g){
-  const labelHolders = new Map(); // label -> [{orderId,name,status}]
-  g.orders.forEach(o => {
-    if (o.status !== '待確認' && o.status !== '已繳費✅') return; // 已取消/已退費不列入重複判斷
-    const decoded = decodeSlotStr(o.slots || ''); // 已對單一訂單內部去重
-    if (!decoded || decoded === '—') return;
-    decoded.split('\n').filter(Boolean).forEach(label => {
-      if (!labelHolders.has(label)) labelHolders.set(label, []);
-      labelHolders.get(label).push({ orderId: o.orderId||'—', name: o.name||'—', status: o.status });
-    });
-  });
-  const dup = new Map();
-  labelHolders.forEach((holders, label) => { if (holders.length > 1) dup.set(label, holders); });
-  return dup;
-}
-
-function groupSummary(g){
-  const paidOrders    = g.orders.filter(o => o.status === '已繳費✅');
-  const pendingOrders = g.orders.filter(o => o.status === '待確認');
-  const cancelOrders  = g.orders.filter(o => o.status === '已取消❌');
-  const refundOrders  = g.orders.filter(o => o.status === '已退費');
-  const totalPaid    = paidOrders.reduce((s,o)=>s+feeToNum(o.fee), 0);
-  const totalPending = pendingOrders.reduce((s,o)=>s+feeToNum(o.fee), 0);
-  const totalRefund  = refundOrders.reduce((s,o)=>s+feeToNum(o.refundAmount), 0);
-  const activeClasses = [...paidOrders, ...pendingOrders]
-    .reduce((s,o)=> s + (parseInt(o.small)||0) + (parseInt(o.big)||0) + (parseInt(o.rally)||0), 0);
-  return { paidOrders, pendingOrders, cancelOrders, refundOrders, totalPaid, totalPending, totalRefund, activeClasses };
-}
-
-let studentGroupsCache = [];
-
-function renderStudentsTab(){
-  const select = document.getElementById('student-select');
-  const prevSelected = select.value;
-
-  if (!allRows || allRows.length === 0) {
-    document.getElementById('students-content').innerHTML = '<div class="empty">目前沒有報名資料</div>';
-    select.innerHTML = '<option value="">目前沒有報名資料</option>';
-    return;
-  }
-
-  const kw = (document.getElementById('student-search').value || '').trim().toLowerCase();
-  let groups = buildStudentGroups();
-
-  if (kw) {
-    groups = groups.filter(g =>
-      [...g.names].some(n => n.toLowerCase().includes(kw)) ||
-      (g.phone || '').toLowerCase().includes(kw) ||
-      [...g.lines].some(l => l.toLowerCase().includes(kw))
-    );
-  }
-
-  // 依姓名排序，方便像電話簿一樣快速找人；同電話下若有多個姓名則以第一個排序
-  groups.sort((a,b) => {
-    const na = [...a.names].sort()[0] || '';
-    const nb = [...b.names].sort()[0] || '';
-    return na.localeCompare(nb, 'zh-Hant');
-  });
-
-  studentGroupsCache = groups;
-
-  if (groups.length === 0) {
-    select.innerHTML = '<option value="">找不到符合的學生</option>';
-    document.getElementById('students-content').innerHTML = '<div class="empty">找不到符合的學生</div>';
-    return;
-  }
-
-  select.innerHTML = '<option value="">請選擇學生（共 ' + groups.length + ' 組電話）...</option>' +
-    groups.map(g => {
-      const namesArr = [...g.names];
-      const namesLabel = namesArr.join('、') || '（未填姓名）';
-      const multiTag = namesArr.length > 1 ? ' ⚠️多人共用此電話' : '';
-      const dupTag = findDuplicateSlotLabels(g).size > 0 ? ' 🔴重複時段' : '';
-      const phoneLabel = g.phone || ([...g.lines][0] || '無聯絡方式');
-      const s = groupSummary(g);
-      return `<option value="${g.key.replace(/"/g,'&quot;')}">${phoneLabel} － ${namesLabel}${multiTag}${dupTag}（共${s.activeClasses}堂・已收$${s.totalPaid.toLocaleString()}）</option>`;
-    }).join('');
-
-  // 篩選後盡量保留原本選取的項目，找不到則清空詳細畫面
-  if (prevSelected && groups.some(g => g.key === prevSelected)) {
-    select.value = prevSelected;
-  } else {
-    document.getElementById('students-content').innerHTML =
-      '<div class="empty">請從上方下拉選單選擇一位學生查看詳細資料</div>';
-    return;
-  }
-  renderStudentDetail();
-}
-
-function renderStudentDetail(){
-  const select = document.getElementById('student-select');
-  const container = document.getElementById('students-content');
-  const key = select.value;
-  if (!key) {
-    container.innerHTML = '<div class="empty">請從上方下拉選單選擇一位學生查看詳細資料</div>';
-    return;
-  }
-  const g = studentGroupsCache.find(x => x.key === key);
-  if (!g) { container.innerHTML = '<div class="empty">找不到這組資料，請重新整理</div>'; return; }
-
-  const s = groupSummary(g);
-  const namesArr = [...g.names];
-  const linesArr = [...g.lines];
-  const statusBadge = { '待確認':'status-pending', '已繳費✅':'status-paid', '已取消❌':'status-cancel', '已退費':'status-refund' };
-  const dupSlotMap = findDuplicateSlotLabels(g);
-
-  let dupWarningHtml = '';
-  if (dupSlotMap.size > 0) {
-    const items = [...dupSlotMap.entries()].map(([label, holders]) => {
-      const holderTxt = holders.map(h => `${h.name}（${h.orderId}・${h.status}）`).join('、');
-      return `<div style="margin-top:4px;"><b style="color:#b91c1c;">${label}</b>：${holderTxt}</div>`;
-    }).join('');
-    dupWarningHtml = `
-      <div class="student-dup-warn">
-        <div>🔴 這支電話下有 ${dupSlotMap.size} 個時段被登記了不只一次，請確認是否為重複報名：</div>
-        ${items}
-      </div>`;
-  }
-
-  // 若同一電話下有多個不同姓名（例如家人共用），個別列出每個人的堂數/金額，避免混在一起看不清楚
-  let nameBreakdownHtml = '';
-  if (namesArr.length > 1) {
-    const rows = namesArr.map(nm => {
-      const ordersForName = g.orders.filter(o => (o.name||'').toString().trim() === nm);
-      const ss = groupSummary({ orders: ordersForName });
-      return `<tr><td>${nm}</td><td>${ss.activeClasses} 堂</td><td>$${ss.totalPaid.toLocaleString()}</td><td>${ss.cancelOrders.length}</td></tr>`;
-    }).join('');
-    nameBreakdownHtml = `
-      <div class="student-multi-warn">⚠️ 這支電話底下有 ${namesArr.length} 個不同姓名，可能是家人共用聯絡方式，以下分別列出各自的堂數與金額：</div>
-      <table class="student-name-table">
-        <tr><th>姓名</th><th>堂數</th><th>已收金額</th><th>取消次數</th></tr>
-        ${rows}
-      </table>`;
-  }
-
-  const orderRows = g.orders
-    .slice()
-    .sort((a,b) => (b.time||'').localeCompare(a.time||''))
-    .map(o => {
-      const sb = statusBadge[o.status] || 'status-pending';
-      const slotsDisplay = decodeSlotStr(o.slots || '');
-      const slotsHtml = slotsDisplay ? slotsDisplay.split('\n').map(label =>
-        dupSlotMap.has(label)
-          ? `<span class="slot-dup-highlight">${label}</span>`
-          : label
-      ).join('<br>') : '';
-      const refundLine = o.status === '已退費'
-        ? `<br><b>退費金額：</b>$${feeToNum(o.refundAmount).toLocaleString()}｜<b>原因：</b>${o.refundReason||'—'}｜<b>經手人：</b>${o.refundHandler||'—'}`
-        : '';
-      return `<div class="student-order-row">
-        <div class="student-order-top">
-          <span>${o.orderId||'—'}${namesArr.length>1 ? ' ｜ <b>'+(o.name||'—')+'</b>' : ''}</span>
-          <span class="reg-status ${sb}">${o.status}</span>
-        </div>
-        <b>報名時間：</b>${o.time||'—'}｜<b>程度：</b>${o.level||'—'}<br>
-        <b>課程費：</b>${formatFeeDisplay(o.fee)}${formatDiscountDisplay(o.discount)!=='—' ? '（折扣 '+formatDiscountDisplay(o.discount)+'）' : ''}｜
-        <b>堂數：</b>小班${o.small||0}・大班${o.big||0}・對打${o.rally||0}${refundLine}
-        ${slotsHtml ? `<div class="reg-slots" style="margin-top:6px;">${slotsHtml}</div>` : ''}
-      </div>`;
-    }).join('');
-
-  container.innerHTML = `
-    <div class="student-detail-card">
-      <div class="student-detail-head">
-        <div class="student-name">${namesArr.join('、') || '（未填姓名）'}</div>
-        <div class="student-sub">電話：${g.phone || '—'} ｜ LINE：${linesArr.join('、') || '—'}</div>
-        <div class="student-chips">
-          <span class="student-chip chip-classes">共 ${s.activeClasses} 堂</span>
-          <span class="student-chip chip-paid">已收 $${s.totalPaid.toLocaleString()}</span>
-          ${s.totalPending>0 ? `<span class="student-chip chip-pending">待收 $${s.totalPending.toLocaleString()}</span>` : ''}
-          ${s.cancelOrders.length>0 ? `<span class="student-chip chip-cancel">取消 ${s.cancelOrders.length}</span>` : ''}
-          ${s.refundOrders.length>0 ? `<span class="student-chip chip-refund">退費 $${s.totalRefund.toLocaleString()}</span>` : ''}
-        </div>
-        ${dupWarningHtml}
-      </div>
-      ${nameBreakdownHtml}
-      <div class="student-body">${orderRows}</div>
-    </div>`;
 }
 
 async function confirmPayment(rowIndex) {
@@ -1019,6 +785,93 @@ function copyInvoiceText() {
 }
 
 // ========================================================
+//  🔁 修改已繳費訂單的時段
+// ========================================================
+let rescheduleRow = null;
+
+function openReschedule(r){
+  rescheduleRow = r;
+  const slotsDisplay = decodeSlotStr(r.slots || '');
+  const curLabels = slotsDisplay ? slotsDisplay.split('\n').filter(Boolean) : [];
+  const curKeys = curLabels.map(l => resolveSlotKey(l));
+
+  const radios = curKeys.map((k,idx) => {
+    const info = SLOT_INFO[k];
+    const label = info ? `${info.date} ${info.time}（${info.cls}・${courtLabel({key:k,court:info.court})}）` : curLabels[idx];
+    return `<label style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px;cursor:pointer;">
+      <input type="radio" name="resched-old" value="${k}" ${idx===0?'checked':''}>
+      <span>${escHtml(label)}</span>
+    </label>`;
+  }).join('') || '<div class="cls-empty">找不到目前的時段資料</div>';
+
+  // 新時段下拉：排除已停課、已包含在此訂單裡的時段
+  const keys = Object.keys(SLOT_INFO).filter(k => !SLOT_ALIAS[k]);
+  keys.sort((a,b)=>{
+    const A=SLOT_INFO[a], B=SLOT_INFO[b];
+    const dA=mmddNum(A.date), dB=mmddNum(B.date);
+    if(dA!==dB) return dA-dB;
+    return A.time.localeCompare(B.time);
+  });
+  const options = keys.filter(k => curKeys.indexOf(k)===-1).map(k=>{
+    const info = SLOT_INFO[k];
+    return `<option value="${k}">${info.date} ${info.time}（${info.cls}・${courtLabel({key:k,court:info.court})}・${info.coach}）</option>`;
+  }).join('');
+
+  document.getElementById('reschedule-content').innerHTML = `
+    <div class="inv-block">
+      <div class="inv-block-title">學員資訊</div>
+      <div class="inv-row"><span class="inv-label">姓名</span><span class="inv-val">${escHtml(r.name)}</span></div>
+      <div class="inv-row"><span class="inv-label">訂單編號</span><span class="inv-val">${escHtml(r.orderId||'—')}</span></div>
+    </div>
+    <div class="inv-block">
+      <div class="inv-block-title">選擇要更改的時段</div>
+      ${radios}
+    </div>
+    <div class="inv-block">
+      <div class="inv-block-title">改成新時段</div>
+      <select id="resched-new-slot" style="width:100%;padding:9px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;">
+        ${options}
+      </select>
+      <div style="font-size:11px;color:#888;margin-top:8px;">⚠️ 若新時段名額已滿，系統會擋下並提示，需要另選時段。</div>
+    </div>
+    <div id="resched-err" style="color:#dc2626;font-size:12px;"></div>
+  `;
+  document.getElementById('reschedule-modal').classList.add('open');
+}
+
+function closeReschedule(){
+  document.getElementById('reschedule-modal').classList.remove('open');
+  rescheduleRow = null;
+}
+
+async function confirmReschedule(){
+  if(!rescheduleRow) return;
+  const oldRadio = document.querySelector('input[name="resched-old"]:checked');
+  const newSel = document.getElementById('resched-new-slot');
+  const errBox = document.getElementById('resched-err');
+  if(!oldRadio || !newSel || !newSel.value){ errBox.textContent = '請選擇要更改的時段與新時段'; return; }
+  const oldKey = oldRadio.value, newKey = newSel.value;
+
+  const btn = document.getElementById('reschedule-confirm-btn');
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '處理中...';
+  errBox.textContent = '';
+  try{
+    const res = await fetch(`${GAS_URL}?action=reschedule&pass=${encodeURIComponent(adminPass)}&rowIndex=${rescheduleRow.rowIndex}&oldSlot=${encodeURIComponent(oldKey)}&newSlot=${encodeURIComponent(newKey)}`);
+    const data = await res.json();
+    if(data.status === 'ok'){
+      closeReschedule();
+      await loadData();
+    } else {
+      errBox.textContent = data.message || '變更失敗';
+    }
+  }catch(e){
+    errBox.textContent = '連線失敗，請重試';
+  }
+  btn.disabled = false; btn.textContent = orig;
+}
+
+// ========================================================
 //  🔔 上課提醒面板
 // ========================================================
 function switchTab(name){
@@ -1026,12 +879,12 @@ function switchTab(name){
   document.getElementById('tab-remind').style.display = name==='remind' ? 'block' : 'none';
   document.getElementById('tab-coach').style.display  = name==='coach'  ? 'block' : 'none';
   document.getElementById('tab-cash').style.display   = name==='cash'   ? 'block' : 'none';
-  document.getElementById('tab-students').style.display = name==='students' ? 'block' : 'none';
+  document.getElementById('tab-roster').style.display = name==='roster' ? 'block' : 'none';
   document.getElementById('atab-reg').classList.toggle('active', name==='reg');
   document.getElementById('atab-remind').classList.toggle('active', name==='remind');
   document.getElementById('atab-coach').classList.toggle('active', name==='coach');
   document.getElementById('atab-cash').classList.toggle('active', name==='cash');
-  document.getElementById('atab-students').classList.toggle('active', name==='students');
+  document.getElementById('atab-roster').classList.toggle('active', name==='roster');
   if(name==='remind'){
     const sel = document.getElementById('remind-date');
     if(!sel.options.length) buildRemindDates();
@@ -1045,8 +898,12 @@ function switchTab(name){
   if(name==='cash'){
     loadAccounting();
   }
-  if(name==='students'){
-    renderStudentsTab();
+  if(name==='roster'){
+    const sel = document.getElementById('roster-date');
+    if(!sel.options.length) buildRosterDates();
+    if(!sel.value) sel.value = defaultRemindDate();
+    syncRosterQuickActive();
+    loadRoster();
   }
 }
 
@@ -1308,6 +1165,140 @@ function renderRemind(){
   box.innerHTML =
     `<div class="remind-summary">📅 ${date}｜共 ${classes.length} 堂課・已繳費學生合計 ${totalPaid} 位</div>`
     + cardsHtml;
+}
+
+// ========================================================
+//  📝 每日上課登記表
+// ========================================================
+function buildRosterDates(){
+  const sel = document.getElementById('roster-date');
+  sel.innerHTML = allClassDates().map(d=>`<option value="${d}">${d}</option>`).join('');
+}
+
+function syncRosterQuickActive(){
+  const v = document.getElementById('roster-date').value || '';
+  document.getElementById('ro-today').classList.toggle('active', v.startsWith(todayMMDD(0)));
+  document.getElementById('ro-tomorrow').classList.toggle('active', v.startsWith(todayMMDD(1)));
+}
+
+function rosterQuick(which){
+  const target = which==='today' ? todayMMDD(0) : todayMMDD(1);
+  const sel = document.getElementById('roster-date');
+  if(!sel.options.length) buildRosterDates();
+  let found = null;
+  for(const o of sel.options){ if(o.value.startsWith(target)){ found = o.value; break; } }
+  if(found){ sel.value = found; syncRosterQuickActive(); loadRoster(); }
+  else {
+    syncRosterQuickActive();
+    document.getElementById('roster-content').innerHTML =
+      `<div class="empty">${which==='today'?'今天':'明天'}（${target}）沒有課</div>`;
+  }
+}
+
+function rosterDateChanged(){ syncRosterQuickActive(); loadRoster(); }
+
+let rosterData = null;
+
+async function loadRoster(){
+  const date = document.getElementById('roster-date').value;
+  const box = document.getElementById('roster-content');
+  if(!date){ box.innerHTML = '<div class="empty">請選擇日期</div>'; return; }
+  box.innerHTML = '<div class="loading">載入中...</div>';
+  try{
+    const res = await fetch(`${GAS_URL}?action=getDailyRoster&date=${encodeURIComponent(date)}&pass=${encodeURIComponent(adminPass)}`);
+    const data = await res.json();
+    if(data.status !== 'ok'){ box.innerHTML = `<div class="empty">${escHtml(data.message||'載入失敗')}</div>`; return; }
+    rosterData = data;
+    renderRoster();
+  }catch(e){
+    box.innerHTML = '<div class="empty">載入失敗，請重試</div>';
+  }
+}
+
+function renderRoster(){
+  const box = document.getElementById('roster-content');
+  if(!rosterData || !rosterData.slots || !rosterData.slots.length){
+    box.innerHTML = `<div class="empty">${escHtml(rosterData?rosterData.date:'')} 沒有課</div>`;
+    return;
+  }
+  const word = relWord(rosterData.date);
+  const cardsHtml = rosterData.slots.map(c => {
+    const attendedCount = c.students.filter(s=>s.attended).length;
+    const rows = c.students.length ? c.students.map(s => `
+      <div class="stu-row" style="flex-wrap:wrap;">
+        <span class="stu-name">${escHtml(s.name)}</span>
+        <span class="stu-contact">${s.source==='手動加課'?'🆕 臨時加課':'已報名'}</span>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;">
+          <input type="checkbox" ${s.attended?'checked':''} onchange="onAttendToggle('${c.key}','${escAttr(s.name)}',this.checked,'attended')"> 已到
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;">
+          <input type="checkbox" ${s.fee?'checked':''} onchange="onAttendToggle('${c.key}','${escAttr(s.name)}',this.checked,'fee')"> 場地費
+        </label>
+        ${s.source==='手動加課'?`<button class="mini-btn" onclick="removeDropIn('${c.key}','${escAttr(s.name)}')">移除</button>`:''}
+      </div>`).join('') : '<div class="cls-empty">尚無應到學生</div>';
+
+    return `<div class="cls-card">
+      <div class="cls-head">
+        <div class="cls-time">⏰ ${c.label.split(') ')[1]||c.label}</div>
+        <div class="cls-meta">${c.coach||'—'} ｜ ${c.cls==='rally'?'對打課':'小班'} ｜ 應到 ${c.students.length} 位・已到 ${attendedCount} 位${c.closed?' ｜ ⚠️已停課':''}</div>
+      </div>
+      <div class="cls-body">
+        ${rows}
+        <div style="display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px dashed #e2e8f0;">
+          <input type="text" id="dropin-${c.key}" placeholder="臨時加課學生姓名" style="flex:1;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;">
+          <button class="mini-btn" onclick="addDropIn('${c.key}')">➕ 加入</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  box.innerHTML = `<div class="remind-summary">📅 ${rosterData.date}（${word}）｜共 ${rosterData.slots.length} 堂課</div>` + cardsHtml;
+}
+
+function escAttr(s){ return String(s==null?'':s).replace(/'/g,"\\'"); }
+
+async function onAttendToggle(slotKey, name, checked, field){
+  const date = rosterData.date;
+  const slot = rosterData.slots.find(s=>s.key===slotKey);
+  const stu = slot && slot.students.find(s=>s.name===name);
+  if(stu) stu[field] = checked; // 樂觀更新畫面上的統計數字
+  renderRoster();
+  try{
+    const payload = {
+      date, slotKey, name,
+      attended: stu ? !!stu.attended : (field==='attended'?checked:false),
+      fee: stu ? !!stu.fee : (field==='fee'?checked:false),
+      source: (stu && stu.source) || '報名'
+    };
+    const res = await fetch(`${GAS_URL}?action=saveAttendance&pass=${encodeURIComponent(adminPass)}&data=${encodeURIComponent(JSON.stringify(payload))}`);
+    const data = await res.json();
+    if(data.status !== 'ok'){ alert('儲存失敗，請重試'); loadRoster(); }
+  }catch(e){ alert('連線失敗，請重試'); loadRoster(); }
+}
+
+async function addDropIn(slotKey){
+  const input = document.getElementById(`dropin-${slotKey}`);
+  const name = input.value.trim();
+  if(!name) return;
+  const date = rosterData.date;
+  try{
+    const payload = { date, slotKey, name, attended:true, fee:false, source:'手動加課' };
+    const res = await fetch(`${GAS_URL}?action=saveAttendance&pass=${encodeURIComponent(adminPass)}&data=${encodeURIComponent(JSON.stringify(payload))}`);
+    const data = await res.json();
+    if(data.status === 'ok'){ input.value=''; await loadRoster(); }
+    else alert(data.message || '加入失敗');
+  }catch(e){ alert('連線失敗，請重試'); }
+}
+
+async function removeDropIn(slotKey, name){
+  if(!window.confirm(`確定要移除「${name}」嗎？`)) return;
+  const date = rosterData.date;
+  try{
+    const res = await fetch(`${GAS_URL}?action=removeAttendanceRow&pass=${encodeURIComponent(adminPass)}&date=${encodeURIComponent(date)}&slotKey=${encodeURIComponent(slotKey)}&name=${encodeURIComponent(name)}`);
+    const data = await res.json();
+    if(data.status === 'ok'){ await loadRoster(); }
+    else alert(data.message || '移除失敗');
+  }catch(e){ alert('連線失敗，請重試'); }
 }
 
 function copyElText(id, btn){
